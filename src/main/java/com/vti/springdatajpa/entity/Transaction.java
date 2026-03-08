@@ -1,0 +1,58 @@
+package com.vti.springdatajpa.entity;
+
+import com.vti.springdatajpa.entity.enums.TransactionDirection;
+import com.vti.springdatajpa.entity.enums.TransactionStatus;
+import com.vti.springdatajpa.entity.enums.TransactionType;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "transactions")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Transaction {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne
+    private Wallet wallet;
+
+    @Enumerated(EnumType.STRING)
+    private TransactionType type;
+
+    @Enumerated(EnumType.STRING)
+    private TransactionDirection direction;
+
+    private Double amount;
+    private Double fee;
+
+    private Double balanceBefore;
+    private Double balanceAfter;
+
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
+
+    private String referenceId;
+    private String idempotencyKey;
+
+    private Integer relatedTxId;
+
+    @Column(columnDefinition = "TEXT")
+    private String metadata;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+    
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+}
