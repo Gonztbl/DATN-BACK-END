@@ -152,3 +152,28 @@ CREATE TABLE balance_change_logs (
 
 ALTER TABLE users
 MODIFY id CHAR(36) NOT NULL;
+
+-- Face AI Module Tables
+
+CREATE TABLE face_embeddings (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  embedding TEXT NOT NULL COMMENT 'JSON array of 512 float values',
+  pose VARCHAR(20) NOT NULL COMMENT 'front / left / right',
+  model_version VARCHAR(50),
+  quality_score DOUBLE,
+  face_angle DOUBLE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_face_embed_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE face_verification_logs (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  similarity DOUBLE,
+  result VARCHAR(10) COMMENT 'PASS / FAIL',
+  ip VARCHAR(50),
+  device_id VARCHAR(100),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_face_verify_user FOREIGN KEY (user_id) REFERENCES users(id)
+);

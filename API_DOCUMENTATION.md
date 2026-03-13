@@ -1515,3 +1515,136 @@ curl -X GET "http://localhost:8080/api/admin/transactions?page=0&size=50" \
 8. **Error Handling**: Các lỗi phổ biến: 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Internal Server Error)
 9. **Food Ordering**: APIs mới cho hệ thống đặt đồ ăn trực tuyến, tích hợp với hệ thống thanh toán SmartPay hiện có
 10. **Database Schema**: Schema cho food ordering được tạo trong database `bank_db` hiện có để tích hợp với hệ thống user/wallet
+
+---
+
+## 13. Face AI APIs
+
+### 13.1 Register Face Embedding
+**Endpoint**: `POST /api/face/register`
+
+**Description**: Đăng ký embedding khuôn mặt mới cho user.
+
+**Headers**: `Authorization: Bearer <token>`
+
+**Request Body** (multipart/form-data):
+- `image` (file): Ảnh khuôn mặt (max 2MB, 1920x1080)
+- `userId` (integer): ID của user
+- `pose` (string): Góc chụp khuôn mặt (`front` / `left` / `right`)
+
+**Response**: 200 OK
+```json
+{
+  "id": 1,
+  "userId": 10,
+  "pose": "front",
+  "message": "Face registered successfully"
+}
+```
+
+---
+
+### 13.2 Verify Face
+**Endpoint**: `POST /api/face/verify`
+
+**Description**: Xác thực khuôn mặt bằng cách so sánh với các embedding đã đăng ký của user.
+
+**Headers**: `Authorization: Bearer <token>`
+
+**Request Body** (multipart/form-data):
+- `image` (file): Ảnh khuôn mặt cần xác thực
+- `userId` (integer): User ID cần xác thực
+- `deviceId` (string, optional): Thông tin thiết bị để audit log
+
+**Response**: 200 OK
+```json
+{
+  "similarity": 0.85,
+  "result": "PASS",
+  "matchedPose": "front",
+  "threshold": 0.55,
+  "message": "Face verification passed"
+}
+```
+
+---
+
+### 13.3 List Embeddings
+**Endpoint**: `GET /api/face/list/{userId}`
+
+**Description**: Lấy danh sách metadata của các embedding đã đăng ký của một user.
+
+**Headers**: `Authorization: Bearer <token>`
+
+**Path Parameters**:
+- `userId`: ID của user
+
+**Response**: 200 OK
+```json
+[
+  {
+    "id": 1,
+    "userId": 10,
+    "pose": "front",
+    "createdAt": "2024-03-11T16:00:00"
+  }
+]
+```
+
+---
+
+### 13.4 Delete Embedding
+**Endpoint**: `DELETE /api/face/{embeddingId}`
+
+**Description**: Xóa một embedding đã đăng ký.
+
+**Headers**: `Authorization: Bearer <token>`
+
+**Path Parameters**:
+- `embeddingId`: ID của embedding cần xóa
+
+**Response**: 200 OK
+```json
+{
+  "message": "Embedding deleted successfully"
+}
+```
+
+---
+
+### 13.5 Generate Embedding (Utility)
+**Endpoint**: `POST /api/face/embedding`
+
+**Description**: Tạo vector embedding thô từ ảnh (không lưu vào DB). Dành cho mục đích test.
+
+**Headers**: `Authorization: Bearer <token>`
+
+**Request Body** (multipart/form-data):
+- `file` (file): Ảnh khuôn mặt
+
+**Response**: 200 OK
+```json
+[0.0123, -0.0456, 0.0789, ...] // Array of 512 floats
+```
+
+---
+
+### 13.6 Compare Two Faces (Utility)
+**Endpoint**: `POST /api/face/compare`
+
+**Description**: So sánh trực tiếp 2 ảnh khuôn mặt và trả về điểm tương đồng.
+
+**Headers**: `Authorization: Bearer <token>`
+
+**Request Body** (multipart/form-data):
+- `img1` (file): Ảnh khuôn mặt 1
+- `img2` (file): Ảnh khuôn mặt 2
+
+**Response**: 200 OK
+```json
+{
+  "similarity": 0.85,
+  "isMatch": true,
+  "threshold": 0.55
+}
+```

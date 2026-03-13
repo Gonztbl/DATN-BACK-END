@@ -61,6 +61,9 @@ public class SecurityConfig {
                         // All authenticated users can access
                         .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN", "SUPPORT")
 
+                        // Face AI endpoints (require authentication)
+                        .requestMatchers("/api/face/**").authenticated()
+
                         // All other requests require authentication
                         .anyRequest().authenticated());
 
