@@ -35,5 +35,9 @@ public class UserManagerController {
         userManageService.unlockUser(id);
     }
 
+    @PutMapping("/update/{id}")
+    public UserManagerDTO updateUser(@PathVariable Integer id, @RequestBody UserManagerDTO userDto) {
+        return userManageService.updateUser(id, userDto);
+    }
 
 }

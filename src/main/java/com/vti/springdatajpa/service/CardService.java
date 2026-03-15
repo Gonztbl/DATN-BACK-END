@@ -287,4 +287,47 @@ public class CardService {
         transactionRepository.save(transaction);
     }
 
+    /**
+     * Set card as default for user
+     */
+    public SetDefaultCardResponseDTO setDefaultCard(String username, Integer cardId) {
+        User user = findUserByUsernameOrEmail(username);
+
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+
+        if (!card.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Access denied: Not your card");
+        }
+
+        SetDefaultCardResponseDTO response = new SetDefaultCardResponseDTO();
+        response.setId(card.getId());
+        response.setCardNumber(maskCardNumber(card.getCardNumber()));
+        response.setDefault(true);
+        response.setMessage("Thẻ đã được đặt làm mặc định");
+        return response;
+    }
+
+    /**
+     * Delete card
+     */
+    public void deleteCard(String username, Integer cardId) {
+        User user = findUserByUsernameOrEmail(username);
+
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+
+        if (!card.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Access denied: Not your card");
+        }
+
+        // Don't allow deleting if it's the only card
+        List<Card> userCards = cardRepository.findByUserId(user.getId());
+        if (userCards.size() <= 1) {
+            throw new RuntimeException("Cannot delete the only card. Please add another card first.");
+        }
+
+        cardRepository.delete(card);
+    }
+
 }

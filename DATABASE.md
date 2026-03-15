@@ -2,6 +2,8 @@
 
 Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa trên các class `@Entity` trong source code:
 
+## Danh sách Entities
+
 ### 1. AdminAction
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
@@ -106,7 +108,30 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `avatarUrl` | String | |
 | `accountNumber` | String | |
 
-### 10. Notification
+### 10. FaceEmbedding
+| Thuộc tính | Kiểu dữ liệu | Ghi chú |
+|---|---|---|
+| `id` | Long | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
+| `userId` | Integer | `@Column(nullable = false)` |
+| `embedding` | String | `@Column(columnDefinition = "TEXT")` - JSON array string |
+| `pose` | String | `@Column(length = 20)` - front / left / right |
+| `modelVersion` | String | `@Column(length = 50)` - e.g., "arcface_r100_v1" |
+| `qualityScore` | Double | blur score from quality check |
+| `faceAngle` | Double | rotation angle of detected face |
+| `createdAt` | LocalDateTime | `@CreationTimestamp` |
+
+### 11. FaceVerificationLog
+| Thuộc tính | Kiểu dữ liệu | Ghi chú |
+|---|---|---|
+| `id` | Long | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
+| `userId` | Integer | `@Column(nullable = false)` |
+| `similarity` | Double | |
+| `result` | String | `@Column(length = 10)` - PASS / FAIL |
+| `ip` | String | `@Column(length = 50)` |
+| `deviceId` | String | `@Column(length = 100)` |
+| `createdAt` | LocalDateTime | `@CreationTimestamp` |
+
+### 12. Notification
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -117,7 +142,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `isRead` | boolean | |
 | `createdAt` | LocalDateTime | |
 
-### 11. Order
+### 13. Order
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -134,7 +159,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `user` | User | `@ManyToOne` |
 | `orderItems` | List<OrderItem>| `@OneToMany` |
 
-### 12. OrderItem
+### 14. OrderItem
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -145,7 +170,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `order` | Order | `@ManyToOne(fetch = FetchType.LAZY)` |
 | `product` | Product | `@ManyToOne(fetch = FetchType.LAZY)` |
 
-### 13. OTPRequest
+### 15. OTPRequest
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -156,7 +181,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `expiresAt` | LocalDateTime | |
 | `createdAt` | LocalDateTime | |
 
-### 14. Product
+### 16. Product
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -176,7 +201,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `restaurant` | Restaurant | `@ManyToOne(fetch = FetchType.LAZY)` |
 | `reviews` | List<Review> | `@OneToMany` |
 
-### 15. QRCode
+### 17. QRCode
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -186,7 +211,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `expiresAt` | LocalDateTime | |
 | `createdAt` | LocalDateTime | |
 
-### 16. Restaurant
+### 18. Restaurant
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | String | `@Id`, `@Column(length = 20)` |
@@ -202,7 +227,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `deletedAt` | LocalDateTime | |
 | `products` | List<Product>| `@OneToMany` |
 
-### 17. Review
+### 19. Review
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -214,7 +239,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `user` | User | `@ManyToOne(fetch = FetchType.LAZY)` |
 | `product` | Product | `@ManyToOne(fetch = FetchType.LAZY)` |
 
-### 18. Session
+### 20. Session
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -226,7 +251,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `createdAt` | LocalDateTime | |
 | `lastActiveAt` | LocalDateTime | |
 
-### 19. Transaction
+### 21. Transaction
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -245,7 +270,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `createdAt` | LocalDateTime | `@CreationTimestamp` |
 | `updatedAt` | LocalDateTime | `@UpdateTimestamp` |
 
-### 20. TransferDetail
+### 22. TransferDetail
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -256,7 +281,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `method` | TransferMethod | `@Enumerated(EnumType.STRING)` |
 | `createdAt` | LocalDateTime | |
 
-### 21. User
+### 23. User
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -276,9 +301,9 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `updatedAt` | LocalDateTime | |
 | `wallet` | Wallet | `@OneToOne(mappedBy = "user")` |
 | `avatarUrl` | String | |
-| `membership` | String | |
+| `membership` | String | Silver, Gold, Platinum |
 
-### 22. Wallet
+### 24. Wallet
 | Thuộc tính | Kiểu dữ liệu | Ghi chú |
 |---|---|---|
 | `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
@@ -288,6 +313,130 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `balance` | Double | |
 | `availableBalance`| Double | |
 | `status` | WalletStatus | `@Enumerated(EnumType.STRING)` |
-| `accountNumber` | String | |
+| `accountNumber` | String | Số tài khoản = số điện thoại |
 | `createdAt` | LocalDateTime | |
 | `updatedAt` | LocalDateTime | |
+
+### 25. Address
+| Thuộc tính | Kiểu dữ liệu | Ghi chú |
+|---|---|---|
+| `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
+| `user` | User | `@ManyToOne(fetch = FetchType.LAZY)`, `@JoinColumn(name = "user_id", nullable = false)` |
+| `recipientName` | String | `@Column(name = "recipient_name", nullable = false)` |
+| `phone` | String | `@Column(nullable = false)` |
+| `address` | String | `@Column(nullable = false, columnDefinition = "TEXT")` |
+| `isDefault` | Boolean | `@Column(name = "is_default")`, Default = `false` |
+| `createdAt` | LocalDateTime | `@Column(name = "created_at")` |
+| `updatedAt` | LocalDateTime | `@Column(name = "updated_at")` |
+
+### 26. Favorite
+| Thuộc tính | Kiểu dữ liệu | Ghi chú |
+|---|---|---|
+| `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
+| `user` | User | `@ManyToOne(fetch = FetchType.LAZY)`, `@JoinColumn(name = "user_id", nullable = false)` |
+| `restaurant` | Restaurant | `@ManyToOne(fetch = FetchType.LAZY)`, `@JoinColumn(name = "restaurant_id", nullable = false)` |
+| `createdAt` | LocalDateTime | `@Column(name = "created_at")` |
+
+### 27. SupportTicket
+| Thuộc tính | Kiểu dữ liệu | Ghi chú |
+|---|---|---|
+| `id` | Integer | `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` |
+| `user` | User | `@ManyToOne(fetch = FetchType.LAZY)`, `@JoinColumn(name = "user_id", nullable = false)` |
+| `subject` | String | `@Column(nullable = false)` |
+| `message` | String | `@Column(nullable = false, columnDefinition = "TEXT")` |
+| `orderId` | Integer | `@Column(name = "order_id")` |
+| `attachments` | String | `@Column(columnDefinition = "TEXT")` - JSON array of base64 strings |
+| `status` | TicketStatus | `@Enumerated(EnumType.STRING)`, Default = `OPEN` |
+| `createdAt` | LocalDateTime | `@Column(name = "created_at")` |
+| `updatedAt` | LocalDateTime | `@Column(name = "updated_at")` |
+
+---
+
+## Danh sách Enums
+
+### BankAccountStatus
+- `ACTIVE`
+- `PENDING`
+- `REVOKED`
+
+### BankTransferStatus
+- `PENDING`
+- `SUCCESS`
+- `FAILED`
+
+### CardStatus
+- `ACTIVE`
+- `INACTIVE`
+- `LOCKED`
+
+### CardWithdrawStatus
+- `PENDING`
+- `SUCCESS`
+- `FAILED`
+
+### Order.OrderStatus
+- `PENDING`
+- `CONFIRMED`
+- `PREPARING`
+- `DELIVERING`
+- `COMPLETED`
+- `CANCELLED`
+
+### CardDeposit.DepositStatus
+- `PENDING`
+- `SUCCESS`
+- `FAILED`
+
+### QRType
+- `STATIC`
+- `DYNAMIC`
+
+### Role
+- `USER`
+- `ADMIN`
+- `SUPPORT`
+
+### TransactionDirection
+- `IN`
+- `OUT`
+
+### TransactionStatus
+- `PENDING`
+- `COMPLETED`
+- `FAILED`
+
+### TransactionType
+- `DEPOSIT`
+- `WITHDRAW`
+- `TRANSFER_IN`
+- `TRANSFER_OUT`
+
+### TransferMethod
+- `IN_APP`
+- `QR`
+- `BANK`
+
+### WalletStatus
+- `ACTIVE`
+- `FROZEN`
+- `CLOSED`
+
+### SupportTicket.TicketStatus
+- `OPEN`
+- `IN_PROGRESS`
+- `RESOLVED`
+- `CLOSED`
+
+---
+
+## Tổng kết
+
+- **Tổng số Entities:** 27
+- **Tổng số Enums:** 14
+
+**Entities mới thêm:**
+- `FaceEmbedding` - Lưu trữ embedding vector khuôn mặt cho xác thực sinh trắc học
+- `FaceVerificationLog` - Log lịch sử xác thực khuôn mặt
+- `Address` - Địa chỉ giao hàng của người dùng
+- `Favorite` - Nhà hàng yêu thích của người dùng
+- `SupportTicket` - Yêu cầu hỗ trợ khách hàng

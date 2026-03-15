@@ -2,7 +2,6 @@ package com.vti.springdatajpa.controller;
 
 import com.vti.springdatajpa.dto.*;
 import com.vti.springdatajpa.service.CardService;
-import com.vti.springdatajpa.service.CardWithdrawService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -93,6 +92,44 @@ public class CardController {
 
         List<CardDepositHistoryDTO> history = cardService.getDepositHistory(userName);
         return ResponseEntity.ok(history);
+    }
+
+    /**
+     * POST /api/cards/{id}/default - Set card as default
+     */
+    @PostMapping("/{id}/default")
+    public ResponseEntity<SetDefaultCardResponseDTO> setDefaultCard(@PathVariable Integer id) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userName;
+        if (principal instanceof com.vti.springdatajpa.entity.User) {
+            userName = ((com.vti.springdatajpa.entity.User) principal).getUserName();
+        } else if (principal instanceof String) {
+            userName = (String) principal;
+        } else {
+            throw new RuntimeException("Unsupported identity type: " + principal.getClass().getName());
+        }
+
+        SetDefaultCardResponseDTO response = cardService.setDefaultCard(userName, id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * DELETE /api/cards/{id} - Delete card
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCard(@PathVariable Integer id) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userName;
+        if (principal instanceof com.vti.springdatajpa.entity.User) {
+            userName = ((com.vti.springdatajpa.entity.User) principal).getUserName();
+        } else if (principal instanceof String) {
+            userName = (String) principal;
+        } else {
+            throw new RuntimeException("Unsupported identity type: " + principal.getClass().getName());
+        }
+
+        cardService.deleteCard(userName, id);
+        return ResponseEntity.noContent().build();
     }
 
     // @PostMapping("/withdraw")

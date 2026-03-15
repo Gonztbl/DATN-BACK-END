@@ -49,11 +49,13 @@
 - `GET /api/admin/wallets` - Xem tất cả ví
 - `PUT /api/admin/wallets/lock/{id}` - Khóa ví
 - `PUT /api/admin/wallets/unlock/{id}` - Mở khóa ví
+- `POST /api/admin/wallets/topup` - Nạp tiền vào ví (Admin)
 
 ### User Manager APIs
 - `GET /api/userManager/all` - Xem tất cả users
 - `PUT /api/userManager/lock/{id}` - Khóa user
 - `PUT /api/userManager/unlock/{id}` - Mở khóa user
+- `PUT /api/userManager/update/{id}` - Cập nhật thông tin user (Admin)
 
 ### QR Code APIs
 - `GET /api/qr/wallet` - Tạo QR Code cho ví
@@ -433,6 +435,39 @@
 
 ---
 
+### 6.5 Topup Wallet (Admin)
+**Endpoint**: `POST /api/admin/wallets/topup`
+
+**Description**: Admin nạp tiền trực tiếp vào ví của người dùng.
+
+**Request Body**:
+```json
+{
+  "walletId": 1,
+  "userId": 2,
+  "accountNumber": "0987654321",
+  "amountAdd": 500000.0
+}
+```
+
+**Response**:
+```json
+{
+  "transactionId": 12346,
+  "walletId": 1,
+  "userId": 2,
+  "accountNumber": "0987654321",
+  "amountAdded": 500000.0,
+  "previousBalance": 1000000.0,
+  "newBalance": 1500000.0,
+  "status": "COMPLETED",
+  "message": "Topup successful",
+  "timestamp": "2026-03-10T15:00:00"
+}
+```
+
+---
+
 ## 7. QR Code APIs
 
 ### 7.1 Generate QR Code
@@ -487,6 +522,82 @@
   "walletCode": "WALLET123",
   "accountNumber": "0987654321",
   "amount": null
+}
+```
+
+---
+
+## 8. User Manager APIs
+
+### 8.1 Get All Users (Admin)
+**Endpoint**: `GET /api/userManager/all`
+
+**Description**: Lấy danh sách tất cả người dùng (thường ngoại trừ các user có Role ADMIN) để hiển thị trong dashboard quản lý.
+
+**Response**:
+```json
+[
+  {
+    "id": 2,
+    "userName": "nguyenvana",
+    "email": "nguyenvana@example.com",
+    "phone": "0987654321",
+    "fullName": "Nguyen Van A",
+    "isActive": true,
+    "createdAt": "2024-03-10T14:30:00"
+  }
+]
+```
+
+### 8.2 Lock User (Admin)
+**Endpoint**: `PUT /api/userManager/lock/{id}`
+
+**Description**: Khóa tài khoản của một người dùng dựa trên ID của họ.
+
+**Path Parameters**:
+- `id` – ID của user cần khóa.
+
+**Response**: 200 OK
+
+### 8.3 Unlock User (Admin)
+**Endpoint**: `PUT /api/userManager/unlock/{id}`
+
+**Description**: Mở khóa tài khoản của một người dùng dựa trên ID của họ.
+
+**Path Parameters**:
+- `id` – ID của user cần mở khóa.
+
+**Response**: 200 OK
+
+### 8.4 Update User Profile (Admin)
+**Endpoint**: `PUT /api/userManager/update/{id}`
+
+**Description**: Cập nhật thông tin chi tiết của người dùng từ phía quản trị viên (Admin). Giúp Admin có thể sửa đổi dữ liệu người dùng khi cần hỗ trợ.
+
+**Path Parameters**:
+- `id` – ID của user cần cập nhật.
+
+**Request Body**:
+```json
+{
+  "userName": "nguyenvana",
+  "email": "nguyenvana@newdomain.com",
+  "phone": "0987111222",
+  "fullName": "Nguyen Van A Mới",
+  "isActive": true
+}
+```
+
+**Response**: (200 OK) Trả về `UserManagerDTO` chứa thông tin user sau khi cập nhật.
+```json
+{
+  "id": 2,
+  "userName": "nguyenvana",
+  "email": "nguyenvana@newdomain.com",
+  "phone": "0987111222",
+  "fullName": "Nguyen Van A Mới",
+  "isActive": true,
+  "createdAt": "2024-03-10T14:30:00"
 }
 ```
 
@@ -1646,5 +1757,1072 @@ curl -X GET "http://localhost:8080/api/admin/transactions?page=0&size=50" \
   "similarity": 0.85,
   "isMatch": true,
   "threshold": 0.55
+}
+```
+
+---
+
+## 14. Orders API
+
+### 14.1 Get Order List
+**Endpoint**: `GET /api/orders`
+
+**Description**: Lấy danh sách đơn hàng của user hiện tại, hỗ trợ phân trang và lọc theo trạng thái.
+
+**Headers**:
+- `Authorization: Bearer <token>` (bắt buộc)
+
+**Query Parameters**:
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| page | int | No | 0 | Số trang (bắt đầu từ 0) |
+| size | int | No | 10 | Số lượng đơn hàng mỗi trang |
+| status | string | No | - | Lọc theo trạng thái: PENDING, CONFIRMED, PREPARING, DELIVERING, COMPLETED, CANCELLED |
+| sort | string | No | createdAt,desc | Sắp xếp, ví dụ: createdAt,desc |
+
+**Response**: 200 OK
+```json
+{
+  "content": [
+    {
+      "id": 2025,
+      "totalAmount": 155000.00,
+      "status": "PENDING",
+      "createdAt": "2025-03-04T15:23:00Z",
+      "updatedAt": "2025-03-04T15:23:00Z",
+      "recipientName": "Nguyễn Văn A",
+      "recipientPhone": "0987654321",
+      "deliveryAddress": "Số 123, đường ABC, quận Hai Bà Trưng, Hà Nội",
+      "paymentMethod": "SmartPay",
+      "itemCount": 2,
+      "items": [
+        {
+          "productId": 2,
+          "productName": "Phở Bò Gia Truyền",
+          "quantity": 1,
+          "priceAtTime": 65000.00,
+          "subtotal": 65000.00
+        },
+        {
+          "productId": 4,
+          "productName": "Trà Sữa Trân Châu",
+          "quantity": 2,
+          "priceAtTime": 45000.00,
+          "subtotal": 90000.00
+        }
+      ]
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 10,
+    "sort": {
+      "sorted": true,
+      "unsorted": false,
+      "empty": false
+    },
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalPages": 5,
+  "totalElements": 50,
+  "last": false,
+  "size": 10,
+  "number": 0,
+  "sort": {
+    "sorted": true,
+    "unsorted": false,
+    "empty": false
+  },
+  "numberOfElements": 10,
+  "first": true,
+  "empty": false
+}
+```
+
+**Errors**:
+- 401 Unauthorized: Token không hợp lệ
+- 500 Internal Server Error: Lỗi máy chủ
+
+---
+
+### 14.2 Get Order Detail
+**Endpoint**: `GET /api/orders/{id}`
+
+**Description**: Lấy chi tiết một đơn hàng cụ thể, bao gồm danh sách sản phẩm và lịch sử thanh toán.
+
+**Headers**:
+- `Authorization: Bearer <token>` (bắt buộc)
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của đơn hàng |
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "totalAmount": 155000.00,
+  "status": "COMPLETED",
+  "createdAt": "2025-03-04T15:23:00Z",
+  "updatedAt": "2025-03-05T10:15:00Z",
+  "recipientName": "Nguyễn Văn A",
+  "recipientPhone": "0987654321",
+  "deliveryAddress": "Số 123, đường ABC, quận Hai Bà Trưng, Hà Nội",
+  "note": "Không hành, nhiều ớt",
+  "paymentMethod": "SmartPay",
+  "itemCount": 2,
+  "items": [
+    {
+      "productId": 2,
+      "productName": "Phở Bò Gia Truyền",
+      "productImage": "data:image/jpeg;base64,/9j/4AAQ...",
+      "quantity": 1,
+      "priceAtTime": 65000.00,
+      "subtotal": 65000.00
+    },
+    {
+      "productId": 4,
+      "productName": "Trà Sữa Trân Châu",
+      "productImage": "data:image/jpeg;base64,/9j/4AAQ...",
+      "quantity": 2,
+      "priceAtTime": 45000.00,
+      "subtotal": 90000.00
+    }
+  ],
+  "paymentHistory": [
+    {
+      "transactionId": 12345,
+      "amount": 155000.00,
+      "status": "COMPLETED",
+      "paymentMethod": "SmartPay",
+      "timestamp": "2025-03-04T15:23:05Z",
+      "referenceId": "2025"
+    }
+  ],
+  "statusHistory": [
+    {
+      "status": "PENDING",
+      "timestamp": "2025-03-04T15:23:00Z",
+      "note": "Đơn hàng đã được tạo"
+    },
+    {
+      "status": "COMPLETED",
+      "timestamp": "2025-03-05T10:15:00Z",
+      "note": "Giao hàng thành công"
+    }
+  ]
+}
+```
+
+**Errors**:
+- 401 Unauthorized: Token không hợp lệ
+- 403 Forbidden: Không có quyền xem đơn hàng này
+- 404 Not Found: Đơn hàng không tồn tại
+- 500 Internal Server Error: Lỗi máy chủ
+
+---
+
+## 15. Admin Order Management API
+
+### 15.1 Get All Orders (Admin)
+**Endpoint**: `GET /api/admin/orders`
+
+**Description**: Lấy danh sách tất cả đơn hàng trong hệ thống, hỗ trợ phân trang, lọc và sắp xếp. Chỉ admin mới có quyền truy cập.
+
+**Headers**:
+- `Authorization: Bearer <token>` (yêu cầu role ADMIN hoặc SUPPORT)
+
+**Query Parameters**:
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| page | int | No | 0 | Số trang (bắt đầu từ 0) |
+| size | int | No | 20 | Số lượng bản ghi mỗi trang |
+| status | string | No | - | Lọc theo trạng thái: PENDING, CONFIRMED, PREPARING, DELIVERING, COMPLETED, CANCELLED |
+| userId | int | No | - | Lọc theo ID người dùng |
+| restaurantId | string | No | - | Lọc theo ID nhà hàng |
+| fromDate | string | No | - | Lọc từ ngày (yyyy-MM-dd) |
+| toDate | string | No | - | Lọc đến ngày (yyyy-MM-dd) |
+| search | string | No | - | Tìm kiếm theo tên người nhận, số điện thoại, địa chỉ |
+| sortBy | string | No | createdAt | Trường sắp xếp (createdAt, totalAmount, status) |
+| sortDir | string | No | desc | Hướng sắp xếp (asc/desc) |
+
+**Response**: 200 OK
+```json
+{
+  "content": [
+    {
+      "id": 2025,
+      "userId": 123,
+      "userName": "nguyenvana",
+      "fullName": "Nguyễn Văn A",
+      "totalAmount": 155000.00,
+      "status": "PENDING",
+      "paymentMethod": "SmartPay",
+      "recipientName": "Nguyễn Văn A",
+      "recipientPhone": "0987654321",
+      "deliveryAddress": "Số 123, đường ABC, quận Hai Bà Trưng, Hà Nội",
+      "note": "Không hành, nhiều ớt",
+      "createdAt": "2026-03-10T14:30:00Z",
+      "updatedAt": "2026-03-10T14:30:00Z"
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 150,
+    "totalPages": 8
+  }
+}
+```
+
+**Errors**:
+- 401 Unauthorized: Token không hợp lệ
+- 403 Forbidden: Không có quyền truy cập (yêu cầu ADMIN role)
+- 500 Internal Server Error: Lỗi máy chủ
+
+---
+
+### 15.2 Get Order Detail (Admin)
+**Endpoint**: `GET /api/admin/orders/{id}`
+
+**Description**: Lấy thông tin chi tiết của một đơn hàng, bao gồm danh sách sản phẩm, thông tin thanh toán và lịch sử cập nhật trạng thái.
+
+**Headers**:
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của đơn hàng |
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "user": {
+    "id": 123,
+    "userName": "nguyenvana",
+    "fullName": "Nguyễn Văn A",
+    "phone": "0987654321",
+    "email": "nguyenvana@example.com"
+  },
+  "restaurant": {
+    "id": "RS-9021",
+    "name": "SmartPay Quận 1",
+    "phone": "02838291234",
+    "address": "123 Nguyễn Huệ, Quận 1, TP.HCM"
+  },
+  "items": [
+    {
+      "productId": 2,
+      "productName": "Phở Bò Gia Truyền",
+      "quantity": 1,
+      "priceAtTime": 65000.00,
+      "subtotal": 65000.00,
+      "image": "data:image/png;base64,..."
+    },
+    {
+      "productId": 4,
+      "productName": "Trà Sữa Trân Châu",
+      "quantity": 2,
+      "priceAtTime": 45000.00,
+      "subtotal": 90000.00,
+      "image": "data:image/png;base64,..."
+    }
+  ],
+  "totalAmount": 155000.00,
+  "status": "PENDING",
+  "statusHistory": [
+    {
+      "status": "PENDING",
+      "timestamp": "2026-03-10T14:30:00Z",
+      "note": "Đơn hàng đã được tạo"
+    }
+  ],
+  "payment": {
+    "method": "SmartPay",
+    "transactionId": 12345,
+    "amount": 155000.00,
+    "status": "COMPLETED",
+    "paidAt": "2026-03-10T14:31:00Z"
+  },
+  "deliveryInfo": {
+    "recipientName": "Nguyễn Văn A",
+    "recipientPhone": "0987654321",
+    "deliveryAddress": "Số 123, đường ABC, quận Hai Bà Trưng, Hà Nội",
+    "note": "Không hành, nhiều ớt"
+  },
+  "createdAt": "2026-03-10T14:30:00Z",
+  "updatedAt": "2026-03-10T14:30:00Z"
+}
+```
+
+**Errors**:
+- 401 Unauthorized: Token không hợp lệ
+- 403 Forbidden: Không có quyền truy cập
+- 404 Not Found: Đơn hàng không tồn tại
+
+---
+
+### 15.3 Update Order Status (Admin)
+**Endpoint**: `PUT /api/admin/orders/{id}/status`
+
+**Description**: Cập nhật trạng thái của đơn hàng. Các trạng thái hợp lệ: PENDING, CONFIRMED, PREPARING, DELIVERING, COMPLETED, CANCELLED.
+
+**Headers**:
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+- `Content-Type: application/json`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của đơn hàng |
+
+**Request Body**:
+```json
+{
+  "status": "CONFIRMED",
+  "note": "Đã xác nhận đơn hàng, đang chuẩn bị"
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "status": "CONFIRMED",
+  "updatedAt": "2026-03-10T15:00:00Z",
+  "message": "Order status updated successfully"
+}
+```
+
+**Errors**:
+- 400 Bad Request: Trạng thái không hợp lệ
+- 401 Unauthorized: Token không hợp lệ
+- 403 Forbidden: Không có quyền
+- 404 Not Found: Đơn hàng không tồn tại
+
+---
+
+### 15.4 Cancel Order (Admin)
+**Endpoint**: `PUT /api/admin/orders/{id}/cancel`
+
+**Description**: Hủy đơn hàng. Nếu đơn hàng đã thanh toán, hệ thống sẽ tự động hoàn tiền vào ví người dùng.
+
+**Headers**:
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+- `Content-Type: application/json`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của đơn hàng |
+
+**Request Body** (optional):
+```json
+{
+  "reason": "Khách hàng yêu cầu hủy"
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "status": "CANCELLED",
+  "refundTransactionId": 12346,
+  "message": "Order cancelled and refund processed successfully"
+}
+```
+
+**Errors**:
+- 400 Bad Request: Đơn hàng đã bị hủy trước đó
+- 401 Unauthorized: Token không hợp lệ
+- 403 Forbidden: Không có quyền
+- 404 Not Found: Đơn hàng không tồn tại
+
+---
+
+## 16. Admin Statistics API
+
+### 16.1 Get Overview Statistics
+**Endpoint**: `GET /api/admin/statistics/overview`
+
+**Description**: Lấy các chỉ số tổng quan cho dashboard admin.
+
+**Headers**:
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Query Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| fromDate | string | Ngày bắt đầu (yyyy-MM-dd) |
+| toDate | string | Ngày kết thúc (yyyy-MM-dd) |
+
+**Response**: 200 OK
+```json
+{
+  "totalOrders": 1250,
+  "totalRevenue": 87500000.50,
+  "averageOrderValue": 70000.00,
+  "ordersByStatus": {
+    "PENDING": 120,
+    "CONFIRMED": 85,
+    "PREPARING": 60,
+    "DELIVERING": 45,
+    "COMPLETED": 900,
+    "CANCELLED": 40
+  },
+  "revenueToday": 3500000.00,
+  "ordersToday": 45,
+  "newUsersToday": 12,
+  "topRestaurants": [
+    {
+      "restaurantId": "RS-9021",
+      "restaurantName": "SmartPay Quận 1",
+      "orderCount": 320,
+      "revenue": 22400000.00
+    }
+  ]
+}
+```
+
+---
+
+### 16.2 Get Revenue Statistics
+**Endpoint**: `GET /api/admin/statistics/revenue`
+
+**Description**: Thống kê doanh thu theo ngày, tuần, tháng.
+
+**Headers**:
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Query Parameters**:
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| groupBy | string | day | Nhóm theo: day, week, month |
+| fromDate | string | - | Ngày bắt đầu |
+| toDate | string | - | Ngày kết thúc |
+
+**Response**: 200 OK
+```json
+{
+  "labels": ["2026-03-01", "2026-03-02", "2026-03-03"],
+  "revenue": [12500000, 13200000, 14800000],
+  "orderCount": [150, 160, 175]
+}
+```
+
+---
+
+### 16.3 Get Top Products
+**Endpoint**: `GET /api/admin/statistics/top-products`
+
+**Description**: Danh sách sản phẩm bán chạy theo số lượng hoặc doanh thu.
+
+**Headers**:
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Query Parameters**:
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| limit | int | 10 | Số lượng sản phẩm |
+| sortBy | string | quantity | Sắp xếp theo: quantity hoặc revenue |
+| fromDate | string | - | Ngày bắt đầu |
+| toDate | string | - | Ngày kết thúc |
+
+**Response**: 200 OK
+```json
+[
+  {
+    "productId": 2,
+    "productName": "Phở Bò Gia Truyền",
+    "quantitySold": 450,
+    "revenue": 29250000.00
+  },
+  {
+    "productId": 4,
+    "productName": "Trà Sữa Trân Châu",
+    "quantitySold": 380,
+    "revenue": 17100000.00
+  }
+]
+```
+
+---
+
+## 17. Admin Review Management API
+
+### 17.1 Get All Reviews (Admin)
+**Endpoint**: `GET /api/admin/reviews`
+
+**Description**: Lấy danh sách tất cả đánh giá sản phẩm, hỗ trợ phân trang và lọc.
+
+**Headers**:
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Query Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| page | int | Số trang (default: 0) |
+| size | int | Số lượng mỗi trang (default: 20) |
+| productId | int | Lọc theo sản phẩm |
+| userId | int | Lọc theo người dùng |
+| rating | int | Lọc theo số sao (1-5) |
+| fromDate | string | Lọc từ ngày (yyyy-MM-dd) |
+
+**Response**: 200 OK
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "user": {
+        "id": 123,
+        "fullName": "Nguyễn Văn A",
+        "avatarUrl": "https://..."
+      },
+      "product": {
+        "id": 2,
+        "name": "Phở Bò Gia Truyền"
+      },
+      "rating": 5,
+      "comment": "Rất ngon!",
+      "createdAt": "2026-03-05T10:00:00Z"
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 20,
+    "totalElements": 100
+  }
+}
+```
+
+---
+
+### 17.2 Delete Review (Admin)
+**Endpoint**: `DELETE /api/admin/reviews/{id}`
+
+**Description**: Xóa một đánh giá không phù hợp.
+
+**Headers**:
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của đánh giá |
+
+**Response**: 204 No Content
+
+**Errors**:
+- 401 Unauthorized: Token không hợp lệ
+- 403 Forbidden: Không có quyền
+- 404 Not Found: Đánh giá không tồn tại
+
+---
+
+## 18. User Order Management API
+
+### 18.1 Cancel Order
+**Endpoint**: `PUT /api/orders/{id}/cancel`
+
+**Description**: Cho phép người dùng hủy đơn hàng của chính họ khi đơn hàng còn ở trạng thái cho phép hủy (thường là PENDING hoặc CONFIRMED).
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của đơn hàng |
+
+**Request Body** (optional):
+```json
+{
+  "reason": "Tôi muốn hủy đơn hàng vì lý do cá nhân"
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "status": "CANCELLED",
+  "refundTransactionId": 12346,
+  "message": "Đơn hàng đã được hủy thành công và tiền đã được hoàn lại vào ví"
+}
+```
+
+**Errors**:
+- 400 Bad Request: Đơn hàng không thể hủy (đã ở trạng thái DELIVERING hoặc COMPLETED)
+- 403 Forbidden: Không phải đơn hàng của user này
+- 404 Not Found: Đơn hàng không tồn tại
+
+---
+
+### 18.2 Reorder
+**Endpoint**: `POST /api/orders/{id}/reorder`
+
+**Description**: Tạo một đơn hàng mới dựa trên đơn hàng cũ (sao chép danh sách sản phẩm, địa chỉ, ghi chú). Giá sản phẩm sẽ được lấy theo giá hiện tại.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của đơn hàng cũ |
+
+**Request Body** (optional):
+```json
+{
+  "deliveryAddress": "Địa chỉ mới (nếu muốn thay đổi)",
+  "note": "Ghi chú mới"
+}
+```
+
+**Response**: 201 Created
+```json
+{
+  "orderId": 2026,
+  "totalAmount": 155000.00,
+  "status": "PENDING",
+  "createdAt": "2026-03-11T09:30:00Z"
+}
+```
+
+---
+
+### 18.3 Track Order
+**Endpoint**: `GET /api/orders/tracking/{id}`
+
+**Description**: Lấy thông tin theo dõi trạng thái đơn hàng chi tiết, bao gồm lịch sử thay đổi trạng thái và ước tính thời gian giao hàng.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của đơn hàng |
+
+**Response**: 200 OK
+```json
+{
+  "orderId": 2025,
+  "currentStatus": "PREPARING",
+  "estimatedDeliveryTime": "2026-03-11T10:30:00Z",
+  "statusHistory": [
+    { "status": "PENDING", "timestamp": "2026-03-11T09:00:00Z" },
+    { "status": "CONFIRMED", "timestamp": "2026-03-11T09:05:00Z" },
+    { "status": "PREPARING", "timestamp": "2026-03-11T09:15:00Z" }
+  ],
+  "deliveryLocation": { "lat": 10.8231, "lng": 106.6297 }
+}
+```
+
+---
+
+## 19. User Review API
+
+### 19.1 Submit Review
+**Endpoint**: `POST /api/products/{id}/reviews`
+
+**Description**: Người dùng gửi đánh giá (rating và comment) cho một sản phẩm. Có thể cập nhật đánh giá nếu đã tồn tại.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của sản phẩm |
+
+**Request Body**:
+```json
+{
+  "rating": 5,
+  "comment": "Sản phẩm rất ngon, đóng gói cẩn thận"
+}
+```
+
+**Response**: 201 Created
+```json
+{
+  "id": 101,
+  "productId": 2,
+  "userId": 123,
+  "rating": 5,
+  "comment": "Sản phẩm rất ngon, đóng gói cẩn thận",
+  "createdAt": "2026-03-11T10:00:00Z"
+}
+```
+
+---
+
+### 19.2 Update Review
+**Endpoint**: `PUT /api/reviews/{id}`
+
+**Description**: Chỉnh sửa nội dung đánh giá của chính user.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của review |
+
+**Request Body**:
+```json
+{
+  "rating": 4,
+  "comment": "Cập nhật: lần này hơi mặn một chút"
+}
+```
+
+**Response**: 200 OK - Trả về review đã cập nhật
+
+**Errors**:
+- 403 Forbidden: Không phải chủ sở hữu
+- 404 Not Found: Không tồn tại
+
+---
+
+### 19.3 Delete Review
+**Endpoint**: `DELETE /api/reviews/{id}`
+
+**Description**: Xóa đánh giá của user.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của review |
+
+**Response**: 204 No Content
+
+---
+
+## 20. Address Management API
+
+### 20.1 Get Addresses
+**Endpoint**: `GET /api/addresses`
+
+**Description**: Lấy tất cả địa chỉ giao hàng đã lưu của user hiện tại.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Response**: 200 OK
+```json
+[
+  {
+    "id": 1,
+    "recipientName": "Nguyễn Văn A",
+    "phone": "0987654321",
+    "address": "Số 123, đường ABC, phường XYZ, quận Hai Bà Trưng, Hà Nội",
+    "isDefault": true,
+    "createdAt": "2026-01-01T00:00:00Z"
+  }
+]
+```
+
+---
+
+### 20.2 Create Address
+**Endpoint**: `POST /api/addresses`
+
+**Description**: Thêm một địa chỉ giao hàng mới.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+
+**Request Body**:
+```json
+{
+  "recipientName": "Nguyễn Văn A",
+  "phone": "0987654321",
+  "address": "Số 789, đường GHI, phường JKL, quận 3, TP.HCM",
+  "isDefault": false
+}
+```
+
+**Response**: 201 Created
+
+---
+
+### 20.3 Update Address
+**Endpoint**: `PUT /api/addresses/{id}`
+
+**Description**: Cập nhật thông tin địa chỉ.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của địa chỉ |
+
+**Request Body**: Tương tự như thêm mới (có thể gửi một phần)
+
+**Response**: 200 OK
+
+---
+
+### 20.4 Delete Address
+**Endpoint**: `DELETE /api/addresses/{id}`
+
+**Description**: Xóa một địa chỉ (không được xóa địa chỉ mặc định nếu là duy nhất).
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của địa chỉ |
+
+**Response**: 204 No Content
+
+---
+
+### 20.5 Set Default Address
+**Endpoint**: `PUT /api/addresses/{id}/default`
+
+**Description**: Đặt một địa chỉ làm mặc định. Các địa chỉ khác của user sẽ tự động chuyển thành không mặc định.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của địa chỉ |
+
+**Response**: 200 OK
+
+---
+
+## 21. Notification API
+
+### 21.1 Get Notifications
+**Endpoint**: `GET /api/notifications`
+
+**Description**: Lấy danh sách thông báo của user. Hỗ trợ phân trang.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Query Parameters**:
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| page | int | 0 | Số trang |
+| size | int | 20 | Số lượng mỗi trang |
+| unreadOnly | boolean | false | Chỉ lấy thông báo chưa đọc |
+
+**Response**: 200 OK
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "type": "ORDER_STATUS",
+      "title": "Đơn hàng #2025 đã được giao",
+      "content": "Đơn hàng của bạn đã được giao thành công.",
+      "isRead": false,
+      "createdAt": "2026-03-11T11:00:00Z"
+    }
+  ],
+  "pageNumber": 0,
+  "pageSize": 20,
+  "totalElements": 100,
+  "totalPages": 5
+}
+```
+
+---
+
+### 21.2 Mark Notification as Read
+**Endpoint**: `PUT /api/notifications/{id}/read`
+
+**Description**: Đánh dấu một thông báo là đã đọc.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của thông báo |
+
+**Response**: 200 OK
+
+---
+
+### 21.3 Mark All as Read
+**Endpoint**: `PUT /api/notifications/read-all`
+
+**Description**: Đánh dấu tất cả thông báo là đã đọc.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Response**: 200 OK
+```json
+"All notifications marked as read"
+```
+
+---
+
+## 22. Card Management API
+
+### 22.1 Set Default Card
+**Endpoint**: `POST /api/cards/{id}/default`
+
+**Description**: Đặt một thẻ làm mặc định cho thanh toán.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của thẻ |
+
+**Response**: 200 OK
+```json
+{
+  "id": 1,
+  "cardNumber": "**** **** **** 2103",
+  "isDefault": true,
+  "message": "Thẻ đã được đặt làm mặc định"
+}
+```
+
+---
+
+### 22.2 Delete Card
+**Endpoint**: `DELETE /api/cards/{id}`
+
+**Description**: Xóa thẻ khỏi danh sách. Không thể xóa thẻ mặc định nếu còn duy nhất.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của thẻ |
+
+**Response**: 204 No Content
+
+---
+
+## 23. Favorite Restaurant API
+
+### 23.1 Add Favorite Restaurant
+**Endpoint**: `POST /api/favorites/restaurants/{id}`
+
+**Description**: Thêm một nhà hàng vào danh sách yêu thích của user.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | ID của nhà hàng |
+
+**Response**: 201 Created
+```json
+{
+  "id": 1,
+  "restaurantId": "RS-9021",
+  "restaurantName": "SmartPay Quận 1",
+  "favoritedAt": "2026-03-11T12:00:00Z"
+}
+```
+
+---
+
+### 23.2 Remove Favorite Restaurant
+**Endpoint**: `DELETE /api/favorites/restaurants/{id}`
+
+**Description**: Xóa nhà hàng khỏi danh sách yêu thích.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | string | ID của nhà hàng |
+
+**Response**: 204 No Content
+
+---
+
+### 23.3 Get Favorite Restaurants
+**Endpoint**: `GET /api/favorites/restaurants`
+
+**Description**: Lấy danh sách nhà hàng yêu thích của user.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Response**: 200 OK
+```json
+[
+  {
+    "restaurantId": "RS-9021",
+    "restaurantName": "SmartPay Quận 1",
+    "logoBase64": "data:image/png;base64,...",
+    "address": "123 Nguyễn Huệ, Quận 1, TP.HCM",
+    "favoritedAt": "2026-03-11T12:00:00Z"
+  }
+]
+```
+
+---
+
+## 24. Support Ticket API
+
+### 24.1 Create Support Ticket
+**Endpoint**: `POST /api/support/tickets`
+
+**Description**: Người dùng gửi yêu cầu hỗ trợ (khiếu nại, thắc mắc) đến admin.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+
+**Request Body**:
+```json
+{
+  "subject": "Đơn hàng giao thiếu món",
+  "message": "Tôi đặt đơn #2025 nhưng bị thiếu món Trà Sữa.",
+  "orderId": 2025,
+  "attachments": "[\"base64_encoded_image...\"]"
+}
+```
+
+**Response**: 201 Created
+```json
+{
+  "ticketId": 1001,
+  "status": "OPEN",
+  "createdAt": "2026-03-11T14:00:00Z",
+  "message": "Yêu cầu hỗ trợ đã được gửi. Chúng tôi sẽ phản hồi trong 24h."
 }
 ```
