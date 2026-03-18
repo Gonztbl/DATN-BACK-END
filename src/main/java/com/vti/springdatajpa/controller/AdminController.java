@@ -2,10 +2,12 @@ package com.vti.springdatajpa.controller;
 
 import com.vti.springdatajpa.dto.*;
 import com.vti.springdatajpa.entity.Transaction;
+import com.vti.springdatajpa.entity.User;
 import com.vti.springdatajpa.entity.Wallet;
 import com.vti.springdatajpa.entity.enums.WalletStatus;
 import com.vti.springdatajpa.service.TransactionService;
 import com.vti.springdatajpa.service.UserManageService;
+import com.vti.springdatajpa.service.RegisterService;
 import com.vti.springdatajpa.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ public class AdminController {
     private final TransactionService transactionService;
     private final WalletRepository walletRepository;
     private final UserManageService userManageService;
+    private final RegisterService registerService;
 
     @GetMapping("/transactions")
     public ResponseEntity<List<AdminTransactionDTO>> getAllTransactions() {
@@ -89,6 +92,28 @@ public class AdminController {
         userManageService.deleteUser(id);
         
         return ResponseEntity.ok(new ApiResponse("User and associated records deleted successfully"));
+    }
+
+    @PostMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<RegisterResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
+        User user = new User();
+        user.setUserName(request.getUserName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setFullName(request.getFullName());
+        user.setPasswordHash(request.getPasswordHash());
+        user.setRole(request.getRole());
+        
+        User savedUser = registerService.createAccountWithRole(user);
+        
+        RegisterResponse response = new RegisterResponse();
+        response.setMessage("User created successfully by admin");
+        response.setUserId(savedUser.getId());
+        response.setAccountNumber(savedUser.getPhone());
+        response.setWalletId("WALLET" + savedUser.getId());
+        
+        return ResponseEntity.ok(response);
     }
 
     private AdminTransactionDTO mapToAdminDTO(Transaction transaction) {

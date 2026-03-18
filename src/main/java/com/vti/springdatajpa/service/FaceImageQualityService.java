@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class FaceImageQualityService {
 
     // Laplacian variance threshold — below this, image is considered blurry
-    private static final double BLUR_THRESHOLD = 18.0;
+    private static final double BLUR_THRESHOLD = 35.0;
 
     // Minimum average brightness (0-255) — below this, image is too dark
     private static final double MIN_BRIGHTNESS = 40.0;
@@ -24,7 +24,7 @@ public class FaceImageQualityService {
     private static final double MAX_BRIGHTNESS = 240.0;
 
     // Minimum image dimension in pixels
-    private static final int MIN_DIMENSION = 80;
+    private static final int MIN_DIMENSION = 150;
 
     /**
      * Quality check result.

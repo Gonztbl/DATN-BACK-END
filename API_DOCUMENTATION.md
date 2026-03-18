@@ -3806,6 +3806,53 @@ Tất cả API yêu cầu JWT token với role `SHIPPER`.
 
 ---
 
+### 6.6 Create User (Admin)
+**Endpoint**: `POST /api/admin/users`
+
+**Description**: Tạo tài khoản người dùng mới (giống như register nhưng dành cho admin). Tự động tạo ví cho user mới.
+
+**Headers**:
+- `Authorization: Bearer <token>` (bắt buộc, role ADMIN)
+- `Content-Type: application/json`
+
+**Request Body**:
+```json
+{
+  "userName": "Long2",
+  "fullName": "Bao Long Trinh2",
+  "email": "longtrinh.280722004@gmail.com",
+  "phone": "0365838902",
+  "passwordHash": "Long@2004",
+  "role": "USER"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| userName | string | Yes | Tên đăng nhập |
+| fullName | string | Yes | Họ và tên đầy đủ |
+| email | string | Yes | Email |
+| phone | string | Yes | Số điện thoại |
+| passwordHash | string | Yes | Mật khẩu |
+| role | enum | Yes | USER, ADMIN, SHIPPER, RESTAURANT_OWNER, SUPPORT |
+
+**Response**: 200 OK
+```json
+{
+  "message": "User created successfully by admin",
+  "userId": 15,
+  "accountNumber": "0365838902",
+  "walletId": "WALLET15"
+}
+```
+
+**Errors**:
+- 400: Invalid request / Username hoặc Email hoặc Phone đã tồn tại
+- 401: Unauthorized (không có quyền ADMIN)
+- 403: Forbidden
+
+---
+
 **Lưu ý**: Các APIs từ 1-26 đã có trong tài liệu gốc, các APIs từ 27-51 là APIs mới được bổ sung trong phiên bản này.
 
 ---
@@ -3872,3 +3919,139 @@ Tất cả API yêu cầu JWT token với role `SHIPPER`.
 ---
 
 **Tổng số APIs hiện tại: 53 APIs** (26 cũ + 27 mới)
+
+---
+
+# H. API SUMMARY REPORT (Báo cáo tổng hợp)
+
+## Danh sách APIs theo nhóm chức năng
+
+### 1. Authentication APIs (5 APIs)
+| STT | Endpoint | Method | Mô tả |
+|-----|----------|--------|-------|
+| 1 | `/api/auth/register` | POST | Đăng ký tài khoản mới |
+| 2 | `/api/auth/login` | POST | Đăng nhập |
+| 3 | `/api/auth/admin/register` | POST | Admin tạo tài khoản có role |
+| 4 | `/api/auth/forgot-password` | POST | Gửi OTP qua email |
+| 5 | `/api/auth/verify-otp` | POST | Xác thực OTP |
+
+### 2. User Management APIs (6 APIs)
+| STT | Endpoint | Method | Mô tả |
+|-----|----------|--------|-------|
+| 1 | `/api/userManager/all` | GET | Lấy danh sách tất cả users |
+| 2 | `/api/userManager/lock/{id}` | PUT | Khóa tài khoản user |
+| 3 | `/api/userManager/unlock/{id}` | PUT | Mở khóa tài khoản user |
+| 4 | `/api/userManager/update/{id}` | PUT | Cập nhật thông tin user |
+| 5 | `/api/admin/users/{id}` | DELETE | Xóa user (kèm wallet, transactions) |
+| 6 | `/api/admin/users` | POST | Tạo user mới (giống register) |
+
+### 3. Wallet APIs (8 APIs)
+| STT | Endpoint | Method | Mô tả |
+|-----|----------|--------|-------|
+| 1 | `/api/wallet/balance` | GET | Xem số dư ví |
+| 2 | `/api/wallets/available-balance` | GET | Xem số dư khả dụng |
+| 3 | `/api/wallet/me` | GET | Thông tin ví của user hiện tại |
+| 4 | `/api/wallets/search` | GET | Tìm ví theo số điện thoại |
+| 5 | `/api/admin/wallets` | GET | Admin lấy danh sách tất cả ví |
+| 6 | `/api/admin/wallets/lock/{id}` | PUT | Khóa ví |
+| 7 | `/api/admin/wallets/unlock/{id}` | PUT | Mở khóa ví |
+| 8 | `/api/admin/wallets/topup` | POST | Nạp tiền vào ví |
+
+### 4. Transaction APIs (8 APIs)
+| STT | Endpoint | Method | Mô tả |
+|-----|----------|--------|-------|
+| 1 | `/api/transfers` | POST | Chuyển tiền |
+| 2 | `/api/transfers/history` | GET | Lịch sử chuyển tiền |
+| 3 | `/api/transfers/{id}` | GET | Chi tiết giao dịch chuyển tiền |
+| 4 | `/api/deposit` | POST | Nạp tiền vào ví |
+| 5 | `/api/deposit/wallet-by-username/{userName}` | GET | Lấy ví theo username |
+| 6 | `/api/transactions/history` | GET | Lịch sử giao dịch |
+| 7 | `/api/admin/transactions` | GET | Admin lấy tất cả giao dịch |
+| 8 | `/api/wallets/{walletId}/withdraw` | POST | Rút tiền từ ví |
+
+### 5. Shipper APIs (4 APIs)
+| STT | Endpoint | Method | Mô tả |
+|-----|----------|--------|-------|
+| 1 | `/api/shipper/orders/available` | GET | Lấy danh sách đơn hàng khả dụng |
+| 2 | `/api/shipper/orders/{id}/accept` | POST | Nhận đơn hàng |
+| 3 | `/api/shipper/location` | POST | Cập nhật vị trí shipper |
+| 4 | `/api/shipper/statistics` | GET | Thống kê shipper |
+
+### 6. Order APIs (5 APIs)
+| STT | Endpoint | Method | Mô tả |
+|-----|----------|--------|-------|
+| 1 | `/api/orders` | POST | Tạo đơn hàng mới |
+| 2 | `/api/orders` | GET | Lấy danh sách đơn hàng |
+| 3 | `/api/orders/{id}` | GET | Chi tiết đơn hàng |
+| 4 | `/api/orders/{id}/cancel` | PUT | Hủy đơn hàng |
+| 5 | `/api/orders/{id}/status` | PUT | Cập nhật trạng thái đơn hàng |
+
+### 7. Restaurant APIs (8 APIs)
+| STT | Endpoint | Method | Mô tả |
+|-----|----------|--------|-------|
+| 1 | `/api/restaurants` | GET | Lấy danh sách nhà hàng |
+| 2 | `/api/restaurants/{id}` | GET | Chi tiết nhà hàng |
+| 3 | `/api/restaurants/{id}/menu` | GET | Lấy menu nhà hàng |
+| 4 | `/api/restaurant-owner/restaurant` | GET | Lấy nhà hàng của owner |
+| 5 | `/api/restaurant-owner/restaurant` | POST | Tạo nhà hàng mới |
+| 6 | `/api/restaurant-owner/restaurant/{id}` | PUT | Cập nhật nhà hàng |
+| 7 | `/api/restaurant-owner/menu-items` | POST | Thêm món ăn vào menu |
+| 8 | `/api/restaurant-owner/menu-items/{id}` | PUT | Cập nhật món ăn |
+
+### 8. Admin Management APIs (6 APIs)
+| STT | Endpoint | Method | Mô tả |
+|-----|----------|--------|-------|
+| 1 | `/api/admin/restaurant-owners` | GET | Lấy danh sách restaurant owners |
+| 2 | `/api/admin/restaurant-owners/{id}/lock` | PUT | Khóa restaurant owner |
+| 3 | `/api/admin/restaurant-owners/{id}/unlock` | PUT | Mở khóa restaurant owner |
+| 4 | `/api/admin/shippers` | GET | Lấy danh sách shippers |
+| 5 | `/api/admin/shippers/{id}/lock` | PUT | Khóa shipper |
+| 6 | `/api/admin/shippers/{id}/unlock` | PUT | Mở khóa shipper |
+
+### 9. Card & Payment APIs (4 APIs)
+| STT | Endpoint | Method | Mô tả |
+|-----|----------|--------|-------|
+| 1 | `/api/cards` | GET | Lấy danh sách thẻ |
+| 2 | `/api/cards` | POST | Thêm thẻ mới |
+| 3 | `/api/cards/{id}/default` | PUT | Đặt thẻ mặc định |
+| 4 | `/api/cards/{id}` | DELETE | Xóa thẻ |
+
+### 10. QR Code APIs (3 APIs)
+| STT | Endpoint | Method | Mô tả |
+|-----|----------|--------|-------|
+| 1 | `/api/qr/wallet/me` | GET | Lấy QR code ví của user |
+| 2 | `/api/qr/generate` | POST | Tạo QR code với số tiền |
+| 3 | `/api/qr/scan` | POST | Quét và xử lý QR code |
+
+## Thống kê tổng quan
+
+| Nhóm chức năng | Số lượng APIs |
+|----------------|---------------|
+| Authentication | 5 |
+| User Management | 6 |
+| Wallet | 8 |
+| Transaction | 8 |
+| Shipper | 4 |
+| Order | 5 |
+| Restaurant | 8 |
+| Admin Management | 6 |
+| Card & Payment | 4 |
+| QR Code | 3 |
+| **TỔNG CỘNG** | **53 APIs** |
+
+## Phân quyền theo Role
+
+| Role | APIs có thể truy cập |
+|------|---------------------|
+| PUBLIC | `/api/auth/*` (trừ admin/register) |
+| USER | Wallet, Transaction, Order, Card APIs |
+| SHIPPER | Shipper APIs + User APIs |
+| RESTAURANT_OWNER | Restaurant Owner APIs + User APIs |
+| ADMIN | Tất cả Admin APIs + User APIs |
+| SUPPORT | APIs hỗ trợ khách hàng |
+
+---
+
+**Ngày cập nhật**: March 18, 2026
+**Phiên bản**: v2.0
+**Tác giả**: DATN Development Team

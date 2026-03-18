@@ -168,7 +168,7 @@ public class FacePipelineService {
             stddev.release();
 
             // Flat image threshold (printed photo, screen capture)
-            if (textureVariance < 20.0) {
+            if (textureVariance < 50.0) {
                 throw new RuntimeException(
                         String.format("Possible spoofing detected: low face texture variance (%.1f). "
                                 + "Please use a live camera image.", textureVariance));
