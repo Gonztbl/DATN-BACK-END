@@ -5,17 +5,12 @@ import com.vti.springdatajpa.entity.Transaction;
 import com.vti.springdatajpa.entity.Wallet;
 import com.vti.springdatajpa.entity.enums.WalletStatus;
 import com.vti.springdatajpa.service.TransactionService;
+import com.vti.springdatajpa.service.UserManageService;
 import com.vti.springdatajpa.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -28,6 +23,7 @@ public class AdminController {
 
     private final TransactionService transactionService;
     private final WalletRepository walletRepository;
+    private final UserManageService userManageService;
 
     @GetMapping("/transactions")
     public ResponseEntity<List<AdminTransactionDTO>> getAllTransactions() {
@@ -86,6 +82,15 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable Integer id) {
+        // Delegate deletion to service to handle all related records
+        userManageService.deleteUser(id);
+        
+        return ResponseEntity.ok(new ApiResponse("User and associated records deleted successfully"));
+    }
+
     private AdminTransactionDTO mapToAdminDTO(Transaction transaction) {
         AdminTransactionDTO dto = new AdminTransactionDTO();
         dto.setTransactionId("TXN-" + transaction.getId());
@@ -122,6 +127,8 @@ public class AdminController {
         dto.setCreatedAt(wallet.getCreatedAt());
         dto.setStatus(wallet.getStatus() != null ? wallet.getStatus().name() : null);
         dto.setUserId(wallet.getUser() != null ? wallet.getUser().getId() : null);
+        dto.setRole(wallet.getUser() != null && wallet.getUser().getRole() != null ? 
+                   wallet.getUser().getRole().name() : null);
         return dto;
     }
 }

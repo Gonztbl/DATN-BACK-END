@@ -5,7 +5,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+
+import jakarta.persistence.CascadeType;
 
 @Entity
 @Table(name = "users")
@@ -60,7 +61,7 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Wallet wallet;
 
     private String avatarUrl;

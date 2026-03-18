@@ -24,5 +24,7 @@ public class UserManagerDTO {
     private boolean isActive;
 
     private LocalDateTime createdAt;
+    
+    private String role;
 
 }

@@ -52,4 +52,11 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     // Alternative method for soft delete check
     @Query("SELECT p FROM Product p WHERE p.id = :id AND p.deletedAt IS NULL")
     Optional<Product> findActiveProductById(@Param("id") Integer id);
+
+    // Restaurant Owner methods
+    Page<Product> findByRestaurantIdAndDeletedAtIsNull(String restaurantId, Pageable pageable);
+
+    Page<Product> findByRestaurantIdAndStatusAndDeletedAtIsNull(String restaurantId, String status, Pageable pageable);
+
+    Optional<Product> findByIdAndRestaurantIdAndDeletedAtIsNull(Integer id, String restaurantId);
 }

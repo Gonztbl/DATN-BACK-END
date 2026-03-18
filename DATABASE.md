@@ -154,9 +154,18 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `recipientPhone`| String | `@Column(nullable = false)` |
 | `note` | String | |
 | `paymentMethod`| String | |
+| `restaurantId` | String | `@Column(name = "restaurant_id")` |
+| `shipperId` | Integer | `@Column(name = "shipper_id")` - ID của shipper giao hàng |
+| `rejectedReason` | String | `@Column(name = "rejected_reason", columnDefinition = "TEXT")` - Lý do từ chối đơn |
+| `deliveryFailedReason` | String | `@Column(name = "delivery_failed_reason", columnDefinition = "TEXT")` - Lý do giao thất bại |
+| `confirmedAt` | LocalDateTime | `@Column(name = "confirmed_at")` - Thời gian xác nhận đơn |
+| `readyAt` | LocalDateTime | `@Column(name = "ready_at")` - Thời gian sẵn sàng để giao |
+| `pickedUpAt` | LocalDateTime | `@Column(name = "picked_up_at")` - Thời gian shipper lấy hàng |
+| `deliveredAt` | LocalDateTime | `@Column(name = "delivered_at")` - Thời gian giao hàng thành công |
 | `createdAt` | LocalDateTime | |
 | `updatedAt` | LocalDateTime | |
 | `user` | User | `@ManyToOne` |
+| `restaurant` | Restaurant | `@ManyToOne(fetch = FetchType.LAZY)` |
 | `orderItems` | List<OrderItem>| `@OneToMany` |
 
 ### 14. OrderItem
@@ -167,6 +176,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `productId` | Integer | `@Column(nullable = false)` |
 | `quantity` | Integer | `@Column(nullable = false)` |
 | `priceAtTime` | BigDecimal | `@Column(precision = 10, scale = 2, nullable = false)` |
+| `note` | String | `@Column(columnDefinition = "TEXT")` - Ghi chú cho món |
 | `order` | Order | `@ManyToOne(fetch = FetchType.LAZY)` |
 | `product` | Product | `@ManyToOne(fetch = FetchType.LAZY)` |
 
@@ -225,6 +235,7 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 | `createdAt` | LocalDateTime | |
 | `updatedAt` | LocalDateTime | |
 | `deletedAt` | LocalDateTime | |
+| `ownerId` | Integer | `@Column(name = "owner_id")` - ID của chủ nhà hàng |
 | `products` | List<Product>| `@OneToMany` |
 
 ### 19. Review
@@ -378,9 +389,11 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 - `PENDING`
 - `CONFIRMED`
 - `PREPARING`
+- `READY_FOR_PICKUP`
 - `DELIVERING`
 - `COMPLETED`
 - `CANCELLED`
+- `DELIVERY_FAILED`
 
 ### CardDeposit.DepositStatus
 - `PENDING`
@@ -395,6 +408,8 @@ Dưới đây là chi tiết các bảng thuộc tính của hệ thống dựa 
 - `USER`
 - `ADMIN`
 - `SUPPORT`
+- `RESTAURANT_OWNER`
+- `SHIPPER`
 
 ### TransactionDirection
 - `IN`

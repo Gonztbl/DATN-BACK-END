@@ -8,4 +8,5 @@ import java.util.List;
 public interface BankAccountRepository extends JpaRepository<BankAccount, Integer> {
     BankAccount findByIdAndUserId(Integer id, Integer userId);
     List<BankAccount> findByUserId(Integer userId);
+    void deleteByUserId(Integer userId);
 }

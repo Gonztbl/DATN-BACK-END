@@ -54,6 +54,27 @@ public class Order {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "shipper_id")
+    private Integer shipperId;
+
+    @Column(name = "rejected_reason", columnDefinition = "TEXT")
+    private String rejectedReason;
+
+    @Column(name = "delivery_failed_reason", columnDefinition = "TEXT")
+    private String deliveryFailedReason;
+
+    @Column(name = "confirmed_at")
+    private LocalDateTime confirmedAt;
+
+    @Column(name = "ready_at")
+    private LocalDateTime readyAt;
+
+    @Column(name = "picked_up_at")
+    private LocalDateTime pickedUpAt;
+
+    @Column(name = "delivered_at")
+    private LocalDateTime deliveredAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
@@ -73,6 +94,6 @@ public class Order {
     }
 
     public enum OrderStatus {
-        PENDING, CONFIRMED, PREPARING, DELIVERING, COMPLETED, CANCELLED
+        PENDING, CONFIRMED, PREPARING, READY_FOR_PICKUP, DELIVERING, COMPLETED, CANCELLED, DELIVERY_FAILED
     }
 }

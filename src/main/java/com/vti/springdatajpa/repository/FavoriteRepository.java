@@ -13,4 +13,6 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Integer> {
     Optional<Favorite> findByUserIdAndRestaurantId(Integer userId, String restaurantId);
     void deleteByUserIdAndRestaurantId(Integer userId, String restaurantId);
     boolean existsByUserIdAndRestaurantId(Integer userId, String restaurantId);
+
+    void deleteByUserId(Integer userId);
 }

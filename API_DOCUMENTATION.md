@@ -402,7 +402,8 @@
     "availableBalance": 1500000.0,
     "createdAt": "2023-11-20T14:35:00",
     "status": "ACTIVE",
-    "userId": 2
+    "userId": 2,
+    "role": "USER"
   }
 ]
 ```
@@ -544,7 +545,8 @@
     "phone": "0987654321",
     "fullName": "Nguyen Van A",
     "isActive": true,
-    "createdAt": "2024-03-10T14:30:00"
+    "createdAt": "2024-03-10T14:30:00",
+    "role": "USER"
   }
 ]
 ```
@@ -2826,3 +2828,1047 @@ curl -X GET "http://localhost:8080/api/admin/transactions?page=0&size=50" \
   "message": "Yêu cầu hỗ trợ đã được gửi. Chúng tôi sẽ phản hồi trong 24h."
 }
 ```
+
+---
+
+## 25. Restaurant Owner API
+
+Tất cả API trong nhóm này yêu cầu:
+- **Authentication**: JWT token (Bearer) của người dùng có role `RESTAURANT_OWNER`
+- **Authorization**: Chỉ cho phép chủ nhà hàng thao tác trên dữ liệu của chính nhà hàng họ
+
+### 25.1 GET /api/restaurant-owner/orders
+**Description**: Lấy danh sách đơn hàng của nhà hàng.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Query Parameters**:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| page | int | No | Số trang (default: 1) |
+| limit | int | No | Số lượng mỗi trang (default: 10) |
+| status | string | No | Lọc theo trạng thái |
+| sortBy | string | No | Trường sắp xếp (default: createdAt) |
+| sortDir | string | No | asc/desc (default: desc) |
+
+**Response**: 200 OK
+```json
+{
+  "data": [
+    {
+      "id": 2025,
+      "orderCode": "#2025",
+      "userId": 123,
+      "customerName": "Nguyễn Văn A",
+      "customerPhone": "0987654321",
+      "totalAmount": 155000.00,
+      "status": "PENDING",
+      "paymentMethod": "SMARTPAY",
+      "createdAt": "2026-03-15T10:30:00Z",
+      "items": [
+        {
+          "productId": 2,
+          "productName": "Phở Bò",
+          "quantity": 1,
+          "price": 65000.00
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "total": 45,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 5
+  }
+}
+```
+
+### 25.2 GET /api/restaurant-owner/orders/{id}
+**Description**: Lấy chi tiết một đơn hàng.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID đơn hàng |
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "orderCode": "#2025",
+  "userId": 123,
+  "customerName": "Nguyễn Văn A",
+  "customerPhone": "0987654321",
+  "deliveryAddress": "Số 123, đường ABC, Hai Bà Trưng, Hà Nội",
+  "note": "Không hành",
+  "totalAmount": 155000.00,
+  "status": "PENDING",
+  "paymentMethod": "SMARTPAY",
+  "paymentStatus": "PAID",
+  "transactionId": "TXN-123456",
+  "createdAt": "2026-03-15T10:30:00Z",
+  "items": [
+    {
+      "productId": 2,
+      "productName": "Phở Bò",
+      "quantity": 1,
+      "price": 65000.00,
+      "note": "Không hành"
+    }
+  ]
+}
+```
+
+### 25.3 PUT /api/restaurant-owner/orders/{id}/confirm
+**Description**: Xác nhận đơn hàng, chuyển từ PENDING sang CONFIRMED.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID đơn hàng |
+
+**Request Body** (optional):
+```json
+{
+  "estimatedReadyTime": "2026-03-15T11:00:00Z"
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "status": "CONFIRMED",
+  "message": "Order confirmed successfully"
+}
+```
+
+### 25.4 PUT /api/restaurant-owner/orders/{id}/reject
+**Description**: Từ chối đơn hàng, chuyển sang CANCELLED.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID đơn hàng |
+
+**Request Body**:
+```json
+{
+  "reason": "Hết nguyên liệu"
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "status": "CANCELLED",
+  "message": "Order rejected"
+}
+```
+
+### 25.5 PUT /api/restaurant-owner/orders/{id}/ready
+**Description**: Báo món đã sẵn sàng để shipper lấy.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID đơn hàng |
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "status": "READY_FOR_PICKUP",
+  "message": "Order is ready for pickup"
+}
+```
+
+### 25.6 GET /api/restaurant-owner/products
+**Description**: Lấy danh sách sản phẩm của nhà hàng.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Query Parameters**:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| page | int | No | Số trang (default: 1) |
+| limit | int | No | Số lượng mỗi trang (default: 10) |
+| search | string | No | Tìm kiếm |
+| status | string | No | available/unavailable |
+
+**Response**: 200 OK
+```json
+{
+  "data": [
+    {
+      "id": 101,
+      "name": "Phở Bò Đặc Biệt",
+      "description": "Phở bò với thịt tái, nạm, gầu",
+      "price": 75000.00,
+      "imageBase64": "data:image/png;base64,...",
+      "categoryId": 2,
+      "status": "available",
+      "createdAt": "2026-03-15T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 20,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 2
+  }
+}
+```
+
+### 25.7 GET /api/restaurant-owner/products/{id}
+**Description**: Lấy chi tiết sản phẩm.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID sản phẩm |
+
+### 25.8 POST /api/restaurant-owner/products
+**Description**: Thêm sản phẩm mới.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+
+**Request Body**:
+```json
+{
+  "name": "Phở Bò Đặc Biệt",
+  "description": "Phở bò với thịt tái, nạm, gầu",
+  "price": 75000.00,
+  "imageBase64": "data:image/png;base64,...",
+  "categoryId": 2,
+  "status": "available"
+}
+```
+
+### 25.9 PUT /api/restaurant-owner/products/{id}
+**Description**: Cập nhật sản phẩm.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID sản phẩm |
+
+### 25.10 DELETE /api/restaurant-owner/products/{id}
+**Description**: Xóa sản phẩm (soft delete).
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+### 25.11 PUT /api/restaurant-owner/restaurant/status
+**Description**: Cập nhật trạng thái hoạt động của nhà hàng.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+
+**Request Body**:
+```json
+{
+  "isOpen": false
+}
+```
+
+---
+
+## 26. Shipper API
+
+Tất cả API yêu cầu JWT token với role `SHIPPER`.
+
+### 26.1 GET /api/shipper/orders
+**Description**: Lấy danh sách đơn hàng.
+
+**Headers**:
+- `Authorization: Bearer <token>`
+
+**Query Parameters**:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| page | int | No | Số trang |
+| limit | int | No | Số lượng mỗi trang |
+| status | string | No | Lọc theo trạng thái |
+| assigned | boolean | No | true = đơn đã gán, false = đơn chưa có shipper |
+
+**Response**: 200 OK
+```json
+{
+  "data": [
+    {
+      "id": 2025,
+      "orderCode": "#2025",
+      "restaurantName": "Phở Thìn",
+      "restaurantAddress": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
+      "customerName": "Nguyễn Văn A",
+      "customerPhone": "0987654321",
+      "deliveryAddress": "Số 123, đường ABC, Hai Bà Trưng, Hà Nội",
+      "totalAmount": 155000.00,
+      "status": "READY_FOR_PICKUP",
+      "paymentMethod": "SMARTPAY",
+      "createdAt": "2026-03-15T10:30:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 20,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 2
+  }
+}
+```
+
+### 26.2 GET /api/shipper/orders/{id}
+**Description**: Lấy chi tiết đơn hàng.
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "orderCode": "#2025",
+  "restaurant": {
+    "name": "Phở Thìn",
+    "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
+    "phone": "02439712738",
+    "latitude": 21.0285,
+    "longitude": 105.8542
+  },
+  "customer": {
+    "name": "Nguyễn Văn A",
+    "phone": "0987654321",
+    "address": "Số 123, đường ABC, Hai Bà Trưng, Hà Nội",
+    "latitude": 21.0285,
+    "longitude": 105.8542
+  },
+  "items": [
+    {
+      "productName": "Phở Bò",
+      "quantity": 1,
+      "note": "Không hành"
+    }
+  ],
+  "totalAmount": 155000.00,
+  "paymentMethod": "SMARTPAY",
+  "paymentStatus": "PAID",
+  "note": "Gọi trước khi giao",
+  "status": "READY_FOR_PICKUP",
+  "createdAt": "2026-03-15T10:30:00Z"
+}
+```
+
+### 26.3 PUT /api/shipper/orders/{id}/accept
+**Description**: Shipper nhận đơn.
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "status": "READY_FOR_PICKUP",
+  "message": "Order accepted"
+}
+```
+
+### 26.4 PUT /api/shipper/orders/{id}/picked-up
+**Description**: Xác nhận đã lấy hàng. Chuyển sang DELIVERING.
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "status": "DELIVERING",
+  "message": "Picked up, on the way"
+}
+```
+
+### 26.5 PUT /api/shipper/orders/{id}/delivered
+**Description**: Báo giao hàng thành công.
+
+**Request Body** (optional):
+```json
+{
+  "photoBase64": "data:image/jpeg;base64,..."
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "status": "COMPLETED",
+  "message": "Delivered successfully"
+}
+```
+
+### 26.6 PUT /api/shipper/orders/{id}/failed
+**Description**: Báo giao hàng thất bại.
+
+**Request Body**:
+```json
+{
+  "reason": "Khách không nghe máy",
+  "photoBase64": "data:image/jpeg;base64,..."
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "id": 2025,
+  "status": "DELIVERY_FAILED",
+  "message": "Delivery failed, waiting for further instructions"
+}
+```
+
+---
+
+# C. ADMIN APIs
+
+## 27. POST /api/auth/admin/register
+**Description**: Admin đăng ký user với vai trò cụ thể.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Request Body**:
+```json
+{
+  "userName": "shipper01",
+  "email": "shipper01@example.com", 
+  "phone": "0987654321",
+  "fullName": "Nguyễn Văn Shipper",
+  "passwordHash": "hashedPassword",
+  "role": "SHIPPER" // ADMIN, SUPPORT, RESTAURANT_OWNER, SHIPPER
+}
+```
+
+**Response**: 201 Created
+```json
+{
+  "id": 123,
+  "userName": "shipper01",
+  "email": "shipper01@example.com",
+  "role": "SHIPPER",
+  "message": "User created successfully"
+}
+```
+
+**Errors**: 400, 401, 403
+
+---
+
+## 28. GET /api/admin/shippers
+**Description**: Danh sách tài xế (phân trang, tìm kiếm, lọc theo trạng thái online).
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Query Parameters**:
+- `page`: int (default 1)
+- `limit`: int (default 10) 
+- `search`: string (tìm theo tên, SĐT, email)
+- `isOnline`: boolean (lọc theo trạng thái online)
+
+**Response**: 200 OK
+```json
+{
+  "data": [
+    {
+      "userId": 123,
+      "fullName": "Trần Văn B",
+      "phone": "0988111222",
+      "email": "shipper@example.com",
+      "vehicleType": "Xe máy",
+      "vehiclePlate": "29A-12345",
+      "isOnline": true,
+      "isActive": true,
+      "createdAt": "2026-03-15T10:30:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 45,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 5
+  }
+}
+```
+
+---
+
+## 29. GET /api/admin/shippers/{id}
+**Description**: Chi tiết tài xế (kèm lịch sử giao hàng).
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Response**: 200 OK
+```json
+{
+  "userId": 123,
+  "fullName": "Trần Văn B",
+  "phone": "0988111222", 
+  "email": "shipper@example.com",
+  "isActive": true,
+  "createdAt": "2026-03-15T10:30:00Z",
+  "vehicleType": "Xe máy",
+  "vehiclePlate": "29A-12345",
+  "isOnline": true,
+  "currentLat": 21.0285,
+  "currentLng": 105.8542,
+  "totalOrders": 320,
+  "completedOrders": 295
+}
+```
+
+---
+
+## 30. PUT /api/admin/shippers/{id}/lock
+**Description**: Khóa tài khoản tài xế.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Request Body** (optional):
+```json
+{
+  "reason": "Vi phạm giao hàng"
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "message": "Shipper locked successfully"
+}
+```
+
+---
+
+## 31. PUT /api/admin/shippers/{id}/unlock
+**Description**: Mở khóa tài khoản tài xế.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Response**: 200 OK
+```json
+{
+  "message": "Shipper unlocked successfully"
+}
+```
+
+---
+
+## 32. GET /api/admin/restaurant-owners
+**Description**: Danh sách chủ nhà hàng (phân trang, tìm kiếm).
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Query Parameters**:
+- `page`: int (default 1)
+- `limit`: int (default 10)
+- `search`: string (tìm theo tên, SĐT, email)
+
+**Response**: 200 OK
+```json
+{
+  "data": [
+    {
+      "userId": 456,
+      "fullName": "Nguyễn Văn A",
+      "phone": "0987654321",
+      "email": "owner@example.com",
+      "isActive": true,
+      "createdAt": "2026-03-15T10:30:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 25,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 3
+  }
+}
+```
+
+---
+
+## 33. GET /api/admin/restaurant-owners/{id}
+**Description**: Chi tiết chủ nhà hàng.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Response**: 200 OK
+```json
+{
+  "userId": 456,
+  "fullName": "Nguyễn Văn A",
+  "phone": "0987654321",
+  "email": "owner@example.com", 
+  "isActive": true,
+  "createdAt": "2026-03-15T10:30:00Z",
+  "restaurants": [
+    {
+      "id": "RS-1234",
+      "name": "Phở Thìn Lò Đúc",
+      "phone": "02439712738",
+      "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
+      "status": true,
+      "productCount": 25,
+      "createdAt": "2026-03-15T10:30:00Z"
+    }
+  ]
+}
+```
+
+---
+
+## 34. PUT /api/admin/restaurant-owners/{id}/lock
+**Description**: Khóa tài khoản chủ nhà hàng.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Request Body** (optional):
+```json
+{
+  "reason": "Vi phạm quy định"
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "message": "Restaurant owner locked successfully"
+}
+```
+
+---
+
+## 35. PUT /api/admin/restaurant-owners/{id}/unlock
+**Description**: Mở khóa tài khoản chủ nhà hàng.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+
+**Response**: 200 OK
+```json
+{
+  "message": "Restaurant owner unlocked successfully"
+}
+```
+
+---
+
+## 36-39. SUPPORT TICKETS APIs
+**Description**: Quản lý yêu cầu hỗ trợ (TODO - cần implement SupportTicket entity).
+
+- GET /api/admin/support-tickets - Danh sách tickets
+- GET /api/admin/support-tickets/{id} - Chi tiết ticket  
+- PUT /api/admin/support-tickets/{id}/reply - Trả lời ticket
+- PUT /api/admin/support-tickets/{id}/status - Cập nhật trạng thái
+
+---
+
+# D. CHUNG (Multi-role APIs)
+
+## 40. POST /api/upload
+**Description**: Upload file ảnh (hỗ trợ multipart/form-data).
+
+**Headers**: 
+- `Authorization: Bearer <token>` (cho phép nhiều role: ADMIN, RESTAURANT_OWNER, SHIPPER, USER)
+- `Content-Type: multipart/form-data`
+
+**Form Data**:
+- `file`: file ảnh (tối đa 5MB, chỉ chấp nhận image/*)
+
+**Response**: 200 OK
+```json
+{
+  "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
+  "base64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
+  "error": null
+}
+```
+
+**Errors**: 
+- 400: File không hợp lệ (rỗng, quá 5MB, không phải ảnh)
+- 401: Chưa đăng nhập
+
+---
+
+# E. RESTAURANT OWNER APIs (Bổ sung)
+
+## 41. GET /api/restaurant-owner/reviews  
+**Description**: Lấy danh sách đánh giá của nhà hàng.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
+
+**Query Parameters**:
+- `page`: int (default 1)
+- `limit`: int (default 10) 
+- `rating`: int (lọc theo số sao 1-5)
+
+**Response**: 200 OK
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "userName": "Nguyễn Văn A",
+      "rating": 5,
+      "comment": "Ngon tuyệt vời, phục vụ nhanh",
+      "createdAt": "2026-03-15T10:30:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 120,
+    "page": 1, 
+    "limit": 10,
+    "totalPages": 12
+  }
+}
+```
+
+---
+
+## 42. GET /api/restaurant-owner/statistics/overview
+**Description**: Thống kê tổng quan của nhà hàng.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
+
+**Response**: 200 OK
+```json
+{
+  "todayOrders": 12,
+  "todayRevenue": 2450000,
+  "pendingOrders": 5,
+  "preparingOrders": 3,
+  "completedOrders": 120,
+  "cancelledOrders": 2
+}
+```
+
+---
+
+## 43. GET /api/restaurant-owner/statistics/revenue
+**Description**: Thống kê doanh thu theo ngày/tuần/tháng.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
+
+**Query Parameters**:
+- `groupBy`: string (day, week, month)
+- `fromDate`: string (yyyy-MM-dd)
+- `toDate`: string (yyyy-MM-dd)
+
+**Response**: 200 OK
+```json
+{
+  "labels": ["2026-03-01", "2026-03-02", "2026-03-03"],
+  "revenue": [1250000, 1320000, 1180000]
+}
+```
+
+---
+
+## 44. GET /api/restaurant-owner/statistics/top-products
+**Description**: Top sản phẩm bán chạy.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
+
+**Query Parameters**:
+- `limit`: int (default 10)
+- `fromDate`: string (yyyy-MM-dd)
+- `toDate`: string (yyyy-MM-dd)
+
+**Response**: 200 OK
+```json
+[
+  {
+    "productId": 2,
+    "productName": "Phở Bò Đặc Biệt",
+    "quantitySold": 45,
+    "revenue": 2925000
+  }
+]
+```
+
+---
+
+## 45. PUT /api/restaurant-owner/restaurant
+**Description**: Cập nhật thông tin nhà hàng.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
+
+**Request Body**:
+```json
+{
+  "name": "Phở Thìn Lò Đúc",
+  "phone": "02439712738",
+  "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
+  "logoBase64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+  "openingHours": "08:00-22:00"
+}
+```
+
+**Response**: 200 OK (trả về thông tin nhà hàng sau cập nhật)
+
+---
+
+## 46. PUT /api/restaurant-owner/restaurant/status  
+**Description**: Cập nhật trạng thái hoạt động (mở/đóng).
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
+
+**Request Body**:
+```json
+{
+  "isOpen": false
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "message": "Restaurant status updated",
+  "isOpen": false
+}
+```
+
+---
+
+# F. SHIPPER APIs (Bổ sung)
+
+## 47. GET /api/shipper/profile
+**Description**: Lấy thông tin profile mở rộng của shipper.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu SHIPPER role)
+
+**Response**: 200 OK
+```json
+{
+  "userId": 123,
+  "fullName": "Trần Văn B",
+  "phone": "0988111222",
+  "vehicleType": "Xe máy",
+  "vehiclePlate": "29A-12345", 
+  "isOnline": true,
+  "currentLat": 21.0285,
+  "currentLng": 105.8542
+}
+```
+
+---
+
+## 48. PUT /api/shipper/profile
+**Description**: Cập nhật thông tin profile.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu SHIPPER role)
+
+**Request Body**:
+```json
+{
+  "vehicleType": "Xe tay ga",
+  "vehiclePlate": "29B-67890"
+}
+```
+
+**Response**: 200 OK (trả về profile sau cập nhật)
+
+---
+
+## 49. PUT /api/shipper/status
+**Description**: Cập nhật trạng thái online/offline.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu SHIPPER role)
+
+**Request Body**:
+```json
+{
+  "isOnline": true
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "isOnline": true,
+  "message": "Status updated"
+}
+```
+
+---
+
+## 50. POST /api/shipper/location
+**Description**: Cập nhật tọa độ hiện tại.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu SHIPPER role)
+
+**Request Body**:
+```json
+{
+  "lat": 21.0285,
+  "lng": 105.8542
+}
+```
+
+**Response**: 200 OK
+
+---
+
+## 51. GET /api/shipper/statistics
+**Description**: Thống kê cá nhân của shipper.
+
+**Headers**: 
+- `Authorization: Bearer <token>` (yêu cầu SHIPPER role)
+
+**Response**: 200 OK
+```json
+{
+  "totalDelivered": 320,
+  "totalDistance": 1240.5,
+  "totalRevenue": 0,
+  "todayDelivered": 12
+}
+```
+
+---
+
+### 6.5 Delete User (Admin)
+**Endpoint**: `DELETE /api/admin/users/{id}`
+
+**Description**: Xóa tài khoản người dùng khỏi hệ thống. Không thể xóa tài khoản ADMIN. Việc xóa user sẽ tự động xóa:
+- Ví (wallet) liên quan
+- Tất cả giao dịch (transactions) của ví đó
+
+**Headers**:
+- `Authorization: Bearer <token>` (bắt buộc, role ADMIN)
+
+**Path Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| id | int | ID của người dùng cần xóa |
+
+**Response**: 200 OK
+```json
+{
+  "message": "User and associated wallet deleted successfully"
+}
+```
+
+**Errors**: 
+- 404: User not found
+- 403: Cannot delete admin user
+- 401: Unauthorized (không có quyền ADMIN)
+
+**Lưu ý**: Cascade được cấu hình để tự động xóa wallet và transactions, đảm bảo toàn vẹn dữ liệu.
+
+---
+
+**Lưu ý**: Các APIs từ 1-26 đã có trong tài liệu gốc, các APIs từ 27-51 là APIs mới được bổ sung trong phiên bản này.
+
+---
+
+# G. AUTHENTICATION APIs (Bổ sung)
+
+## 52. POST /api/auth/forgot-password
+**Description**: Gửi mã OTP xác thực đến email để khôi phục mật khẩu.
+
+**Request Body**:
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "message": "OTP đã được gửi đến email của bạn"
+}
+```
+
+**Errors**: 
+- 400: Email không hợp lệ hoặc không tồn tại
+- 500: Lỗi gửi email
+
+**Ghi chú**: 
+- OTP có hiệu lực 5 phút
+- OTP gồm 6 chữ số ngẫu nhiên
+- Email được gửi bất đồng bộ
+
+---
+
+## 53. POST /api/auth/verify-otp
+**Description**: Xác thực mã OTP đã nhận qua email.
+
+**Request Body**:
+```json
+{
+  "email": "user@example.com",
+  "otpCode": "123456",
+  "purpose": "RESET_PASSWORD"
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "message": "Xác thực OTP thành công"
+}
+```
+
+**Errors**: 
+- 400: OTP không hợp lệ hoặc đã hết hạn
+- 400: Email không hợp lệ
+- 400: Thiếu thông tin required
+
+**Ghi chú**:
+- `purpose` có thể là: `RESET_PASSWORD`, `EMAIL_VERIFICATION`, etc.
+- OTP sau khi xác thực sẽ bị vô hiệu hóa
+- Chỉ chấp nhận OTP 6 chữ số
+
+---
+
+**Tổng số APIs hiện tại: 53 APIs** (26 cũ + 27 mới)

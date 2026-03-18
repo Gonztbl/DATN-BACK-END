@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface CardDepositRepository extends JpaRepository<CardDeposit, Integer> {
     List<CardDeposit> findByUserIdOrderByTimestampDesc(Integer userId);
+    void deleteByUserId(Integer userId);
 }

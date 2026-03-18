@@ -45,6 +45,9 @@ public class Restaurant {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "owner_id")
+    private Integer ownerId;
+
     @OneToMany(mappedBy = "restaurant")
     private List<Product> products;
 

@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface SupportTicketRepository extends JpaRepository<SupportTicket, Integer> {
     List<SupportTicket> findByUserIdOrderByCreatedAtDesc(Integer userId);
+
+    void deleteByUserId(Integer userId);
 }

@@ -67,4 +67,44 @@ public class RegisterServiceImpl implements RegisterService {
 
         return savedUser;
     }
+
+    @Override
+    public User createAccountWithRole(User user) {
+        // check trùng username/email/phone
+        if (registerRepository.existsByUserName(user.getUserName())) {
+            throw new RuntimeException("USERNAME_EXISTS");
+        }
+        if (registerRepository.existsByEmail(user.getEmail())) {
+            throw new RuntimeException("EMAIL_EXISTS");
+        }
+        if (registerRepository.existsByPhone(user.getPhone())) {
+            throw new RuntimeException("PHONE_EXISTS");
+        }
+
+        // mã hoá password
+        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+
+        int pin = 100000 + new Random().nextInt(900000);
+        user.setPinHash(String.valueOf(pin));
+        user.setActive(true);
+        // Role is already set by the caller
+        user.setCreatedAt(java.time.LocalDateTime.now());
+
+        // Lưu user trước
+        User savedUser = registerRepository.save(user);
+
+        Wallet wallet = new Wallet();
+        wallet.setUser(savedUser);
+        wallet.setCode("WALLET" + savedUser.getId()); // mã wallet
+        wallet.setCurrency("VND");
+        wallet.setBalance(0.0);
+        wallet.setAvailableBalance(0.0);
+        wallet.setStatus(WalletStatus.ACTIVE);
+        wallet.setAccountNumber(user.getPhone());
+        wallet.setCreatedAt(java.time.LocalDateTime.now());
+
+        walletRepository.save(wallet);
+
+        return savedUser;
+    }
 }

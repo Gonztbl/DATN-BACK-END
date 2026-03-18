@@ -14,4 +14,6 @@ public interface FaceEmbeddingRepository extends JpaRepository<FaceEmbedding, Lo
     List<FaceEmbedding> findByUserIdAndPose(Integer userId, String pose);
 
     long countByUserId(Integer userId);
+
+    void deleteByUserId(Integer userId);
 }

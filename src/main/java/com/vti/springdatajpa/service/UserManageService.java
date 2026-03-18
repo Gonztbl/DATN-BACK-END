@@ -12,4 +12,6 @@ public interface UserManageService {
     void unlockUser(Integer id);
 
     UserManagerDTO updateUser(Integer id, UserManagerDTO userDto);
+
+    void deleteUser(Integer id);
 }

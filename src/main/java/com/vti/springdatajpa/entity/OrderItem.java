@@ -28,6 +28,9 @@ public class OrderItem {
     @Column(name = "price_at_time", nullable = false, precision = 10, scale = 2)
     private BigDecimal priceAtTime;
 
+    @Column(columnDefinition = "TEXT")
+    private String note;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", insertable = false, updatable = false)
     private Order order;

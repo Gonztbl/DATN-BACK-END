@@ -4,10 +4,13 @@ import com.vti.springdatajpa.entity.Restaurant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -30,6 +33,8 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, String> 
     
     Optional<Restaurant> findByIdAndDeletedAtIsNull(String id);
     
+    List<Restaurant> findByOwnerIdAndDeletedAtIsNull(Integer ownerId);
+    
     boolean existsByNameAndDeletedAtIsNull(String name);
     
     @Query("SELECT COUNT(r) > 0 FROM Restaurant r WHERE r.name = :name AND r.id != :excludeId AND r.deletedAt IS NULL")
@@ -37,4 +42,9 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, String> 
     
     @Query("SELECT COUNT(p) > 0 FROM Product p WHERE p.restaurantId = :restaurantId")
     boolean hasProducts(@Param("restaurantId") String restaurantId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Restaurant r SET r.ownerId = NULL WHERE r.ownerId = :ownerId")
+    void setOwnerIdNull(@Param("ownerId") Integer ownerId);
 }

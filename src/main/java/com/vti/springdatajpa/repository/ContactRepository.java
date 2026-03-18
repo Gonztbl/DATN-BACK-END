@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ContactRepository extends JpaRepository<Contact, Integer> {
     List<Contact> findByUserId(Integer userId, Pageable pageable);
+    void deleteByUserId(Integer userId);
 }

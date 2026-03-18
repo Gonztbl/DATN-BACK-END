@@ -20,4 +20,5 @@ public interface CardWithdrawRepository extends JpaRepository<CardWithdraw, Inte
     List<CardWithdraw> findByUserIdAndCreatedAtBetweenOrderByCreatedAtDesc(
         Integer userId, LocalDateTime startDate, LocalDateTime endDate
     );
+    void deleteByUserId(Integer userId);
 }

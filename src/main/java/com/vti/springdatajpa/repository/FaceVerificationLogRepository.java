@@ -10,4 +10,6 @@ import java.util.List;
 public interface FaceVerificationLogRepository extends JpaRepository<FaceVerificationLog, Long> {
 
     List<FaceVerificationLog> findByUserIdOrderByCreatedAtDesc(Integer userId);
+
+    void deleteByUserId(Integer userId);
 }

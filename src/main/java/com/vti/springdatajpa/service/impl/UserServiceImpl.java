@@ -175,15 +175,35 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public UserOutputDTO me() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String identity;
+
+        if (principal instanceof User) {
+            identity = ((User) principal).getUserName();
+        } else if (principal instanceof String) {
+            identity = (String) principal;
+        } else {
+            throw new RuntimeException("Unsupported principal type: " + (principal != null ? principal.getClass().getName() : "null"));
+        }
+
+        // Reload user from database to ensure we have a managed entity with initialized relationships
+        User user = findUserByUsernameOrEmail(identity);
+        
         UserOutputDTO userOutputDTO = new UserOutputDTO();
         userOutputDTO.setId(user.getId());
         userOutputDTO.setEmail(user.getEmail());
         userOutputDTO.setFullName(user.getFullName());
         userOutputDTO.setPhone(user.getPhone());
         userOutputDTO.setUsername(user.getUserName());
+        userOutputDTO.setRole(user.getRole());
         userOutputDTO.setWallet(user.getWallet());
+        userOutputDTO.setActive(user.isActive());
+        userOutputDTO.setVerified(user.isVerified());
+        userOutputDTO.setCreatedAt(user.getCreatedAt());
+        userOutputDTO.setUpdatedAt(user.getUpdatedAt());
+        
         return userOutputDTO;
     }
 

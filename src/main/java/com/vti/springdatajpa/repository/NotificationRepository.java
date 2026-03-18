@@ -13,4 +13,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     Page<Notification> findByUserIdOrderByCreatedAtDesc(Integer userId, Pageable pageable);
     List<Notification> findByUserIdAndIsReadFalse(Integer userId);
     Page<Notification> findByUserIdAndIsReadFalse(Integer userId, Pageable pageable);
+
+    void deleteByUserId(Integer userId);
 }

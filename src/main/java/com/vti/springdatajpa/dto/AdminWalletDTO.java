@@ -11,4 +11,5 @@ public class AdminWalletDTO {
     private LocalDateTime createdAt;
     private String status;
     private Integer userId;
+    private String role;
 }
