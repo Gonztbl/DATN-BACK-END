@@ -90,14 +90,15 @@ public class FacePipelineService {
         long t3 = System.currentTimeMillis();
         Mat alignedFace = null;
 
-        if (detection.landmarks != null) {
-            alignedFace = alignmentService.alignFace(image, detection.landmarks);
-            if (alignedFace == null) {
-                log.warn("  [align] 5-point failed, trying eye-based");
-                alignedFace = alignmentService.alignFaceByEyes(
-                        image, detection.landmarks[0], detection.landmarks[1], detection.bbox);
-            }
-        }
+        if (detection.landmarks != null && detection.landmarks.length >= 2) {
+    // Sử dụng alignFaceByEyes để xoay ảnh theo mắt, sau đó crop theo bbox và resize
+    alignedFace = alignmentService.alignFaceByEyes(
+            image,
+            detection.landmarks[0],
+            detection.landmarks[1],
+            detection.bbox
+    );
+}
 
         if (alignedFace == null) {
             log.warn("  [align] fallback to simple crop (lower accuracy)");

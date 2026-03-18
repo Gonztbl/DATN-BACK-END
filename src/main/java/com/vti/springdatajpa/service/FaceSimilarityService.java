@@ -16,7 +16,7 @@ public class FaceSimilarityService {
     private double threshold;
 
     // Minimum gap between best and second-best similarity to confirm match
-    private static final double SIMILARITY_MARGIN = 0.05;
+    private static final double SIMILARITY_MARGIN = 0.07;
 
     /**
      * Cosine similarity for L2-normalized vectors.

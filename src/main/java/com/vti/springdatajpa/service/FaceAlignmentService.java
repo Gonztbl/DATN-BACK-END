@@ -31,64 +31,38 @@ public class FaceAlignmentService {
     private static final double[] REF_MOUTH_R = { 70.7299, 92.2041 };
 
     /**
-     * Align a face image using 5 landmark points.
-     * Applies affine transformation to normalize face position/rotation.
-     *
-     * @param image     Original full image
-     * @param landmarks 5 landmark points [left_eye, right_eye, nose, mouth_left,
-     *                  mouth_right]
-     * @return Aligned face image 112x112 ready for ArcFace
+     * ALIGNMENT NHẸ - CHỈ XOAY + SCALE THEO MẮT (không ép 5 điểm)
+     * Đây là cách tốt nhất cho ArcFace ResNet100 khi test người thật khác nhau
      */
     public Mat alignFace(Mat image, Point[] landmarks) {
-        if (landmarks == null || landmarks.length < 5) {
-            log.warn("No landmarks available, falling back to simple crop");
-            return null; // Caller should handle fallback
-        }
-
-        try {
-            // Source points (detected landmarks)
-            MatOfPoint2f srcPoints = new MatOfPoint2f(
-                    landmarks[0], // left eye
-                    landmarks[1], // right eye
-                    landmarks[2], // nose
-                    landmarks[3], // mouth left
-                    landmarks[4] // mouth right
-            );
-
-            // Destination points (reference positions for 112x112)
-            MatOfPoint2f dstPoints = new MatOfPoint2f(
-                    new Point(REF_LEFT_EYE[0], REF_LEFT_EYE[1]),
-                    new Point(REF_RIGHT_EYE[0], REF_RIGHT_EYE[1]),
-                    new Point(REF_NOSE[0], REF_NOSE[1]),
-                    new Point(REF_MOUTH_L[0], REF_MOUTH_L[1]),
-                    new Point(REF_MOUTH_R[0], REF_MOUTH_R[1]));
-
-            // Estimate affine transformation (similarity transform)
-            // Use estimateAffinePartial2D for rotation + scale + translation (4 DOF)
-            Mat transform = estimateSimilarityTransform(srcPoints, dstPoints);
-
-            if (transform == null || transform.empty()) {
-                log.warn("Failed to estimate affine transform, using fallback");
-                srcPoints.release();
-                dstPoints.release();
-                return null;
-            }
-
-            // Apply affine transformation
-            Mat aligned = new Mat();
-            Imgproc.warpAffine(image, aligned, transform, new Size(112, 112));
-
-            srcPoints.release();
-            dstPoints.release();
-            transform.release();
-
-            log.debug("Face aligned successfully to 112x112");
-            return aligned;
-
-        } catch (Exception e) {
-            log.error("Face alignment failed: {}", e.getMessage());
+        if (landmarks == null || landmarks.length < 2) {
+            log.warn("Không đủ landmarks, trả về null để pipeline dùng fallback crop");
             return null;
         }
+
+        Point leftEye = landmarks[0];
+        Point rightEye = landmarks[1];
+
+        // Tính góc và khoảng cách mắt
+        double dx = rightEye.x - leftEye.x;
+        double dy = rightEye.y - leftEye.y;
+        double angle = Math.toDegrees(Math.atan2(dy, dx));
+        double eyeDist = Math.hypot(dx, dy);
+
+        // Center giữa hai mắt
+        Point center = new Point((leftEye.x + rightEye.x) / 2.0, (leftEye.y + rightEye.y) / 2.0);
+
+        // Scale để khoảng cách mắt ~68-72px trên ảnh 112x112 (chuẩn ArcFace)
+        double scale = 10.0 / eyeDist;
+
+        Mat rotMatrix = Imgproc.getRotationMatrix2D(center, angle, scale);
+
+        Mat aligned = new Mat();
+        Imgproc.warpAffine(image, aligned, rotMatrix, new Size(112, 112), Imgproc.INTER_LINEAR);
+
+        rotMatrix.release();
+        log.debug("Aligned bằng 2-point eye only, angle={:.1f}°, scale={:.2f}", angle, scale);
+        return aligned;
     }
 
     /**

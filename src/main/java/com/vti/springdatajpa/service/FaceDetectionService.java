@@ -19,7 +19,7 @@ public class FaceDetectionService {
     @Autowired
     private OnnxModelService modelService;
 
-    private static final float CONFIDENCE_THRESHOLD = 0.7f;
+    private static final float CONFIDENCE_THRESHOLD = 0.73f;
     private static final int MIN_FACE_SIZE = 80;
 
     public static class DetectionResult {
