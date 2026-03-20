@@ -48,6 +48,12 @@ public class Restaurant {
     @Column(name = "owner_id")
     private Integer ownerId;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "category_id")
+    private Integer categoryId;
+
     @OneToMany(mappedBy = "restaurant")
     private List<Product> products;
 

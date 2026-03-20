@@ -62,7 +62,7 @@ public class AdminController {
         Wallet wallet = walletRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Wallet not found"));
         
-        wallet.setStatus(WalletStatus.FROZEN);
+        wallet.setStatus(WalletStatus.SUSPENDED);
         walletRepository.save(wallet);
         
         return ResponseEntity.ok("Wallet locked successfully");

@@ -55,6 +55,12 @@ public class SecurityConfig {
                         // Admin-only endpoints (general rule AFTER specific rules)
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
+                        // Restaurant Owner endpoints
+                        .requestMatchers("/api/restaurant-owner/**").hasRole("RESTAURANT_OWNER")
+
+                        // Categories public endpoint
+                        .requestMatchers("/api/categories/**").permitAll()
+
                         // Support and Admin can access
                         .requestMatchers("/api/support/**").hasAnyRole("ADMIN", "SUPPORT")
 

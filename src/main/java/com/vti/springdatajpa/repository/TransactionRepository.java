@@ -75,4 +75,18 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
             @Param("toDate") LocalDateTime toDate,
             Pageable pageable
     );
+
+    long countByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
+
+    @Query("SELECT SUM(t.amount) FROM Transaction t")
+    Double sumAmount();
+
+    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.createdAt >= :startDate AND t.createdAt <= :endDate")
+    Double sumAmountBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.wallet.id = :walletId AND t.direction = :direction")
+    Double sumAmountByWalletIdAndDirection(@Param("walletId") Integer walletId, @Param("direction") TransactionDirection direction);
+
+    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.wallet.id = :walletId AND t.direction = :direction AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
+    Double sumAmountByWalletIdAndDirectionBetween(@Param("walletId") Integer walletId, @Param("direction") TransactionDirection direction, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

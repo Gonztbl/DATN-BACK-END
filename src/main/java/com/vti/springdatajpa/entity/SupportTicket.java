@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "support_tickets")
@@ -41,6 +42,12 @@ public class SupportTicket {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "assigned_to")
+    private Integer assignedTo; // Admin user ID
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TicketReply> replies;
 
     @PrePersist
     protected void onCreate() {

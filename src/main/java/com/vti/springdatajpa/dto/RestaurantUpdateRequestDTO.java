@@ -16,4 +16,8 @@ public class RestaurantUpdateRequestDTO {
     private String logoBase64;
     
     private Boolean status;
+    
+    private String description;
+    
+    private Integer categoryId;
 }

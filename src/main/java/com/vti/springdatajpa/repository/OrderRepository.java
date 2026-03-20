@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,4 +42,25 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     void deleteByUserId(Integer userId);
     void deleteByShipperId(Integer shipperId);
+
+    long countByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
+
+    long countByShipperId(Integer shipperId);
+    long countByShipperIdAndStatus(Integer shipperId, Order.OrderStatus status);
+    long countByShipperIdAndCreatedAtBetween(Integer shipperId, LocalDateTime startDate, LocalDateTime endDate);
+
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(o.totalAmount) FROM Order o")
+    BigDecimal sumTotalAmount();
+
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.createdAt >= :startDate AND o.createdAt <= :endDate")
+    BigDecimal sumTotalAmountBetween(@org.springframework.data.repository.query.Param("startDate") LocalDateTime startDate, @org.springframework.data.repository.query.Param("endDate") LocalDateTime endDate);
+
+    long countByRestaurantId(String restaurantId);
+    long countByRestaurantIdAndCreatedAtBetween(String restaurantId, LocalDateTime startDate, LocalDateTime endDate);
+
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.restaurantId = :restaurantId")
+    BigDecimal sumTotalAmountByRestaurantId(@org.springframework.data.repository.query.Param("restaurantId") String restaurantId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.restaurantId = :restaurantId AND o.createdAt >= :startDate AND o.createdAt <= :endDate")
+    BigDecimal sumTotalAmountByRestaurantIdAndCreatedAtBetween(@org.springframework.data.repository.query.Param("restaurantId") String restaurantId, @org.springframework.data.repository.query.Param("startDate") LocalDateTime startDate, @org.springframework.data.repository.query.Param("endDate") LocalDateTime endDate);
 }

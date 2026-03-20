@@ -1,6 +1,7 @@
 package com.vti.springdatajpa.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -19,4 +20,11 @@ public class RestaurantCreateRequestDTO {
     private String logoBase64;
     
     private Boolean status = true;
+    
+    private String description;
+    
+    private Integer categoryId;
+    
+    @NotNull(message = "userId không được để trống")
+    private Integer userId;
 }

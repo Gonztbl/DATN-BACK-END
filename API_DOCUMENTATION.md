@@ -1,893 +1,3777 @@
-# API Documentation - E-Wallet Backend System
+# API Documentation
 
-**Last Updated**: 2026-01-15
-**Version**: 4.0
+## PUT /api/userManager/update/{id}
 
----
+### 1. Endpoint
+`PUT /api/userManager/update/{id}`
 
-## API Summary
-
-### Authentication APIs
-- `POST /api/auth/register` - Đăng ký tài khoản
-- `POST /api/auth/login` - Đăng nhập
-
-### User & Profile APIs  
-- `GET /api/user/profile` - Lấy thông tin cá nhân
-- `PUT /api/user/profile` - Cập nhật thông tin cá nhân
-- `PUT /api/user/profile/avatar` - Cập nhật avatar
-- `GET /api/me` - Lấy thông tin người dùng hiện tại
-
-### Card APIs
-- `GET /api/cards` - Danh sách thẻ của user hiện tại
-- `GET /api/cards/{userId}/users` - Danh sách thẻ theo userId
-- `POST /api/cards` - Thêm thẻ mới
-- `POST /api/cards/deposit` - Nạp tiền từ thẻ
-- `POST /api/cards/withdraw` - Rút tiền từ thẻ
-
-### Wallet APIs
-- `GET /api/wallet/balance` - Xem số dư ví
-- `GET /api/wallet/me` - Lấy thông tin ví (QR)
-
-### Wallet Transfer APIs
-- `POST /api/wallet/transfers` - Chuyển tiền giữa các ví
-- `GET /api/wallet/transfers/recent` - Lịch sử giao dịch gần đây
-- `GET /api/wallet/transfers/lookup/{accountNumber}` - Tìm kiếm tài khoản
-
-### E-Wallet Transfer APIs
-- `GET /api/user/E-Wallet/transfers/wallet/{walletId}/history` - Lịch sử chuyển khoản theo ví
-- `GET /api/user/E-Wallet/transfers/{transferId}` - Chi tiết chuyển khoản
-- `GET /api/user/E-Wallet/transfers/wallets/search` - Tìm kiếm ví theo số điện thoại
-- `POST /api/user/E-Wallet/transfers` - Chuyển tiền qua điện thoại
-
-### Transaction APIs
-- `GET /api/transactions` - Lịch sử giao dịch (phân trang)
-- `POST /api/transactions/transfer` - Chuyển tiền
-- `POST /api/transactions` - Nạp tiền (topup)
-
-### Admin APIs
-- `GET /api/admin/transactions` - Xem tất cả giao dịch
-- `GET /api/admin/wallets` - Xem tất cả ví
-- `PUT /api/admin/wallets/lock/{id}` - Khóa ví
-- `PUT /api/admin/wallets/unlock/{id}` - Mở khóa ví
-- `POST /api/admin/wallets/topup` - Nạp tiền vào ví (Admin)
-
-### User Manager APIs
-- `GET /api/userManager/all` - Xem tất cả users
-- `PUT /api/userManager/lock/{id}` - Khóa user
-- `PUT /api/userManager/unlock/{id}` - Mở khóa user
-- `PUT /api/userManager/update/{id}` - Cập nhật thông tin user (Admin)
-
-### QR Code APIs
-- `GET /api/qr/wallet` - Tạo QR Code cho ví
-- `GET /api/qr/wallet/download` - Tải QR Image
-- `POST /api/qr/wallet/with-amount` - Tạo QR với số tiền
-- `POST /api/qr/resolve` - Giải mã QR Payload
-- `POST /api/qr/read-image` - Đọc ảnh QR thành JSON
-
-### Bank Account APIs
-- `GET /api/bank-account` - Danh sách tài khoản ngân hàng
-
-### Food Ordering APIs
-- `GET /api/categories` - Lấy danh sách danh mục món ăn
-- `GET /api/products` - Lấy danh sách sản phẩm (món ăn)
-- `GET /api/products/{id}` - Lấy chi tiết một sản phẩm
-- `GET /api/products/{id}/reviews` - Lấy danh sách đánh giá của sản phẩm
-- `POST /api/orders` - Đặt hàng (checkout)
-
-### Admin Category Management APIs
-- `GET /api/admin/categories` - Lấy danh sách danh mục (có phân trang, tìm kiếm, sắp xếp)
-- `GET /api/admin/categories/{id}` - Lấy chi tiết một danh mục
-- `POST /api/admin/categories` - Thêm mới danh mục
-- `PUT /api/admin/categories/{id}` - Cập nhật danh mục
-- `DELETE /api/admin/categories/{id}` - Xóa danh mục
-- `GET /api/admin/categories/export` - Xuất dữ liệu danh mục (Excel/CSV)
-- `GET /api/admin/categories/check-name` - Kiểm tra tên danh mục đã tồn tại
-
----
-
-## 1. Authentication APIs
-
-### 1.1 Register
-**Endpoint**: `POST /api/auth/register`
-
-**Request Body**:
+### 2. Request Body / Parameters
 ```json
 {
-  "userName": "newuser",
-  "email": "newuser@example.com", 
-  "phone": "0987654321",
-  "fullName": "Nguyen Van New",
-  "passwordHash": "123456"
+  "id": 0,
+  "userName": "string",
+  "email": "string",
+  "phone": "string",
+  "fullName": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "role": "string",
+  "active": true
 }
 ```
 
-**Response**:
+### 3. Response
+**Status 400**: Bad Request
+
 ```json
 {
-  "message": "User registered successfully",
-  "userId": 123,
-  "accountNumber": "0987654321"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-### 1.2 Login
-**Endpoint**: `POST /api/auth/login`
+**Status 200**: OK
 
-**Request Body**:
 ```json
 {
-  "userName": "testuser",
-  "passwordHash": "123456"
-}
-```
-
-**Response**:
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9...",
-  "type": "Bearer",
-  "expiresIn": 36000000,
-  "userName": "testuser",
-  "email": "testuser@example.com",
-  "fullName": "Test User",
-  "roles": ["USER"],
-  "avatar": "base64-avatar-string",
-  "membership": "STANDARD",
-  "status": "ACTIVE",
-  "isActive": true
+  "id": 0,
+  "userName": "string",
+  "email": "string",
+  "phone": "string",
+  "fullName": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "role": "string",
+  "active": true
 }
 ```
 
 ---
 
-## 2. Card APIs
+## PUT /api/userManager/unlock/{id}
 
-### 2.1 Get Cards
-**Endpoint**: `GET /api/cards`
+### 1. Endpoint
+`PUT /api/userManager/unlock/{id}`
 
-**Headers**: `Authorization: Bearer <token>`
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
 
-**Response**:
-```json
-[
-  {
-    "id": 1,
-    "cardNumber": "**** **** **** 2103",
-    "holderName": "NGUYEN VAN A",
-    "expiryDate": "05/25",
-    "type": "DEBIT",
-    "bankName": "Vietcombank",
-    "balanceCard": 100000000000000000000.0,
-    "status": "ACTIVE",
-    "last4": "2103"
-  }
-]
-```
+### 3. Response
+**Status 400**: Bad Request
 
-### 2.2 Add Card
-**Endpoint**: `POST /api/cards`
-
-**Headers**: `Authorization: Bearer <token>`
-
-**Request Body**:
 ```json
 {
-  "cardNumber": "5702676235112103",
-  "holderName": "NGUYEN VAN A",
-  "expiryDate": "05/25",
-  "cvv": "477",
-  "type": "DEBIT",
-  "bankName": "Vietcombank",
-  "balanceCard": 500000.0
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Response**:
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## PUT /api/userManager/lock/{id}
+
+### 1. Endpoint
+`PUT /api/userManager/lock/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
 ```json
 {
-  "id": 123,
-  "cardNumber": "**** **** **** 2103",
-  "holderName": "NGUYEN VAN A",
-  "expiryDate": "05/25",
-  "type": "DEBIT",
-  "bankName": "Vietcombank",
-  "balanceCard": 500000.0,
-  "status": "ACTIVE",
-  "last4": "2103"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## GET /api/user/profile
+
+### 1. Endpoint
+`GET /api/user/profile`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "userName": "string",
+  "email": "string",
+  "firstName": "string",
+  "lastName": "string",
+  "avatar": "string",
+  "avatarUrl": "string",
+  "verified": true,
+  "membership": "string",
+  "phone": "string",
+  "dateOfBirth": "string",
+  "address": "string"
 }
 ```
 
 ---
 
-## 3. Wallet APIs
+## PUT /api/user/profile
 
-### 3.1 Get Balance
-**Endpoint**: `GET /api/wallet/balance`
+### 1. Endpoint
+`PUT /api/user/profile`
 
-**Headers**: `Authorization: Bearer <token>`
-
-**Response**:
+### 2. Request Body / Parameters
 ```json
 {
-  "balance": 5000000.0,
-  "monthlyChangePercent": 2.5
+  "firstName": "string",
+  "lastName": "string",
+  "phone": "string",
+  "dateOfBirth": "string",
+  "address": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
+```
+
+---
+
+## PUT /api/user/profile/avatar
+
+### 1. Endpoint
+`PUT /api/user/profile/avatar`
+
+### 2. Request Body / Parameters
+```json
+{
+  "avatar": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
+```
+
+---
+
+## PUT /api/shipper/orders/{id}/picked-up
+
+### 1. Endpoint
+`PUT /api/shipper/orders/{id}/picked-up`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "status": "string",
+  "message": "string"
 }
 ```
 
 ---
 
-## 4. Wallet Transfer APIs
+## PUT /api/shipper/orders/{id}/failed
 
-### 4.1 Transfer Money
-**Endpoint**: `POST /api/wallet/transfers`
+### 1. Endpoint
+`PUT /api/shipper/orders/{id}/failed`
 
-**Headers**: `Authorization: Bearer <token>`
-
-**Request Body**:
+### 2. Request Body / Parameters
 ```json
 {
-  "toAccountNumber": "0987654321",
-  "amount": 1000.00,
-  "description": "Thanh toán hóa đơn"
+  "reason": "string",
+  "photoBase64": "string"
 }
 ```
 
-**Response**:
+### 3. Response
+**Status 400**: Bad Request
+
 ```json
 {
-  "transactionId": 12345,
-  "fromAccountNumber": "0123456789",
-  "toAccountNumber": "0987654321",
-  "toAccountName": "Nguyen Van B",
-  "amount": 1000.00,
-  "previousBalance": 5000.00,
-  "newBalance": 4000.00,
-  "description": "Thanh toán hóa đơn",
-  "timestamp": "2026-01-14T01:00:00",
-  "status": "SUCCESS",
-  "message": "Transfer successful",
-  "transactionType": "WALLET_TRANSFER"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-### 4.2 Get Recent Transactions
-**Endpoint**: `GET /api/wallet/transfers/recent?limit=10`
+**Status 200**: OK
 
-**Headers**: `Authorization: Bearer <token>`
-
-**Query Parameters**:
-- `limit`: Số lượng record (default: 10, max: 100)
-
-**Response**:
-```json
-[
-  {
-    "transactionId": 12345,
-    "transactionType": "TRANSFER_OUT",
-    "direction": "OUT",
-    "amount": 1000.00,
-    "balanceBefore": 5000.00,
-    "balanceAfter": 4000.00,
-    "partnerAccountNumber": "0987654321",
-    "partnerAccountName": "Nguyen Van B",
-    "description": "Thanh toán hóa đơn",
-    "timestamp": "2026-01-14T01:00:00",
-    "status": "COMPLETED",
-    "referenceId": "0987654321"
-  }
-]
-```
-
-### 4.3 Lookup Account
-**Endpoint**: `GET /api/wallet/transfers/lookup/{accountNumber}`
-
-**Headers**: `Authorization: Bearer <token>`
-
-**Path Parameters**:
-- `accountNumber`: Số tài khoản cần tìm
-
-**Response**:
 ```json
 {
-  "accountNumber": "0987654321",
-  "accountName": "Nguyen Van B",
-  "accountType": "WALLET",
-  "active": true,
-  "found": true,
-  "message": "Account found"
+  "id": 0,
+  "status": "string",
+  "message": "string"
 }
 ```
 
 ---
 
-## 5. Transaction APIs
+## PUT /api/shipper/orders/{id}/delivered
 
-### 5.1 Get Transactions
-**Endpoint**: `GET /api/transactions?page=0&size=10`
+### 1. Endpoint
+`PUT /api/shipper/orders/{id}/delivered`
 
-**Headers**: `Authorization: Bearer <token>`
-
-**Query Parameters**:
-- `page`: Số trang (default: 0)
-- `size`: Số lượng record (default: 10)
-
-**Response**:
+### 2. Request Body / Parameters
 ```json
 {
-  "content": [
+  "photoBase64": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "status": "string",
+  "message": "string"
+}
+```
+
+---
+
+## PUT /api/shipper/orders/{id}/accept
+
+### 1. Endpoint
+`PUT /api/shipper/orders/{id}/accept`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "status": "string",
+  "message": "string"
+}
+```
+
+---
+
+## PUT /api/reviews/{id}
+
+### 1. Endpoint
+`PUT /api/reviews/{id}`
+
+### 2. Request Body / Parameters
+```json
+{
+  "rating": 0,
+  "comment": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "productId": 0,
+  "userId": 0,
+  "rating": 0,
+  "comment": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "productName": "string"
+}
+```
+
+---
+
+## DELETE /api/reviews/{id}
+
+### 1. Endpoint
+`DELETE /api/reviews/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## PUT /api/restaurant-owner/restaurant/status
+
+### 1. Endpoint
+`PUT /api/restaurant-owner/restaurant/status`
+
+### 2. Request Body / Parameters
+```json
+{
+  "isOpen": true
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "restaurantId": "string",
+  "isOpen": true,
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## GET /api/restaurant-owner/products/{id}
+
+### 1. Endpoint
+`GET /api/restaurant-owner/products/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "imageBase64": "string",
+  "categoryId": 0,
+  "status": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## PUT /api/restaurant-owner/products/{id}
+
+### 1. Endpoint
+`PUT /api/restaurant-owner/products/{id}`
+
+### 2. Request Body / Parameters
+```json
+{
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "imageBase64": "string",
+  "categoryId": 0,
+  "status": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "imageBase64": "string",
+  "categoryId": 0,
+  "status": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## DELETE /api/restaurant-owner/products/{id}
+
+### 1. Endpoint
+`DELETE /api/restaurant-owner/products/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## PUT /api/restaurant-owner/orders/{id}/reject
+
+### 1. Endpoint
+`PUT /api/restaurant-owner/orders/{id}/reject`
+
+### 2. Request Body / Parameters
+```json
+{
+  "reason": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "status": "string",
+  "message": "string"
+}
+```
+
+---
+
+## PUT /api/restaurant-owner/orders/{id}/ready
+
+### 1. Endpoint
+`PUT /api/restaurant-owner/orders/{id}/ready`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "status": "string",
+  "message": "string"
+}
+```
+
+---
+
+## PUT /api/restaurant-owner/orders/{id}/confirm
+
+### 1. Endpoint
+`PUT /api/restaurant-owner/orders/{id}/confirm`
+
+### 2. Request Body / Parameters
+```json
+{
+  "estimatedReadyTime": "2023-10-10T10:10:10.000Z"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "status": "string",
+  "message": "string"
+}
+```
+
+---
+
+## PUT /api/orders/{id}/cancel
+
+### 1. Endpoint
+`PUT /api/orders/{id}/cancel`
+
+### 2. Request Body / Parameters
+```json
+{
+  "reason": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "status": "string",
+  "refundTransactionId": 0,
+  "message": "string"
+}
+```
+
+---
+
+## PUT /api/notifications/{id}/read
+
+### 1. Endpoint
+`PUT /api/notifications/{id}/read`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "type": "string",
+  "title": "string",
+  "content": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "read": true
+}
+```
+
+---
+
+## PUT /api/notifications/read-all
+
+### 1. Endpoint
+`PUT /api/notifications/read-all`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+"string"
+```
+
+---
+
+## PUT /api/admin/wallets/unlock/{id}
+
+### 1. Endpoint
+`PUT /api/admin/wallets/unlock/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+"string"
+```
+
+---
+
+## PUT /api/admin/wallets/lock/{id}
+
+### 1. Endpoint
+`PUT /api/admin/wallets/lock/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+"string"
+```
+
+---
+
+## PUT /api/admin/support-tickets/{id}/status
+
+### 1. Endpoint
+`PUT /api/admin/support-tickets/{id}/status`
+
+### 2. Request Body / Parameters
+```json
+{
+  "replyMessage": "string",
+  "status": "string",
+  "assigneeId": 0
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "userId": 0,
+  "userName": "string",
+  "subject": "string",
+  "message": "string",
+  "orderId": 0,
+  "attachments": "string",
+  "status": "string",
+  "assignedTo": 0,
+  "assignedToName": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z",
+  "replies": [
     {
-      "id": 123,
-      "type": "TRANSFER",
-      "amount": 1000.00,
-      "date": "2026-01-14T01:00:00",
-      "status": "COMPLETED",
-      "category": "General",
-      "direction": "OUT"
-    }
-  ],
-  "totalElements": 100,
-  "totalPages": 10,
-  "size": 10,
-  "number": 0
-}
-```
-
-### 5.2 Transfer Money
-**Endpoint**: `POST /api/transactions/transfer`
-
-**Headers**: `Authorization: Bearer <token>`
-
-**Request Body**:
-```json
-{
-  "toWalletId": 456,
-  "amount": 1000.00,
-  "description": "Chuyển tiền"
-}
-```
-
-**Response**:
-```json
-{
-  "transactionId": 12345,
-  "fromWalletId": 123,
-  "toWalletId": 456,
-  "amount": 1000.00,
-  "description": "Chuyển tiền",
-  "timestamp": "2026-01-14T01:00:00",
-  "status": "SUCCESS"
-}
-```
-
----
-
-## 6. Admin APIs
-
-### 6.1 Get All Transactions
-**Endpoint**: `GET /api/admin/transactions`
-
-**Query Parameters**:
-- `page`: Số trang (default: 0)
-- `size`: Số lượng record (default: 50)
-
-**Response**:
-```json
-[
-  {
-    "transactionId": "TXN-882941",
-    "walletId": "WAL-00923",
-    "amount": 1200,
-    "status": "COMPLETE",
-    "type": "DEPOSIT",
-    "createdAt": "2023-11-20T14:35:00"
-  }
-]
-```
-
----
-
-### 6.2 Get All Wallets
-**Endpoint**: `GET /api/admin/wallets`
-
-**Query Parameters**:
-- `page`: Số trang (default: 0)
-- `size`: Số lượng record (default: 50)
-
-**Response**:
-```json
-[
-  {
-    "id": 1,
-    "accountNumber": "0987654321",
-    "availableBalance": 1500000.0,
-    "createdAt": "2023-11-20T14:35:00",
-    "status": "ACTIVE",
-    "userId": 2,
-    "role": "USER"
-  }
-]
-```
-
----
-
-### 6.3 Lock Wallet
-**Endpoint**: `PUT /api/admin/wallets/lock/{id}`
-
-**Path Parameters**:
-- `id`: Wallet ID
-
-**Response**:
-```json
-"Wallet locked successfully"
-```
-
----
-
-### 6.4 Unlock Wallet
-**Endpoint**: `PUT /api/admin/wallets/unlock/{id}`
-
-**Path Parameters**:
-- `id`: Wallet ID
-
-**Response**:
-```json
-"Wallet unlocked successfully"
-```
-
----
-
-### 6.5 Topup Wallet (Admin)
-**Endpoint**: `POST /api/admin/wallets/topup`
-
-**Description**: Admin nạp tiền trực tiếp vào ví của người dùng.
-
-**Request Body**:
-```json
-{
-  "walletId": 1,
-  "userId": 2,
-  "accountNumber": "0987654321",
-  "amountAdd": 500000.0
-}
-```
-
-**Response**:
-```json
-{
-  "transactionId": 12346,
-  "walletId": 1,
-  "userId": 2,
-  "accountNumber": "0987654321",
-  "amountAdded": 500000.0,
-  "previousBalance": 1000000.0,
-  "newBalance": 1500000.0,
-  "status": "COMPLETED",
-  "message": "Topup successful",
-  "timestamp": "2026-03-10T15:00:00"
-}
-```
-
----
-
-## 7. QR Code APIs
-
-### 7.1 Generate QR Code
-**Endpoint**: `GET /api/qr/wallet`
-
-**Headers**: `Authorization: Bearer <token>`
-
-**Response**:
-```json
-{
-  "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
-  "walletCode": "WALLET123",
-  "accountNumber": "0987654321"
-}
-```
-
-### 7.2 Generate QR with Amount
-**Endpoint**: `POST /api/qr/wallet/with-amount`
-
-**Headers**: `Authorization: Bearer <token>`
-
-**Request Body**:
-```json
-{
-  "amount": 100000.00
-}
-```
-
-**Response**:
-```json
-{
-  "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
-  "walletCode": "WALLET123",
-  "accountNumber": "0987654321",
-  "amount": 100000.00
-}
-```
-
-### 7.3 Resolve QR
-**Endpoint**: `POST /api/qr/resolve`
-
-**Request Body**:
-```json
-{
-  "qrData": "WALLET123"
-}
-```
-
-**Response**:
-```json
-{
-  "walletCode": "WALLET123",
-  "accountNumber": "0987654321",
-  "amount": null
-}
-```
-
----
-
-## 8. User Manager APIs
-
-### 8.1 Get All Users (Admin)
-**Endpoint**: `GET /api/userManager/all`
-
-**Description**: Lấy danh sách tất cả người dùng (thường ngoại trừ các user có Role ADMIN) để hiển thị trong dashboard quản lý.
-
-**Response**:
-```json
-[
-  {
-    "id": 2,
-    "userName": "nguyenvana",
-    "email": "nguyenvana@example.com",
-    "phone": "0987654321",
-    "fullName": "Nguyen Van A",
-    "isActive": true,
-    "createdAt": "2024-03-10T14:30:00",
-    "role": "USER"
-  }
-]
-```
-
-### 8.2 Lock User (Admin)
-**Endpoint**: `PUT /api/userManager/lock/{id}`
-
-**Description**: Khóa tài khoản của một người dùng dựa trên ID của họ.
-
-**Path Parameters**:
-- `id` – ID của user cần khóa.
-
-**Response**: 200 OK
-
-### 8.3 Unlock User (Admin)
-**Endpoint**: `PUT /api/userManager/unlock/{id}`
-
-**Description**: Mở khóa tài khoản của một người dùng dựa trên ID của họ.
-
-**Path Parameters**:
-- `id` – ID của user cần mở khóa.
-
-**Response**: 200 OK
-
-### 8.4 Update User Profile (Admin)
-**Endpoint**: `PUT /api/userManager/update/{id}`
-
-**Description**: Cập nhật thông tin chi tiết của người dùng từ phía quản trị viên (Admin). Giúp Admin có thể sửa đổi dữ liệu người dùng khi cần hỗ trợ.
-
-**Path Parameters**:
-- `id` – ID của user cần cập nhật.
-
-**Request Body**:
-```json
-{
-  "userName": "nguyenvana",
-  "email": "nguyenvana@newdomain.com",
-  "phone": "0987111222",
-  "fullName": "Nguyen Van A Mới",
-  "isActive": true
-}
-```
-
-**Response**: (200 OK) Trả về `UserManagerDTO` chứa thông tin user sau khi cập nhật.
-```json
-{
-  "id": 2,
-  "userName": "nguyenvana",
-  "email": "nguyenvana@newdomain.com",
-  "phone": "0987111222",
-  "fullName": "Nguyen Van A Mới",
-  "isActive": true,
-  "createdAt": "2024-03-10T14:30:00"
-}
-```
-
----
-
-## 10. Food Ordering APIs
-
-### 10.1 Get Categories
-**Endpoint**: `GET /api/categories`
-
-**Description**: Lấy danh sách danh mục món ăn để hiển thị các nút lọc ở đầu trang
-
-**Response**:
-```json
-[
-  { "id": 1, "name": "Tất cả", "icon": "restaurant" },
-  { "id": 2, "name": "Bánh Mì", "icon": "lunch_dining" },
-  { "id": 3, "name": "Phở & Bún", "icon": "ramen_dining" },
-  { "id": 4, "name": "Trà Sữa", "icon": "bubbles" },
-  { "id": 5, "name": "Cà phê", "icon": "local_cafe" }
-]
-```
-
-**Database Table**: `categories`
-- `id` (INT AUTO_INCREMENT, Primary Key)
-- `name` (VARCHAR(100), Not Null)
-- `icon` (VARCHAR(50))
-- `created_at` (DATETIME)
-- `updated_at` (DATETIME)
-
----
-
-### 10.2 Get Products
-**Endpoint**: `GET /api/products`
-
-**Description**: Lấy danh sách sản phẩm (món ăn) để hiển thị grid sản phẩm. Có thể lọc theo danh mục hoặc tìm kiếm theo từ khóa.
-
-**Query Parameters** (Optional):
-- `category_id` – Lọc theo danh mục (nếu không gửi thì lấy tất cả)
-- `search` – Từ khóa tìm kiếm (tên món, mô tả)
-- `page`, `limit` – Phân trang (nếu cần)
-
-**Response**:
-```json
-[
-  {
-    "id": 1,
-    "name": "Bánh Mì Đặc Biệt",
-    "category": { "id": 2, "name": "Bánh Mì" },
-    "price": 35000.00,
-    "rating": 4.8,
-    "image_url": "https://example.com/banhmi.jpg",
-    "restaurant_id": 2,
-    "restaurant_name": "Bánh Mì Hồng Hoa"
-  },
-  {
-    "id": 2,
-    "name": "Phở Bò Gia Truyền",
-    "category": { "id": 3, "name": "Phở & Bún" },
-    "price": 65000.00,
-    "rating": 4.9,
-    "image_url": "https://example.com/pho.jpg",
-    "restaurant_id": 1,
-    "restaurant_name": "Phở Thìn Lò Đúc"
-  }
-]
-```
-
-**Database Tables**:
-- `products`
-  - `id` (INT AUTO_INCREMENT, Primary Key)
-  - `name` (VARCHAR(255), Not Null)
-  - `description` (TEXT)
-  - `price` (DECIMAL(10,2), Not Null)
-  - `image_url` (VARCHAR(500))
-  - `category_id` (INT, Foreign Key to categories)
-  - `restaurant_id` (INT, Foreign Key to restaurants)
-  - `rating_avg` (DECIMAL(3,2), Default 0.00)
-  - `rating_count` (INT, Default 0)
-  - `created_at` (DATETIME)
-  - `updated_at` (DATETIME)
-
-- `categories` (xem ở API 10.1)
-- `restaurants`
-  - `id` (INT AUTO_INCREMENT, Primary Key)
-  - `name` (VARCHAR(255), Not Null)
-  - `address` (TEXT)
-  - `logo_url` (VARCHAR(500))
-  - `is_open` (BOOLEAN, Default TRUE)
-  - `created_at` (DATETIME)
-  - `updated_at` (DATETIME)
-
----
-
-### 10.3 Get Product Detail
-**Endpoint**: `GET /api/products/{id}`
-
-**Description**: Lấy chi tiết một sản phẩm khi người dùng click vào sản phẩm, modal hiển thị chi tiết
-
-**Path Parameters**:
-- `id` – Product ID
-
-**Response**:
-```json
-{
-  "id": 2,
-  "name": "Phở Bò Gia Truyền",
-  "description": "Phở bò truyền thống với nước dùng hầm xương trong 12 giờ...",
-  "price": 65000.00,
-  "image_url": "https://example.com/pho-detail.jpg",
-  "category": { "id": 3, "name": "Phở & Bún" },
-  "restaurant": {
-    "id": 1,
-    "name": "Phở Thìn Lò Đúc",
-    "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
-    "is_open": true,
-    "logo_url": "https://example.com/pho-thin-logo.jpg"
-  },
-  "rating": 4.9,
-  "rating_count": 1200
-}
-```
-
-**Database Tables**: `products`, `restaurants`, `categories` (xem ở API 10.2)
-
----
-
-### 10.4 Get Product Reviews
-**Endpoint**: `GET /api/products/{id}/reviews`
-
-**Description**: Lấy danh sách đánh giá của sản phẩm để hiển thị các nhận xét bên dưới modal
-
-**Path Parameters**:
-- `id` – Product ID
-
-**Query Parameters**:
-- `page`, `limit` – Phân trang
-
-**Response**:
-```json
-{
-  "total": 1200,
-  "reviews": [
-    {
-      "id": 1,
-      "user": { 
-        "id": 1, 
-        "name": "Nguyễn Văn A", 
-        "avatar_url": "https://example.com/avatar1.jpg" 
-      },
-      "rating": 5,
-      "comment": "Nước dùng rất ngon và thanh. Sẽ quay lại ủng hộ!",
-      "created_at": "2025-03-02T10:30:00Z"
-    },
-    {
-      "id": 2,
-      "user": { 
-        "id": 2, 
-        "name": "Trần Thị B", 
-        "avatar_url": "https://example.com/avatar2.jpg" 
-      },
-      "rating": 4,
-      "comment": "Phở ngon, giá hợp lý, phục vụ nhanh.",
-      "created_at": "2025-03-01T15:45:00Z"
+      "id": 0,
+      "ticketId": 0,
+      "adminId": 0,
+      "adminName": "string",
+      "message": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z"
     }
   ]
 }
 ```
 
-**Database Tables**:
-- `reviews`
-  - `id` (INT AUTO_INCREMENT, Primary Key)
-  - `user_id` (INT, Foreign Key to users)
-  - `product_id` (INT, Foreign Key to products)
-  - `rating` (INT, Not Null, Check 1-5)
-  - `comment` (TEXT)
-  - `created_at` (DATETIME)
+---
 
-- `users` (table existing)
-  - `id` (INT AUTO_INCREMENT, Primary Key)
-  - `name` (VARCHAR(100))
-  - `avatar_url` (VARCHAR(500))
+## PUT /api/admin/support-tickets/{id}/assign
+
+### 1. Endpoint
+`PUT /api/admin/support-tickets/{id}/assign`
+
+### 2. Request Body / Parameters
+```json
+{
+  "replyMessage": "string",
+  "status": "string",
+  "assigneeId": 0
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "userId": 0,
+  "userName": "string",
+  "subject": "string",
+  "message": "string",
+  "orderId": 0,
+  "attachments": "string",
+  "status": "string",
+  "assignedTo": 0,
+  "assignedToName": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z",
+  "replies": [
+    {
+      "id": 0,
+      "ticketId": 0,
+      "adminId": 0,
+      "adminName": "string",
+      "message": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z"
+    }
+  ]
+}
+```
 
 ---
 
-### 10.5 Create Order (Checkout)
-**Endpoint**: `POST /api/orders`
+## PUT /api/admin/shippers/{id}/unlock
 
-**Description**: Đặt hàng khi người dùng điền thông tin giao hàng và bấm "Đặt hàng ngay với SmartPay"
+### 1. Endpoint
+`PUT /api/admin/shippers/{id}/unlock`
 
-**Headers**: `Authorization: Bearer <token>`
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
 
-**Request Body**:
+### 3. Response
+**Status 400**: Bad Request
+
 ```json
 {
-  "user_id": 123,
-  "items": [
-    { 
-      "product_id": 2, 
-      "quantity": 1, 
-      "price": 65000.00 
-    },
-    { 
-      "product_id": 4, 
-      "quantity": 2, 
-      "price": 45000.00 
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## PUT /api/admin/shippers/{id}/lock
+
+### 1. Endpoint
+`PUT /api/admin/shippers/{id}/lock`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## GET /api/admin/settings
+
+### 1. Endpoint
+`GET /api/admin/settings`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "configKey": "string",
+    "configValue": "string",
+    "description": "string"
+  }
+]
+```
+
+---
+
+## PUT /api/admin/settings
+
+### 1. Endpoint
+`PUT /api/admin/settings`
+
+### 2. Request Body / Parameters
+```json
+[
+  {
+    "configKey": "string",
+    "configValue": "string",
+    "description": "string"
+  }
+]
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "configKey": "string",
+    "configValue": "string",
+    "description": "string"
+  }
+]
+```
+
+---
+
+## GET /api/admin/restaurants/{id}
+
+**Summary:** Get restaurant by ID
+
+### 1. Endpoint
+`GET /api/admin/restaurants/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, string) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": "string",
+  "name": "string",
+  "phone": "string",
+  "email": "string",
+  "address": "string",
+  "logoBase64": "string",
+  "status": true,
+  "productCount": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## PUT /api/admin/restaurants/{id}
+
+**Summary:** Update restaurant
+
+### 1. Endpoint
+`PUT /api/admin/restaurants/{id}`
+
+### 2. Request Body / Parameters
+```json
+{
+  "name": "string",
+  "phone": "string",
+  "email": "string",
+  "address": "string",
+  "logoBase64": "string",
+  "status": true
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": "string",
+  "name": "string",
+  "phone": "string",
+  "email": "string",
+  "address": "string",
+  "logoBase64": "string",
+  "status": true,
+  "productCount": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## DELETE /api/admin/restaurants/{id}
+
+**Summary:** Delete restaurant
+
+### 1. Endpoint
+`DELETE /api/admin/restaurants/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, string) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## PUT /api/admin/restaurant-owners/{id}/unlock
+
+### 1. Endpoint
+`PUT /api/admin/restaurant-owners/{id}/unlock`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## PUT /api/admin/restaurant-owners/{id}/lock
+
+### 1. Endpoint
+`PUT /api/admin/restaurant-owners/{id}/lock`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## GET /api/admin/products/{id}
+
+**Summary:** Get product by ID
+
+### 1. Endpoint
+`GET /api/admin/products/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "category": {
+    "id": 0,
+    "name": "string",
+    "icon": "string"
+  },
+  "restaurant": {
+    "id": "string",
+    "name": "string",
+    "logoBase64": "string"
+  },
+  "imageBase64": "string",
+  "status": "string",
+  "ratingAvg": 0,
+  "ratingCount": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## PUT /api/admin/products/{id}
+
+**Summary:** Update product
+
+### 1. Endpoint
+`PUT /api/admin/products/{id}`
+
+### 2. Request Body / Parameters
+```json
+{
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "categoryId": 0,
+  "restaurantId": "string",
+  "status": "string",
+  "imageBase64": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "category": {
+    "id": 0,
+    "name": "string",
+    "icon": "string"
+  },
+  "restaurant": {
+    "id": "string",
+    "name": "string",
+    "logoBase64": "string"
+  },
+  "imageBase64": "string",
+  "status": "string",
+  "ratingAvg": 0,
+  "ratingCount": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## DELETE /api/admin/products/{id}
+
+**Summary:** Delete product
+
+### 1. Endpoint
+`DELETE /api/admin/products/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, string) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## PUT /api/admin/products/{id}/status
+
+**Summary:** Update product status
+
+### 1. Endpoint
+`PUT /api/admin/products/{id}/status`
+
+### 2. Request Body / Parameters
+```json
+{}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "category": {
+    "id": 0,
+    "name": "string",
+    "icon": "string"
+  },
+  "restaurant": {
+    "id": "string",
+    "name": "string",
+    "logoBase64": "string"
+  },
+  "imageBase64": "string",
+  "status": "string",
+  "ratingAvg": 0,
+  "ratingCount": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## PUT /api/admin/orders/{id}/status
+
+### 1. Endpoint
+`PUT /api/admin/orders/{id}/status`
+
+### 2. Request Body / Parameters
+```json
+{
+  "status": "string",
+  "note": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "status": "string",
+  "updatedAt": "2023-10-10T10:10:10.000Z",
+  "message": "string"
+}
+```
+
+---
+
+## PUT /api/admin/orders/{id}/cancel
+
+### 1. Endpoint
+`PUT /api/admin/orders/{id}/cancel`
+
+### 2. Request Body / Parameters
+```json
+{
+  "reason": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "status": "string",
+  "refundTransactionId": 0,
+  "message": "string"
+}
+```
+
+---
+
+## GET /api/admin/categories/{id}
+
+**Summary:** Get category by ID
+
+### 1. Endpoint
+`GET /api/admin/categories/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "icon": "string",
+  "orderIndex": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## PUT /api/admin/categories/{id}
+
+**Summary:** Update category
+
+### 1. Endpoint
+`PUT /api/admin/categories/{id}`
+
+### 2. Request Body / Parameters
+```json
+{
+  "name": "string",
+  "icon": "string",
+  "orderIndex": 0
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "icon": "string",
+  "orderIndex": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## DELETE /api/admin/categories/{id}
+
+**Summary:** Delete category
+
+### 1. Endpoint
+`DELETE /api/admin/categories/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## PUT /api/admin/cards/{id}/unlock
+
+### 1. Endpoint
+`PUT /api/admin/cards/{id}/unlock`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "userId": 0,
+  "userFullName": "string",
+  "bankCode": "string",
+  "bankName": "string",
+  "accountNumber": "string",
+  "accountName": "string",
+  "status": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## PUT /api/admin/cards/{id}/lock
+
+### 1. Endpoint
+`PUT /api/admin/cards/{id}/lock`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "userId": 0,
+  "userFullName": "string",
+  "bankCode": "string",
+  "bankName": "string",
+  "accountNumber": "string",
+  "accountName": "string",
+  "status": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## PUT /api/addresses/{id}
+
+### 1. Endpoint
+`PUT /api/addresses/{id}`
+
+### 2. Request Body / Parameters
+```json
+{
+  "recipientName": "string",
+  "phone": "string",
+  "address": "string",
+  "isDefault": true
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "recipientName": "string",
+  "phone": "string",
+  "address": "string",
+  "isDefault": true,
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## DELETE /api/addresses/{id}
+
+### 1. Endpoint
+`DELETE /api/addresses/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## PUT /api/addresses/{id}/default
+
+### 1. Endpoint
+`PUT /api/addresses/{id}/default`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "recipientName": "string",
+  "phone": "string",
+  "address": "string",
+  "isDefault": true,
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## POST /api/wallets/{walletId}/withdraw
+
+### 1. Endpoint
+`POST /api/wallets/{walletId}/withdraw`
+
+### 2. Request Body / Parameters
+```json
+{
+  "bankAccountId": 0,
+  "amount": 0,
+  "note": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "transactionId": 0,
+  "status": "string",
+  "amount": 0,
+  "fee": 0,
+  "totalDebit": 0,
+  "balanceBefore": 0,
+  "availableBalanceBefore": 0,
+  "availableBalanceAfter": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## POST /api/wallet/transfers
+
+### 1. Endpoint
+`POST /api/wallet/transfers`
+
+### 2. Request Body / Parameters
+```json
+{
+  "toAccountNumber": "string",
+  "amount": 0,
+  "description": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "transactionId": 0,
+  "fromAccountNumber": "string",
+  "toAccountNumber": "string",
+  "toAccountName": "string",
+  "amount": 0,
+  "previousBalance": 0,
+  "newBalance": 0,
+  "description": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z",
+  "status": "string",
+  "message": "string",
+  "transactionType": "string",
+  "success": true
+}
+```
+
+---
+
+## POST /api/user/E-Wallet/transfers
+
+### 1. Endpoint
+`POST /api/user/E-Wallet/transfers`
+
+### 2. Request Body / Parameters
+```json
+{
+  "toUserId": 0,
+  "amount": 0,
+  "note": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "partnerName": "string",
+  "direction": "string",
+  "amount": 0,
+  "status": "string",
+  "note": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "type": "string",
+  "referenceId": "string",
+  "success": true
+}
+```
+
+---
+
+## POST /api/upload
+
+### 1. Endpoint
+`POST /api/upload`
+
+### 2. Request Body / Parameters
+```json
+{
+  "file": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "url": "string",
+  "base64": "string",
+  "error": "string"
+}
+```
+
+---
+
+## GET /api/transactions
+
+### 1. Endpoint
+`GET /api/transactions`
+
+### 2. Request Body / Parameters
+- `pageable` (query, string) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true,
+  "size": 0,
+  "content": [
+    {
+      "id": 0,
+      "type": "string",
+      "description": "string",
+      "category": "string",
+      "amount": 0,
+      "date": "2023-10-10T10:10:10.000Z",
+      "status": "string",
+      "direction": "string"
     }
   ],
-  "delivery_address": "Số 123, đường ABC, quận Hai Bà Trưng, Hà Nội",
-  "recipient_name": "Nguyễn Văn A",
-  "recipient_phone": "0987654321",
-  "note": "Không hành, nhiều ớt",
-  "payment_method": "SmartPay"
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": true,
+    "unsorted": true
+  },
+  "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "sorted": true,
+      "unsorted": true
+    },
+    "paged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "unpaged": true
+  },
+  "empty": true
 }
 ```
-
-**Response**:
-```json
-{
-  "order_id": 2025,
-  "total_amount": 155000.00,
-  "status": "pending",
-  "created_at": "2025-03-04T15:23:00Z"
-}
-```
-
-**Database Tables**:
-- `orders`
-  - `id` (INT AUTO_INCREMENT, Primary Key)
-  - `user_id` (INT, Foreign Key to users)
-  - `total_amount` (DECIMAL(10,2), Not Null)
-  - `status` (ENUM: 'pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled')
-  - `delivery_address` (TEXT, Not Null)
-  - `recipient_name` (VARCHAR(100), Not Null)
-  - `recipient_phone` (VARCHAR(20), Not Null)
-  - `note` (TEXT)
-  - `payment_method` (VARCHAR(50))
-  - `created_at` (DATETIME)
-  - `updated_at` (DATETIME)
-
-- `order_items`
-  - `id` (INT AUTO_INCREMENT, Primary Key)
-  - `order_id` (INT, Foreign Key to orders)
-  - `product_id` (INT, Foreign Key to products)
-  - `quantity` (INT, Not Null, Check > 0)
-  - `price_at_time` (DECIMAL(10,2), Not Null)
 
 ---
 
-## 12. Admin Category Management APIs
+## POST /api/transactions
 
-### 12.1 Get Categories (Admin)
-**Endpoint**: `GET /api/admin/categories`
+### 1. Endpoint
+`POST /api/transactions`
 
-**Description**: Hiển thị bảng danh sách danh mục, hỗ trợ tìm kiếm theo tên/ID, phân trang, sắp xếp.
+### 2. Request Body / Parameters
+```json
+{
+  "type": "string",
+  "amount": 0,
+  "note": "string",
+  "toUserName": "string",
+  "sourceCardId": "string"
+}
+```
 
-**Query Parameters**:
-- `page` – Số trang (1-based, default: 1)
-- `limit` – Số lượng record (default: 10)
-- `search` – Từ khóa tìm kiếm (tên hoặc ID)
-- `sort_by` – Trường sắp xếp (default: id)
-- `sort_dir` – Hướng sắp xếp: asc/desc (default: asc)
+### 3. Response
+**Status 400**: Bad Request
 
-**Response**:
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## POST /api/transactions/transfer
+
+### 1. Endpoint
+`POST /api/transactions/transfer`
+
+### 2. Request Body / Parameters
+```json
+{
+  "toUserId": 0,
+  "amount": 0,
+  "note": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## POST /api/support/tickets
+
+### 1. Endpoint
+`POST /api/support/tickets`
+
+### 2. Request Body / Parameters
+```json
+{
+  "subject": "string",
+  "message": "string",
+  "orderId": 0,
+  "attachments": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "ticketId": 0,
+  "status": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "message": "string"
+}
+```
+
+---
+
+## GET /api/restaurant-owner/products
+
+### 1. Endpoint
+`GET /api/restaurant-owner/products`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `limit` (query, integer) 
+- `search` (query, string) 
+- `status` (query, string) 
+- `sortBy` (query, string) 
+- `sortDir` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "data": [
+    {
+      "id": 0,
+      "name": "string",
+      "description": "string",
+      "price": 0,
+      "imageBase64": "string",
+      "categoryId": 0,
+      "status": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 0,
+    "page": 0,
+    "limit": 0,
+    "totalPages": 0
+  }
+}
+```
+
+---
+
+## POST /api/restaurant-owner/products
+
+### 1. Endpoint
+`POST /api/restaurant-owner/products`
+
+### 2. Request Body / Parameters
+```json
+{
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "imageBase64": "string",
+  "categoryId": 0,
+  "status": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "imageBase64": "string",
+  "categoryId": 0,
+  "status": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## POST /api/qr/wallet/with-amount
+
+### 1. Endpoint
+`POST /api/qr/wallet/with-amount`
+
+### 2. Request Body / Parameters
+```json
+{
+  "amount": 0
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "userId": "string",
+  "walletId": "string",
+  "receiverName": "string",
+  "accountNumber": "string",
+  "amount": 0,
+  "currency": "string",
+  "valid": true,
+  "transferReady": true,
+  "qrBase64": "string"
+}
+```
+
+---
+
+## POST /api/qr/resolve
+
+### 1. Endpoint
+`POST /api/qr/resolve`
+
+### 2. Request Body / Parameters
+```json
+{
+  "qrPayload": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "userId": "string",
+  "walletId": "string",
+  "receiverName": "string",
+  "accountNumber": "string",
+  "amount": 0,
+  "currency": "string",
+  "valid": true
+}
+```
+
+---
+
+## POST /api/qr/read-image
+
+### 1. Endpoint
+`POST /api/qr/read-image`
+
+### 2. Request Body / Parameters
+```json
+{
+  "file": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "userId": "string",
+  "walletId": "string",
+  "receiverName": "string",
+  "accountNumber": "string",
+  "amount": 0,
+  "currency": "string",
+  "valid": true,
+  "transferReady": true
+}
+```
+
+---
+
+## GET /api/products/{id}/reviews
+
+### 1. Endpoint
+`GET /api/products/{id}/reviews`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "productId": 0,
+    "userId": 0,
+    "rating": 0,
+    "comment": "string",
+    "createdAt": "2023-10-10T10:10:10.000Z",
+    "productName": "string"
+  }
+]
+```
+
+---
+
+## POST /api/products/{id}/reviews
+
+### 1. Endpoint
+`POST /api/products/{id}/reviews`
+
+### 2. Request Body / Parameters
+```json
+{
+  "rating": 0,
+  "comment": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "productId": 0,
+  "userId": 0,
+  "rating": 0,
+  "comment": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "productName": "string"
+}
+```
+
+---
+
+## GET /api/orders
+
+### 1. Endpoint
+`GET /api/orders`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `size` (query, integer) 
+- `status` (query, string) 
+- `sort` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true,
+  "size": 0,
+  "content": [
+    {
+      "id": 0,
+      "totalAmount": 0,
+      "status": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "updatedAt": "2023-10-10T10:10:10.000Z",
+      "recipientName": "string",
+      "recipientPhone": "string",
+      "deliveryAddress": "string",
+      "note": "string",
+      "paymentMethod": "string",
+      "itemCount": 0,
+      "items": [
+        {
+          "productId": 0,
+          "productName": "string",
+          "productImage": "string",
+          "quantity": 0,
+          "priceAtTime": 0,
+          "subtotal": 0
+        }
+      ],
+      "paymentHistory": [
+        {
+          "transactionId": 0,
+          "amount": 0,
+          "status": "string",
+          "paymentMethod": "string",
+          "timestamp": "2023-10-10T10:10:10.000Z",
+          "referenceId": "string"
+        }
+      ],
+      "statusHistory": [
+        {
+          "status": "string",
+          "timestamp": "2023-10-10T10:10:10.000Z",
+          "note": "string"
+        }
+      ]
+    }
+  ],
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": true,
+    "unsorted": true
+  },
+  "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "sorted": true,
+      "unsorted": true
+    },
+    "paged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "unpaged": true
+  },
+  "empty": true
+}
+```
+
+---
+
+## POST /api/orders
+
+### 1. Endpoint
+`POST /api/orders`
+
+### 2. Request Body / Parameters
+```json
+{
+  "items": [
+    {
+      "quantity": 0,
+      "product_id": "string",
+      "price_at_time": 0
+    }
+  ],
+  "note": "string",
+  "user_id": "string",
+  "delivery_address": "string",
+  "recipient_name": "string",
+  "recipient_phone": "string",
+  "payment_method": "string",
+  "restaurant_id": "string",
+  "total_amount": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "totalAmount": 0,
+  "status": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z",
+  "recipientName": "string",
+  "recipientPhone": "string",
+  "deliveryAddress": "string",
+  "note": "string",
+  "paymentMethod": "string",
+  "itemCount": 0,
+  "items": [
+    {
+      "productId": 0,
+      "productName": "string",
+      "productImage": "string",
+      "quantity": 0,
+      "priceAtTime": 0,
+      "subtotal": 0
+    }
+  ],
+  "paymentHistory": [
+    {
+      "transactionId": 0,
+      "amount": 0,
+      "status": "string",
+      "paymentMethod": "string",
+      "timestamp": "2023-10-10T10:10:10.000Z",
+      "referenceId": "string"
+    }
+  ],
+  "statusHistory": [
+    {
+      "status": "string",
+      "timestamp": "2023-10-10T10:10:10.000Z",
+      "note": "string"
+    }
+  ]
+}
+```
+
+---
+
+## POST /api/orders/{id}/reorder
+
+### 1. Endpoint
+`POST /api/orders/{id}/reorder`
+
+### 2. Request Body / Parameters
+```json
+{
+  "deliveryAddress": "string",
+  "note": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "orderId": 0,
+  "totalAmount": 0,
+  "status": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## POST /api/favorites/restaurants/{id}
+
+### 1. Endpoint
+`POST /api/favorites/restaurants/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, string) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "restaurantId": "string",
+  "restaurantName": "string",
+  "logoBase64": "string",
+  "address": "string",
+  "favoritedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## DELETE /api/favorites/restaurants/{id}
+
+### 1. Endpoint
+`DELETE /api/favorites/restaurants/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, string) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## POST /api/face/verify
+
+### 1. Endpoint
+`POST /api/face/verify`
+
+### 2. Request Body / Parameters
+```json
+{
+  "image": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "similarity": 0,
+  "result": "string",
+  "matchedPose": "string",
+  "threshold": 0,
+  "message": "string"
+}
+```
+
+---
+
+## POST /api/face/register
+
+### 1. Endpoint
+`POST /api/face/register`
+
+### 2. Request Body / Parameters
+```json
+{
+  "image": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "embeddingId": 0,
+  "userId": 0,
+  "pose": "string",
+  "message": "string"
+}
+```
+
+---
+
+## POST /api/face/embedding
+
+### 1. Endpoint
+`POST /api/face/embedding`
+
+### 2. Request Body / Parameters
+```json
+{
+  "file": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
+```
+
+---
+
+## POST /api/face/compare
+
+### 1. Endpoint
+`POST /api/face/compare`
+
+### 2. Request Body / Parameters
+```json
+{
+  "img1": "string",
+  "img2": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
+```
+
+---
+
+## POST /api/face/add
+
+### 1. Endpoint
+`POST /api/face/add`
+
+### 2. Request Body / Parameters
+```json
+{
+  "image": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "embeddingId": 0,
+  "userId": 0,
+  "pose": "string",
+  "message": "string"
+}
+```
+
+---
+
+## GET /api/cards
+
+### 1. Endpoint
+`GET /api/cards`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "cardNumber": "string",
+    "holderName": "string",
+    "expiryDate": "string",
+    "cvv": "string",
+    "type": "string",
+    "bankName": "string",
+    "status": "string",
+    "last4": "string",
+    "balanceCard": 0
+  }
+]
+```
+
+---
+
+## POST /api/cards
+
+### 1. Endpoint
+`POST /api/cards`
+
+### 2. Request Body / Parameters
+```json
+{
+  "id": 0,
+  "cardNumber": "string",
+  "holderName": "string",
+  "expiryDate": "string",
+  "cvv": "string",
+  "type": "string",
+  "bankName": "string",
+  "status": "string",
+  "last4": "string",
+  "balanceCard": 0
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "cardNumber": "string",
+  "holderName": "string",
+  "expiryDate": "string",
+  "cvv": "string",
+  "type": "string",
+  "bankName": "string",
+  "status": "string",
+  "last4": "string",
+  "balanceCard": 0
+}
+```
+
+---
+
+## POST /api/cards/{id}/default
+
+### 1. Endpoint
+`POST /api/cards/{id}/default`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "cardNumber": "string",
+  "message": "string",
+  "default": true
+}
+```
+
+---
+
+## POST /api/cards/deposit
+
+### 1. Endpoint
+`POST /api/cards/deposit`
+
+### 2. Request Body / Parameters
+```json
+{
+  "cardId": 0,
+  "amount": 0,
+  "description": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "transactionId": 0,
+  "cardId": 0,
+  "cardNumber": "string",
+  "amount": 0,
+  "previousCardBalance": 0,
+  "newCardBalance": 0,
+  "previousWalletBalance": 0,
+  "newWalletBalance": 0,
+  "description": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z",
+  "status": "string",
+  "message": "string"
+}
+```
+
+---
+
+## POST /api/auth/verify-otp
+
+### 1. Endpoint
+`POST /api/auth/verify-otp`
+
+### 2. Request Body / Parameters
+```json
+{
+  "email": "string",
+  "otpCode": "string",
+  "purpose": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
+```
+
+---
+
+## POST /api/auth/register
+
+### 1. Endpoint
+`POST /api/auth/register`
+
+### 2. Request Body / Parameters
+```json
+{
+  "userName": "string",
+  "email": "string",
+  "phone": "string",
+  "fullName": "string",
+  "passwordHash": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "message": "string",
+  "userId": 0,
+  "accountNumber": "string",
+  "walletId": "string"
+}
+```
+
+---
+
+## POST /api/auth/login
+
+### 1. Endpoint
+`POST /api/auth/login`
+
+### 2. Request Body / Parameters
+```json
+{
+  "userName": "string",
+  "password": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "token": "string",
+  "type": "string",
+  "expiresIn": 0,
+  "userName": "string",
+  "email": "string",
+  "fullName": "string",
+  "roles": [
+    "string"
+  ],
+  "status": "string",
+  "active": true
+}
+```
+
+---
+
+## POST /api/auth/forgot-password
+
+### 1. Endpoint
+`POST /api/auth/forgot-password`
+
+### 2. Request Body / Parameters
+```json
+{
+  "email": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
+```
+
+---
+
+## POST /api/auth/admin/register
+
+### 1. Endpoint
+`POST /api/auth/admin/register`
+
+### 2. Request Body / Parameters
+```json
+{
+  "userName": "string",
+  "email": "string",
+  "phone": "string",
+  "fullName": "string",
+  "passwordHash": "string",
+  "role": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "message": "string",
+  "userId": 0,
+  "accountNumber": "string",
+  "walletId": "string"
+}
+```
+
+---
+
+## POST /api/admin/wallets/topup
+
+### 1. Endpoint
+`POST /api/admin/wallets/topup`
+
+### 2. Request Body / Parameters
+```json
+{
+  "walletId": 0,
+  "userId": 0,
+  "accountNumber": "string",
+  "amountAdd": 0
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "transactionId": 0,
+  "walletId": 0,
+  "userId": 0,
+  "accountNumber": "string",
+  "amountAdded": 0,
+  "previousBalance": 0,
+  "newBalance": 0,
+  "status": "string",
+  "message": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## POST /api/admin/users
+
+### 1. Endpoint
+`POST /api/admin/users`
+
+### 2. Request Body / Parameters
+```json
+{
+  "userName": "string",
+  "email": "string",
+  "phone": "string",
+  "fullName": "string",
+  "passwordHash": "string",
+  "role": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "message": "string",
+  "userId": 0,
+  "accountNumber": "string",
+  "walletId": "string"
+}
+```
+
+---
+
+## POST /api/admin/support-tickets/{id}/reply
+
+### 1. Endpoint
+`POST /api/admin/support-tickets/{id}/reply`
+
+### 2. Request Body / Parameters
+```json
+{
+  "replyMessage": "string",
+  "status": "string",
+  "assigneeId": 0
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "userId": 0,
+  "userName": "string",
+  "subject": "string",
+  "message": "string",
+  "orderId": 0,
+  "attachments": "string",
+  "status": "string",
+  "assignedTo": 0,
+  "assignedToName": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z",
+  "replies": [
+    {
+      "id": 0,
+      "ticketId": 0,
+      "adminId": 0,
+      "adminName": "string",
+      "message": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## GET /api/admin/restaurants
+
+**Summary:** Get restaurants with pagination, search, and filters
+
+### 1. Endpoint
+`GET /api/admin/restaurants`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `limit` (query, integer) 
+- `search` (query, string) 
+- `status` (query, boolean) 
+- `sortBy` (query, string) 
+- `sortDir` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "data": [
+    {
+      "id": "string",
+      "name": "string",
+      "phone": "string",
+      "email": "string",
+      "address": "string",
+      "logoBase64": "string",
+      "status": true,
+      "productCount": 0,
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "updatedAt": "2023-10-10T10:10:10.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 0,
+    "page": 0,
+    "limit": 0,
+    "totalPages": 0
+  }
+}
+```
+
+---
+
+## POST /api/admin/restaurants
+
+**Summary:** Create new restaurant
+
+### 1. Endpoint
+`POST /api/admin/restaurants`
+
+### 2. Request Body / Parameters
+```json
+{
+  "name": "string",
+  "phone": "string",
+  "email": "string",
+  "address": "string",
+  "logoBase64": "string",
+  "status": true
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": "string",
+  "name": "string",
+  "phone": "string",
+  "email": "string",
+  "address": "string",
+  "logoBase64": "string",
+  "status": true,
+  "productCount": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## GET /api/admin/products
+
+**Summary:** Get products with pagination, search, and filters
+
+### 1. Endpoint
+`GET /api/admin/products`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `limit` (query, integer) 
+- `search` (query, string) 
+- `categoryId` (query, integer) 
+- `restaurantId` (query, string) 
+- `status` (query, string) 
+- `sortBy` (query, string) 
+- `sortDir` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "data": [
+    {
+      "id": 0,
+      "name": "string",
+      "description": "string",
+      "price": 0,
+      "category": {
+        "id": 0,
+        "name": "string",
+        "icon": "string"
+      },
+      "restaurant": {
+        "id": "string",
+        "name": "string",
+        "logoBase64": "string"
+      },
+      "imageBase64": "string",
+      "status": "string",
+      "ratingAvg": 0,
+      "ratingCount": 0,
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "updatedAt": "2023-10-10T10:10:10.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 0,
+    "page": 0,
+    "limit": 0,
+    "totalPages": 0
+  }
+}
+```
+
+---
+
+## POST /api/admin/products
+
+**Summary:** Create new product
+
+### 1. Endpoint
+`POST /api/admin/products`
+
+### 2. Request Body / Parameters
+```json
+{
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "categoryId": 0,
+  "restaurantId": "string",
+  "status": "string",
+  "imageBase64": "string"
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "category": {
+    "id": 0,
+    "name": "string",
+    "icon": "string"
+  },
+  "restaurant": {
+    "id": "string",
+    "name": "string",
+    "logoBase64": "string"
+  },
+  "imageBase64": "string",
+  "status": "string",
+  "ratingAvg": 0,
+  "ratingCount": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## GET /api/admin/categories
+
+**Summary:** Get categories with pagination, search, and sort
+
+### 1. Endpoint
+`GET /api/admin/categories`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `limit` (query, integer) 
+- `search` (query, string) 
+- `sortBy` (query, string) 
+- `sortDir` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
 ```json
 {
   "content": [
     {
-      "id": 1,
-      "name": "Tất cả",
-      "icon": "restaurant",
-      "orderIndex": 1,
-      "createdAt": "2025-03-04T10:00:00Z",
-      "updatedAt": "2025-03-04T10:00:00Z"
-    },
-    {
-      "id": 2,
-      "name": "Bánh Mì",
-      "icon": "lunch_dining",
-      "orderIndex": 2,
-      "createdAt": "2025-03-04T10:00:00Z",
-      "updatedAt": "2025-03-04T10:00:00Z"
+      "id": 0,
+      "name": "string",
+      "icon": "string",
+      "orderIndex": 0,
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "updatedAt": "2023-10-10T10:10:10.000Z"
     }
   ],
-  "pageNumber": 1,
-  "pageSize": 10,
-  "totalElements": 5,
-  "totalPages": 1,
+  "pageNumber": 0,
+  "pageSize": 0,
+  "totalElements": 0,
+  "totalPages": 0,
   "first": true,
   "last": true
 }
@@ -895,1298 +3779,1163 @@
 
 ---
 
-### 12.2 Get Category Detail (Admin)
-**Endpoint**: `GET /api/admin/categories/{id}`
+## POST /api/admin/categories
 
-**Description**: Dùng để đổ dữ liệu lên form sửa danh mục.
+**Summary:** Create new category
 
-**Path Parameters**:
-- `id` – Category ID
+### 1. Endpoint
+`POST /api/admin/categories`
 
-**Response**:
+### 2. Request Body / Parameters
 ```json
 {
-  "id": 2,
-  "name": "Bánh Mì",
-  "icon": "lunch_dining",
-  "orderIndex": 2,
-  "createdAt": "2025-03-04T10:00:00Z",
-  "updatedAt": "2025-03-04T10:00:00Z"
+  "name": "string",
+  "icon": "string",
+  "orderIndex": 0
 }
 ```
 
----
+### 3. Response
+**Status 400**: Bad Request
 
-### 12.3 Create Category (Admin)
-**Endpoint**: `POST /api/admin/categories`
-
-**Description**: Thêm mới danh mục.
-
-**Request Body**:
 ```json
 {
-  "name": "Món Lẩu",
-  "icon": "soup_kitchen",
-  "orderIndex": 6
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Response**:
+**Status 200**: OK
+
 ```json
 {
-  "id": 6,
-  "name": "Món Lẩu",
-  "icon": "soup_kitchen",
-  "orderIndex": 6,
-  "createdAt": "2025-03-04T15:30:00Z",
-  "updatedAt": "2025-03-04T15:30:00Z"
+  "id": 0,
+  "name": "string",
+  "icon": "string",
+  "orderIndex": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
 }
 ```
 
 ---
 
-### 12.4 Update Category (Admin)
-**Endpoint**: `PUT /api/admin/categories/{id}`
+## GET /api/addresses
 
-**Description**: Cập nhật danh mục (có thể gửi một phần dữ liệu).
+### 1. Endpoint
+`GET /api/addresses`
 
-**Path Parameters**:
-- `id` – Category ID
+### 2. Request Body / Parameters
+`None`
 
-**Request Body**:
+### 3. Response
+**Status 400**: Bad Request
+
 ```json
 {
-  "name": "Bánh Mì & Bánh Ngọt",
-  "icon": "bakery_dining",
-  "orderIndex": 2
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Response**:
-```json
-{
-  "id": 2,
-  "name": "Bánh Mì & Bánh Ngọt",
-  "icon": "bakery_dining",
-  "orderIndex": 2,
-  "createdAt": "2025-03-04T10:00:00Z",
-  "updatedAt": "2025-03-04T15:45:00Z"
-}
-```
+**Status 200**: OK
 
----
-
-### 12.5 Delete Category (Admin)
-**Endpoint**: `DELETE /api/admin/categories/{id}`
-
-**Description**: Xóa danh mục (kiểm tra ràng buộc nếu có sản phẩm liên kết).
-
-**Path Parameters**:
-- `id` – Category ID
-
-**Response**: `204 No Content`
-
-**Error Response** (nếu có sản phẩm liên kết):
-```json
-{
-  "status": "FAILED",
-  "message": "Cannot delete category because it has associated products",
-  "timestamp": 1641748400000
-}
-```
-
----
-
-### 12.6 Export Categories (Admin)
-**Endpoint**: `GET /api/admin/categories/export`
-
-**Description**: Xuất dữ liệu danh mục ra file Excel/CSV.
-
-**Response**: File download với header `Content-Disposition: attachment; filename=categories.xlsx`
-
----
-
-### 12.7 Check Category Name (Admin)
-**Endpoint**: `GET /api/admin/categories/check-name`
-
-**Description**: Kiểm tra tên danh mục đã tồn tại (dùng cho validation form).
-
-**Query Parameters**:
-- `name` – Tên danh mục cần kiểm tra
-- `exclude_id` – ID loại trừ (khi sửa) (optional)
-
-**Response**:
-```json
-{
-  "exists": false
-}
-```
-
----
-
-## 13. Security & Testing Notes
-
-### 13.1 Authentication
-- **Production**: Tất cả Admin APIs yêu cầu JWT token với `ADMIN` role
-- **Testing**: Tạm thời disable security cho `/api/admin/categories/**` để development
-
-### 13.2 Testing Examples
-```bash
-# 1. Get categories with pagination (1-based page numbering)
-GET http://localhost:8080/api/admin/categories?page=1&limit=10
-
-# 2. Search categories
-GET http://localhost:8080/api/admin/categories?search=Bánh&page=1&limit=5
-
-# 3. Sort categories
-GET http://localhost:8080/api/admin/categories?sortBy=name&sortDir=desc&page=1&limit=10
-
-# 4. Get category detail
-GET http://localhost:8080/api/admin/categories/1
-
-# 5. Create new category
-POST http://localhost:8080/api/admin/categories
-{
-  "name": "Món Lẩu",
-  "icon": "soup_kitchen",
-  "orderIndex": 6
-}
-
-# 6. Update category (partial update)
-PUT http://localhost:8080/api/admin/categories/1
-{
-  "name": "Bánh Mì & Bánh Ngọt"
-}
-
-# 7. Delete category (with constraint check)
-DELETE http://localhost:8080/api/admin/categories/1
-
-# 8. Check category name availability
-GET http://localhost:8080/api/admin/categories/check-name?name=Test%20Category
-GET http://localhost:8080/api/admin/categories/check-name?name=Bánh%20Mì&excludeId=2
-
-# 9. Export categories (CSV format)
-GET http://localhost:8080/api/admin/categories/export
-```
-
-### 13.3 Database Schema
-```sql
--- Categories table (updated)
-CREATE TABLE categories (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  icon VARCHAR(50),
-  order_index INT DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-### 13.5 Important Notes
-- **Page numbering**: Sử dụng 1-based (page=1, 2, 3...) thay vì 0-based
-- **Partial update**: PUT endpoint cho phép cập nhật một hoặc nhiều fields
-- **Constraint check**: Không thể xóa category có sản phẩm liên kết
-- **Export format**: Hiện tại là CSV, có thể nâng cấp lên Excel với Apache POI
-- **Search**: Hỗ trợ tìm kiếm theo tên và ID của category
-- **Soft Delete**: Restaurants sử dụng soft delete với deleted_at timestamp
-- **Image Storage**: Logo được lưu dưới dạng base64 trong LONGTEXT field
-- **ID Format**: Restaurant ID sử dụng format RS-XXXX (auto-generated)
-- **Product Count**: Được cache trong product_count field để tối ưu performance
-
----
-
-## 15. Admin Restaurant Management APIs
-
-### 15.1 Get Restaurants (Admin)
-**Endpoint**: `GET /api/admin/restaurants`
-
-**Description**: Hiển thị bảng danh sách nhà hàng, hỗ trợ tìm kiếm, lọc trạng thái, phân trang, sắp xếp.
-
-**Query Parameters**:
-- `page` – Số trang (1-based, default: 1)
-- `limit` – Số lượng record (default: 10)
-- `search` – Từ khóa tìm kiếm (tên, địa chỉ, SĐT, email, ID)
-- `status` – Lọc theo trạng thái (true=open, false=closed)
-- `sort_by` – Trường sắp xếp (name, created_at, product_count)
-- `sort_dir` – Hướng sắp xếp: asc/desc (default: asc)
-
-**Response**:
-```json
-{
-  "data": [
-    {
-      "id": "RS-1234",
-      "name": "Phở Thìn",
-      "phone": "02439712738",
-      "email": "contact@phothin.com",
-      "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
-      "logo_base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
-      "status": true,
-      "product_count": 45,
-      "created_at": "2025-01-15T08:30:00Z",
-      "updated_at": "2025-01-15T08:30:00Z"
-    }
-  ],
-  "pagination": {
-    "total": 32,
-    "page": 1,
-    "limit": 10,
-    "total_pages": 4
-  }
-}
-```
-
----
-
-### 15.2 Get Restaurant Detail (Admin)
-**Endpoint**: `GET /api/admin/restaurants/{id}`
-
-**Description**: Lấy chi tiết một nhà hàng.
-
-**Path Parameters**:
-- `id` – Restaurant ID
-
-**Response**:
-```json
-{
-  "id": "RS-1234",
-  "name": "Phở Thìn",
-  "phone": "02439712738",
-  "email": "contact@phothin.com",
-  "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
-  "logo_base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
-  "status": true,
-  "product_count": 45,
-  "created_at": "2025-01-15T08:30:00Z",
-  "updated_at": "2025-01-15T08:30:00Z"
-}
-```
-
----
-
-### 15.3 Create Restaurant (Admin)
-**Endpoint**: `POST /api/admin/restaurants`
-
-**Description**: Thêm mới nhà hàng.
-
-**Request Body**:
-```json
-{
-  "name": "Phở Thìn",
-  "phone": "02439712738",
-  "email": "contact@phothin.com",
-  "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
-  "status": true,
-  "logo_base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
-}
-```
-
-**Response**:
-```json
-{
-  "id": "RS-1235",
-  "name": "Phở Thìn",
-  "phone": "02439712738",
-  "email": "contact@phothin.com",
-  "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
-  "logo_base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
-  "status": true,
-  "product_count": 0,
-  "created_at": "2025-03-05T15:30:00Z",
-  "updated_at": "2025-03-05T15:30:00Z"
-}
-```
-
----
-
-### 15.4 Update Restaurant (Admin)
-**Endpoint**: `PUT /api/admin/restaurants/{id}`
-
-**Description**: Cập nhật nhà hàng.
-
-**Request Body**:
-```json
-{
-  "name": "Phở Thìn Lò Đúc",
-  "status": false,
-  "logo_base64": "data:image/png;base64,new_base64_string..."
-}
-```
-
-**Response**: Object nhà hàng sau cập nhật (tương tự response của GET detail).
-
----
-
-### 15.5 Delete Restaurant (Admin)
-**Endpoint**: `DELETE /api/admin/restaurants/{id}`
-
-**Description**: Xóa nhà hàng (soft delete, chỉ khi không có sản phẩm liên kết).
-
-**Response**: 204 No Content nếu thành công.
-
-**Error Response**:
-```json
-{
-  "status": "FAILED",
-  "message": "Cannot delete restaurant because it has associated products",
-  "timestamp": 1641748400000
-}
-```
-
----
-
-### 15.6 Check Restaurant Name (Admin)
-**Endpoint**: `GET /api/admin/restaurants/check-name`
-
-**Description**: Kiểm tra tên nhà hàng đã tồn tại.
-
-**Query Parameters**:
-- `name` – Tên nhà hàng cần kiểm tra
-- `exclude_id` – ID hiện tại khi sửa (để loại trừ chính nó)
-
-**Response**:
-```json
-{
-  "exists": false
-}
-```
-
----
-
-### 15.7 Export Restaurants (Admin)
-**Endpoint**: `GET /api/admin/restaurants/export`
-
-**Description**: Xuất dữ liệu nhà hàng ra file CSV.
-
-**Query Parameters**:
-- `search` – Từ khóa tìm kiếm (tùy chọn)
-- `status` – Lọc theo trạng thái (tùy chọn)
-
-**Response**: File CSV với các cột: ID, Tên, SĐT, Email, Địa chỉ, Trạng thái, Số món, Ngày tạo.
-
-### 15.8 Testing Examples
-```bash
-# 1. Get restaurants with pagination (1-based page numbering)
-GET http://localhost:8080/api/admin/restaurants?page=1&limit=10
-
-# 2. Search restaurants by name, address, phone, email, or ID
-GET http://localhost:8080/api/admin/restaurants?search=Phở&page=1&limit=5
-
-# 3. Filter by status (open/closed)
-GET http://localhost:8080/api/admin/restaurants?status=true&page=1&limit=10
-
-# 4. Sort restaurants
-GET http://localhost:8080/api/admin/restaurants?sortBy=name&sortDir=desc&page=1&limit=10
-GET http://localhost:8080/api/admin/restaurants?sortBy=product_count&sortDir=asc&page=1&limit=10
-
-# 5. Combined search and filter
-GET http://localhost:8080/api/admin/restaurants?search=Hà%20Nội&status=true&sortBy=created_at&sortDir=desc&page=1&limit=10
-
-# 6. Get restaurant detail
-GET http://localhost:8080/api/admin/restaurants/RS-1234
-
-# 7. Create new restaurant
-POST http://localhost:8080/api/admin/restaurants
-{
-  "name": "Phở Thìn",
-  "phone": "02439712738",
-  "email": "contact@phothin.com",
-  "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
-  "status": true,
-  "logo_base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
-}
-
-# 8. Update restaurant (partial update)
-PUT http://localhost:8080/api/admin/restaurants/RS-1234
-{
-  "name": "Phở Thìn Lò Đúc",
-  "status": false,
-  "logo_base64": "data:image/png;base64,new_base64_string..."
-}
-
-# 9. Delete restaurant (with constraint check)
-DELETE http://localhost:8080/api/admin/restaurants/RS-1234
-
-# 10. Check restaurant name availability
-GET http://localhost:8080/api/admin/restaurants/check-name?name=Test%20Restaurant
-GET http://localhost:8080/api/admin/restaurants/check-name?name=Phở%20Thìn&excludeId=RS-1234
-
-# 11. Export restaurants (CSV format)
-GET http://localhost:8080/api/admin/restaurants/export
-GET http://localhost:8080/api/admin/restaurants/export?search=Phở&status=true
-```
-
-### 15.9 Database Schema
-```sql
--- Restaurants table (updated for admin management)
-CREATE TABLE restaurants (
-  id VARCHAR(20) PRIMARY KEY,               -- RS-XXXX format
-  name VARCHAR(255) NOT NULL,
-  phone VARCHAR(20),
-  email VARCHAR(255),
-  address TEXT NOT NULL,
-  logo_base64 LONGTEXT,                      -- Base64 image storage
-  status BOOLEAN DEFAULT TRUE,                -- true = open, false = closed
-  product_count INT DEFAULT 0,                 -- Cached product count
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  deleted_at DATETIME NULL                    -- Soft delete support
-);
-```
-
-### 15.10 Important Implementation Notes
-- **ID Format**: Restaurant ID tự động sinh theo format RS-XXXX
-- **Soft Delete**: Xóa mềm sử dụng deleted_at timestamp
-- **Image Storage**: Logo lưu dạng base64 trong LONGTEXT field
-- **Search**: Multi-field search (name, address, phone, email, ID)
-- **Constraint Check**: Không xóa restaurant có sản phẩm liên kết
-- **Partial Update**: PUT endpoint cho phép cập nhật một hoặc nhiều fields
-- **Export Format**: CSV với UTF-8 encoding và Vietnamese headers
-- **Performance**: product_count được cache để tối ưu query performance
-
----
-
-## 17. Admin Product Management APIs
-
-### 17.1 Get Products (Admin)
-**Endpoint**: `GET /api/admin/products`
-
-**Description**: Hiển thị bảng danh sách sản phẩm, hỗ trợ tìm kiếm, lọc, phân trang, sắp xếp.
-
-**Query Parameters**:
-- `page` – Số trang (1-based, default: 1)
-- `limit` – Số lượng record (default: 10)
-- `search` – Từ khóa tìm kiếm (tên, mô tả, ID)
-- `category_id` – Lọc theo danh mục
-- `restaurant_id` – Lọc theo nhà hàng
-- `status` – Lọc theo trạng thái (available, unavailable)
-- `sort_by` – Trường sắp xếp (name, price, created_at, rating_avg)
-- `sort_dir` – Hướng sắp xếp: asc/desc (default: asc)
-
-**Response**:
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "name": "Salad Ức Gà",
-      "description": "Ức gà áp chảo ăn kèm với rau...",
-      "price": 85000,
-      "category": { "id": 1, "name": "Món chính", "icon": "restaurant" },
-      "restaurant": { "id": "RS-9021", "name": "SmartPay Quận 1", "logo_base64": "..." },
-      "image_base64": "data:image/png;base64,...",
-      "status": "available",
-      "rating_avg": 4.8,
-      "rating_count": 124,
-      "created_at": "2025-02-10T09:30:00Z",
-      "updated_at": "2025-02-10T09:30:00Z"
-    }
-  ],
-  "pagination": {
-    "total": 24,
-    "page": 1,
-    "limit": 10,
-    "total_pages": 3
-  }
-}
-```
-
----
-
-### 17.2 Get Product Detail (Admin)
-**Endpoint**: `GET /api/admin/products/{id}`
-
-**Description**: Lấy chi tiết một sản phẩm.
-
-**Path Parameters**:
-- `id` – Product ID
-
-**Response**: Object sản phẩm chi tiết (tương tự response của GET list).
-
----
-
-### 17.3 Create Product (Admin)
-**Endpoint**: `POST /api/admin/products`
-
-**Description**: Thêm mới sản phẩm.
-
-**Request Body**:
-```json
-{
-  "name": "Salad Ức Gà",
-  "description": "Ức gà áp chảo ăn kèm với rau...",
-  "price": 85000,
-  "category_id": 1,
-  "restaurant_id": "RS-9021",
-  "status": "available",
-  "image_base64": "data:image/png;base64,..."
-}
-```
-
-**Response**: Object sản phẩm vừa tạo (tương tự response của GET detail).
-
----
-
-### 17.4 Update Product (Admin)
-**Endpoint**: `PUT /api/admin/products/{id}`
-
-**Description**: Cập nhật sản phẩm.
-
-**Request Body**:
-```json
-{
-  "name": "Salad Ức Gà Mới",
-  "price": 90000,
-  "status": "unavailable",
-  "image_base64": "data:image/png;base64,new_base64_string..."
-}
-```
-
-**Response**: Object sản phẩm sau cập nhật (tương tự response của GET detail).
-
----
-
-### 17.5 Delete Product (Admin)
-**Endpoint**: `DELETE /api/admin/products/{id}`
-
-**Description**: Xóa sản phẩm (soft delete).
-
-**Response**: 204 No Content nếu thành công.
-
----
-
-### 17.6 Testing Examples
-```bash
-# 1. Get products with pagination (1-based page numbering)
-GET http://localhost:8080/api/admin/products?page=1&limit=10
-
-# 2. Search products by name or description
-GET http://localhost:8080/api/admin/products?search=Salad&page=1&limit=5
-
-# 3. Filter by category
-GET http://localhost:8080/api/admin/products?category_id=1&page=1&limit=10
-
-# 4. Filter by restaurant
-GET http://localhost:8080/api/admin/products?restaurant_id=RS-1234&page=1&limit=10
-
-# 5. Filter by status
-GET http://localhost:8080/api/admin/products?status=available&page=1&limit=10
-
-# 6. Sort products
-GET http://localhost:8080/api/admin/products?sortBy=price&sortDir=desc&page=1&limit=10
-GET http://localhost:8080/api/admin/products?sortBy=rating_avg&sortDir=asc&page=1&limit=10
-
-# 7. Combined filters
-GET http://localhost:8080/api/admin/products?search=Gà&category_id=1&status=available&sortBy=price&sortDir=asc&page=1&limit=10
-
-# 8. Get product detail
-GET http://localhost:8080/api/admin/products/1
-
-# 9. Create new product
-POST http://localhost:8080/api/admin/products
-{
-  "name": "Salad Ức Gà",
-  "description": "Ức gà áp chảo ăn kèm với rau...",
-  "price": 85000,
-  "category_id": 1,
-  "restaurant_id": "RS-9021",
-  "status": "available",
-  "image_base64": "data:image/png;base64,..."
-}
-
-# 10. Update product (partial update)
-PUT http://localhost:8080/api/admin/products/1
-{
-  "name": "Salad Ức Gà Mới",
-  "price": 90000,
-  "status": "unavailable"
-}
-
-# 11. Delete product (soft delete)
-DELETE http://localhost:8080/api/admin/products/1
-```
-
-### 17.7 Database Schema
-```sql
--- Products table (updated for admin management)
-CREATE TABLE products (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  price DECIMAL(10,2) NOT NULL,
-  image_base64 LONGTEXT,                    -- Changed from image_url
-  category_id INT NOT NULL,
-  restaurant_id VARCHAR(20) NOT NULL,
-  rating_avg DECIMAL(3,2) DEFAULT 0.00,
-  rating_count INT DEFAULT 0,
-  status VARCHAR(20) DEFAULT 'available',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  deleted_at DATETIME NULL,
-  CONSTRAINT fk_product_category FOREIGN KEY (category_id) REFERENCES categories(id),
-  CONSTRAINT fk_product_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
-);
-```
-
-### 17.8 Important Implementation Notes
-- **Soft Delete**: Sản phẩm sử dụng soft delete với deleted_at timestamp
-- **Image Storage**: Ảnh lưu dạng base64 trong image_base64 LONGTEXT field (thay đổi từ image_url)
-- **Status Values**: "available" hoặc "unavailable"
-- **Search**: Multi-field search (name, description, ID)
-- **Validation**: Validate category và restaurant existence
-- **Partial Update**: PUT endpoint cho phép cập nhật một hoặc nhiều fields
-- **Unique Check**: Không cho phép trùng tên sản phẩm (excluding current product khi update)
-- **Price Handling**: Convert giữa BigDecimal và Double trong DTO conversion
-- **Column Migration**: Từ image_url VARCHAR(500) sang image_base64 LONGTEXT để lưu large base64 strings
-
----
-
-## 18. Error Responses
-
-### Common Error Format
-```json
-{
-  "status": "FAILED",
-  "message": "Error description",
-  "timestamp": 1641748400000
-}
-```
-
-### HTTP Status Codes
-- `200 OK`: Request thành công
-- `400 Bad Request`: Dữ liệu đầu vào không hợp lệ
-- `401 Unauthorized`: Token không hợp lệ hoặc hết hạn
-- `403 Forbidden`: Không có quyền truy cập
-- `404 Not Found`: Resource không tồn tại
-- `500 Internal Server Error`: Lỗi server
-
----
-
-## 9. Testing Examples
-
-### Add Card
-```bash
-curl -X POST http://localhost:8080/api/cards \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "cardNumber": "5702676235112103",
-    "holderName": "NGUYEN VAN A",
-    "expiryDate": "05/25",
-    "cvv": "477",
-    "type": "DEBIT",
-    "bankName": "Vietcombank"
-  }'
-```
-
-### Wallet Transfer
-```bash
-curl -X POST http://localhost:8080/api/wallet/transfers \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "toAccountNumber": "0987654321",
-    "amount": 100000,
-    "description": "Chuyển tiền test"
-  }'
-```
-
-### Admin Get All Transactions
-```bash
-curl -X GET "http://localhost:8080/api/admin/transactions?page=0&size=50" \
-  -H "Authorization: Bearer ADMIN_JWT_TOKEN"
-```
-
----
-
-**API Documentation Updated: 2026-03-06**
-**Version: 8.1**
-**Total APIs**: 69 endpoints (45 E-Wallet APIs + 5 Food Ordering APIs + 7 Admin Category Management APIs + 7 Admin Restaurant Management APIs + 5 Admin Product Management APIs)
-
-**Recent Updates**:
-- ✅ Added Admin Category Management APIs (7 endpoints)
-- ✅ Added Admin Restaurant Management APIs (7 endpoints)
-- ✅ Added Admin Product Management APIs (5 endpoints)
-- ✅ Fixed DELETE API 400 Bad Request error with String parameter parsing
-- ✅ Fixed soft delete queries to include deleted_at IS NULL filter
-- ✅ Updated image storage from image_url to image_base64 LONGTEXT column
-- ✅ Added comprehensive database migration scripts
-- ✅ Fixed pagination to use 1-based page numbering
-- ✅ Updated database schema with order_index, restaurant, and product status fields
-- ✅ Added comprehensive testing examples
-- ✅ Temporarily disabled security for development testing
-
-## Notes
-
-1. **Authentication**: Tất cả APIs (trừ register, login và food ordering public APIs) cần JWT token trong header `Authorization: Bearer <token>`
-2. **Pagination**: Các API trả về danh sách hỗ trợ phân trang với `page` và `size`
-3. **Validation**: Request body được validate, lỗi 400 sẽ trả về chi tiết lỗi
-4. **Wallet Status**: Chỉ wallet `ACTIVE` mới có thể thực hiện giao dịch
-5. **Transaction Status**: Giao dịch có thể thành công (`success: true`) hoặc thất bại (`success: false`)
-6. **Currency**: Mặc định là VND
-7. **Timestamp Format**: ISO 8601 (yyyy-MM-ddTHH:mm:ss)
-8. **Error Handling**: Các lỗi phổ biến: 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Internal Server Error)
-9. **Food Ordering**: APIs mới cho hệ thống đặt đồ ăn trực tuyến, tích hợp với hệ thống thanh toán SmartPay hiện có
-10. **Database Schema**: Schema cho food ordering được tạo trong database `bank_db` hiện có để tích hợp với hệ thống user/wallet
-
----
-
-## 13. Face AI APIs
-
-### 13.1 Register Face Embedding
-**Endpoint**: `POST /api/face/register`
-
-**Description**: Đăng ký embedding khuôn mặt mới cho user.
-
-**Headers**: `Authorization: Bearer <token>`
-
-**Request Body** (multipart/form-data):
-- `image` (file): Ảnh khuôn mặt (max 2MB, 1920x1080)
-- `userId` (integer): ID của user
-- `pose` (string): Góc chụp khuôn mặt (`front` / `left` / `right`)
-
-**Response**: 200 OK
-```json
-{
-  "id": 1,
-  "userId": 10,
-  "pose": "front",
-  "message": "Face registered successfully"
-}
-```
-
----
-
-### 13.2 Verify Face
-**Endpoint**: `POST /api/face/verify`
-
-**Description**: Xác thực khuôn mặt bằng cách so sánh với các embedding đã đăng ký của user.
-
-**Headers**: `Authorization: Bearer <token>`
-
-**Request Body** (multipart/form-data):
-- `image` (file): Ảnh khuôn mặt cần xác thực
-- `userId` (integer): User ID cần xác thực
-- `deviceId` (string, optional): Thông tin thiết bị để audit log
-
-**Response**: 200 OK
-```json
-{
-  "similarity": 0.85,
-  "result": "PASS",
-  "matchedPose": "front",
-  "threshold": 0.55,
-  "message": "Face verification passed"
-}
-```
-
----
-
-### 13.3 List Embeddings
-**Endpoint**: `GET /api/face/list/{userId}`
-
-**Description**: Lấy danh sách metadata của các embedding đã đăng ký của một user.
-
-**Headers**: `Authorization: Bearer <token>`
-
-**Path Parameters**:
-- `userId`: ID của user
-
-**Response**: 200 OK
 ```json
 [
   {
-    "id": 1,
-    "userId": 10,
-    "pose": "front",
-    "createdAt": "2024-03-11T16:00:00"
+    "id": 0,
+    "recipientName": "string",
+    "phone": "string",
+    "address": "string",
+    "isDefault": true,
+    "createdAt": "2023-10-10T10:10:10.000Z"
   }
 ]
 ```
 
 ---
 
-### 13.4 Delete Embedding
-**Endpoint**: `DELETE /api/face/{embeddingId}`
+## POST /api/addresses
 
-**Description**: Xóa một embedding đã đăng ký.
+### 1. Endpoint
+`POST /api/addresses`
 
-**Headers**: `Authorization: Bearer <token>`
-
-**Path Parameters**:
-- `embeddingId`: ID của embedding cần xóa
-
-**Response**: 200 OK
+### 2. Request Body / Parameters
 ```json
 {
-  "message": "Embedding deleted successfully"
+  "recipientName": "string",
+  "phone": "string",
+  "address": "string",
+  "isDefault": true
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "recipientName": "string",
+  "phone": "string",
+  "address": "string",
+  "isDefault": true,
+  "createdAt": "2023-10-10T10:10:10.000Z"
 }
 ```
 
 ---
 
-### 13.5 Generate Embedding (Utility)
-**Endpoint**: `POST /api/face/embedding`
+## POST /api/E-Wallet/deposits
 
-**Description**: Tạo vector embedding thô từ ảnh (không lưu vào DB). Dành cho mục đích test.
+### 1. Endpoint
+`POST /api/E-Wallet/deposits`
 
-**Headers**: `Authorization: Bearer <token>`
-
-**Request Body** (multipart/form-data):
-- `file` (file): Ảnh khuôn mặt
-
-**Response**: 200 OK
-```json
-[0.0123, -0.0456, 0.0789, ...] // Array of 512 floats
-```
-
----
-
-### 13.6 Compare Two Faces (Utility)
-**Endpoint**: `POST /api/face/compare`
-
-**Description**: So sánh trực tiếp 2 ảnh khuôn mặt và trả về điểm tương đồng.
-
-**Headers**: `Authorization: Bearer <token>`
-
-**Request Body** (multipart/form-data):
-- `img1` (file): Ảnh khuôn mặt 1
-- `img2` (file): Ảnh khuôn mặt 2
-
-**Response**: 200 OK
+### 2. Request Body / Parameters
 ```json
 {
-  "similarity": 0.85,
-  "isMatch": true,
-  "threshold": 0.55
+  "walletId": 0,
+  "amount": 0
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "message": "string",
+  "newBalance": 0
 }
 ```
 
 ---
 
-## 14. Orders API
+## GET /api/wallet/transfers/lookup/{accountNumber}
 
-### 14.1 Get Order List
-**Endpoint**: `GET /api/orders`
+### 1. Endpoint
+`GET /api/wallet/transfers/lookup/{accountNumber}`
 
-**Description**: Lấy danh sách đơn hàng của user hiện tại, hỗ trợ phân trang và lọc theo trạng thái.
+### 2. Request Body / Parameters
+- `accountNumber` (path, string) *(required)*
 
-**Headers**:
-- `Authorization: Bearer <token>` (bắt buộc)
+### 3. Response
+**Status 400**: Bad Request
 
-**Query Parameters**:
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| page | int | No | 0 | Số trang (bắt đầu từ 0) |
-| size | int | No | 10 | Số lượng đơn hàng mỗi trang |
-| status | string | No | - | Lọc theo trạng thái: PENDING, CONFIRMED, PREPARING, DELIVERING, COMPLETED, CANCELLED |
-| sort | string | No | createdAt,desc | Sắp xếp, ví dụ: createdAt,desc |
-
-**Response**: 200 OK
 ```json
 {
-  "content": [
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "accountNumber": "string",
+  "accountName": "string",
+  "accountHolderName": "string",
+  "avatarUrl": "string",
+  "accountType": "string",
+  "active": true,
+  "message": "string",
+  "found": true
+}
+```
+
+---
+
+## GET /api/wallet/summary
+
+### 1. Endpoint
+`GET /api/wallet/summary`
+
+### 2. Request Body / Parameters
+- `period` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "income": 0,
+  "expense": 0,
+  "period": "string"
+}
+```
+
+---
+
+## GET /api/wallet/me
+
+### 1. Endpoint
+`GET /api/wallet/me`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "userId": "string",
+  "walletId": "string",
+  "accountName": "string",
+  "accountNumber": "string",
+  "currency": "string",
+  "balance": 0
+}
+```
+
+---
+
+## GET /api/wallet/balance
+
+### 1. Endpoint
+`GET /api/wallet/balance`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "balance": 0,
+  "monthlyChangePercent": 0
+}
+```
+
+---
+
+## GET /api/wallet/available-balance
+
+### 1. Endpoint
+`GET /api/wallet/available-balance`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "totalBalance": 0,
+  "availableBalance": 0,
+  "heldBalance": 0,
+  "currency": "string"
+}
+```
+
+---
+
+## GET /api/userManager/all
+
+### 1. Endpoint
+`GET /api/userManager/all`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "userName": "string",
+    "email": "string",
+    "phone": "string",
+    "fullName": "string",
+    "createdAt": "2023-10-10T10:10:10.000Z",
+    "role": "string",
+    "active": true
+  }
+]
+```
+
+---
+
+## GET /api/user/E-Wallet/transfers/{transferId}
+
+### 1. Endpoint
+`GET /api/user/E-Wallet/transfers/{transferId}`
+
+### 2. Request Body / Parameters
+- `transferId` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "direction": "string",
+  "amount": 0,
+  "status": "string",
+  "type": "string",
+  "partnerName": "string",
+  "note": "string",
+  "referenceId": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## GET /api/user/E-Wallet/transfers/wallets/search
+
+### 1. Endpoint
+`GET /api/user/E-Wallet/transfers/wallets/search`
+
+### 2. Request Body / Parameters
+- `params` (query, object) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "walletId": 0,
+    "userId": 0,
+    "fullName": "string",
+    "accountNumber": "string"
+  }
+]
+```
+
+---
+
+## GET /api/user/E-Wallet/transfers/wallet/{walletId}/history
+
+### 1. Endpoint
+`GET /api/user/E-Wallet/transfers/wallet/{walletId}/history`
+
+### 2. Request Body / Parameters
+- `walletId` (path, integer) *(required)*
+- `direction` (query, string) 
+- `filter` (query, string) 
+- `page` (query, integer) 
+- `size` (query, integer) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
+```
+
+---
+
+## GET /api/transactions/incoming
+
+### 1. Endpoint
+`GET /api/transactions/incoming`
+
+### 2. Request Body / Parameters
+- `limit` (query, integer) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "type": "string",
+    "amount": 0,
+    "date": "2023-10-10T10:10:10.000Z",
+    "status": "string",
+    "description": "string"
+  }
+]
+```
+
+---
+
+## GET /api/test/categories-list
+
+### 1. Endpoint
+`GET /api/test/categories-list`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "name": "string",
+    "icon": "string",
+    "orderIndex": 0,
+    "createdAt": "2023-10-10T10:10:10.000Z",
+    "updatedAt": "2023-10-10T10:10:10.000Z",
+    "products": [
+      {
+        "id": 0,
+        "name": "string",
+        "description": "string",
+        "price": 0,
+        "imageBase64": "string",
+        "categoryId": 0,
+        "restaurantId": "string",
+        "ratingAvg": 0,
+        "ratingCount": 0,
+        "status": "string",
+        "createdAt": "2023-10-10T10:10:10.000Z",
+        "updatedAt": "2023-10-10T10:10:10.000Z",
+        "deletedAt": "2023-10-10T10:10:10.000Z",
+        "category": "Circular reference: Category",
+        "restaurant": {
+          "id": "string",
+          "name": "string",
+          "phone": "string",
+          "email": "string",
+          "address": "string",
+          "logoBase64": "string",
+          "status": true,
+          "productCount": 0,
+          "createdAt": "2023-10-10T10:10:10.000Z",
+          "updatedAt": "2023-10-10T10:10:10.000Z",
+          "deletedAt": "2023-10-10T10:10:10.000Z",
+          "ownerId": 0,
+          "products": [
+            "Circular reference: Product"
+          ]
+        },
+        "reviews": [
+          {
+            "id": 0,
+            "userId": 0,
+            "productId": 0,
+            "rating": 0,
+            "comment": "string",
+            "createdAt": "2023-10-10T10:10:10.000Z",
+            "user": {
+              "id": 0,
+              "userName": "string",
+              "email": "string",
+              "phone": "string",
+              "fullName": "string",
+              "avatar": "string",
+              "dateOfBirth": "string",
+              "address": "string",
+              "passwordHash": "string",
+              "pinHash": "string",
+              "role": "string",
+              "createdAt": "2023-10-10T10:10:10.000Z",
+              "updatedAt": "2023-10-10T10:10:10.000Z",
+              "wallet": {
+                "id": 0,
+                "code": "string",
+                "currency": "string",
+                "balance": 0,
+                "availableBalance": 0,
+                "status": "string",
+                "accountNumber": "string",
+                "createdAt": "2023-10-10T10:10:10.000Z",
+                "updatedAt": "2023-10-10T10:10:10.000Z",
+                "transactions": [
+                  {
+                    "id": 0,
+                    "wallet": "Circular reference: Wallet",
+                    "type": "string",
+                    "direction": "string",
+                    "amount": 0,
+                    "fee": 0,
+                    "balanceBefore": 0,
+                    "balanceAfter": 0,
+                    "status": "string",
+                    "referenceId": "string",
+                    "idempotencyKey": "string",
+                    "relatedTxId": 0,
+                    "metadata": "string",
+                    "createdAt": "2023-10-10T10:10:10.000Z",
+                    "updatedAt": "2023-10-10T10:10:10.000Z"
+                  }
+                ]
+              },
+              "avatarUrl": "string",
+              "membership": "string",
+              "active": true,
+              "verified": true
+            },
+            "product": "Circular reference: Product"
+          }
+        ]
+      }
+    ]
+  }
+]
+```
+
+---
+
+## GET /api/test/categories-count
+
+### 1. Endpoint
+`GET /api/test/categories-count`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+"string"
+```
+
+---
+
+## GET /api/shipper/orders
+
+### 1. Endpoint
+`GET /api/shipper/orders`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `limit` (query, integer) 
+- `status` (query, string) 
+- `assigned` (query, boolean) 
+- `sortBy` (query, string) 
+- `sortDir` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "data": [
     {
-      "id": 2025,
-      "totalAmount": 155000.00,
-      "status": "PENDING",
-      "createdAt": "2025-03-04T15:23:00Z",
-      "updatedAt": "2025-03-04T15:23:00Z",
-      "recipientName": "Nguyễn Văn A",
-      "recipientPhone": "0987654321",
-      "deliveryAddress": "Số 123, đường ABC, quận Hai Bà Trưng, Hà Nội",
-      "paymentMethod": "SmartPay",
-      "itemCount": 2,
+      "id": 0,
+      "orderCode": "string",
+      "restaurantName": "string",
+      "restaurantAddress": "string",
+      "customerName": "string",
+      "customerPhone": "string",
+      "deliveryAddress": "string",
+      "totalAmount": 0,
+      "status": "string",
+      "paymentMethod": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 0,
+    "page": 0,
+    "limit": 0,
+    "totalPages": 0
+  }
+}
+```
+
+---
+
+## GET /api/shipper/orders/{id}
+
+### 1. Endpoint
+`GET /api/shipper/orders/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "orderCode": "string",
+  "restaurant": {
+    "id": "string",
+    "name": "string",
+    "logoBase64": "string"
+  },
+  "customer": {
+    "name": "string",
+    "phone": "string",
+    "address": "string",
+    "latitude": 0,
+    "longitude": 0
+  },
+  "items": [
+    {
+      "productName": "string",
+      "quantity": 0,
+      "note": "string"
+    }
+  ],
+  "totalAmount": 0,
+  "paymentMethod": "string",
+  "paymentStatus": "string",
+  "note": "string",
+  "status": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## GET /api/restaurant-owner/orders
+
+### 1. Endpoint
+`GET /api/restaurant-owner/orders`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `limit` (query, integer) 
+- `status` (query, string) 
+- `sortBy` (query, string) 
+- `sortDir` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "data": [
+    {
+      "id": 0,
+      "orderCode": "string",
+      "userId": 0,
+      "customerName": "string",
+      "customerPhone": "string",
+      "totalAmount": 0,
+      "status": "string",
+      "paymentMethod": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z",
       "items": [
         {
-          "productId": 2,
-          "productName": "Phở Bò Gia Truyền",
-          "quantity": 1,
-          "priceAtTime": 65000.00,
-          "subtotal": 65000.00
-        },
-        {
-          "productId": 4,
-          "productName": "Trà Sữa Trân Châu",
-          "quantity": 2,
-          "priceAtTime": 45000.00,
-          "subtotal": 90000.00
+          "productId": 0,
+          "productName": "string",
+          "productImage": "string",
+          "quantity": 0,
+          "priceAtTime": 0,
+          "subtotal": 0
         }
       ]
     }
   ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 10,
-    "sort": {
-      "sorted": true,
-      "unsorted": false,
-      "empty": false
-    },
-    "offset": 0,
-    "paged": true,
-    "unpaged": false
-  },
-  "totalPages": 5,
-  "totalElements": 50,
-  "last": false,
-  "size": 10,
-  "number": 0,
-  "sort": {
-    "sorted": true,
-    "unsorted": false,
-    "empty": false
-  },
-  "numberOfElements": 10,
-  "first": true,
-  "empty": false
+  "pagination": {
+    "total": 0,
+    "page": 0,
+    "limit": 0,
+    "totalPages": 0
+  }
 }
 ```
 
-**Errors**:
-- 401 Unauthorized: Token không hợp lệ
-- 500 Internal Server Error: Lỗi máy chủ
+---
+
+## GET /api/restaurant-owner/orders/{id}
+
+### 1. Endpoint
+`GET /api/restaurant-owner/orders/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "orderCode": "string",
+  "userId": 0,
+  "customerName": "string",
+  "customerPhone": "string",
+  "deliveryAddress": "string",
+  "note": "string",
+  "totalAmount": 0,
+  "status": "string",
+  "paymentMethod": "string",
+  "paymentStatus": "string",
+  "transactionId": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "items": [
+    {
+      "productId": 0,
+      "productName": "string",
+      "quantity": 0,
+      "price": 0,
+      "note": "string"
+    }
+  ]
+}
+```
 
 ---
 
-### 14.2 Get Order Detail
-**Endpoint**: `GET /api/orders/{id}`
+## GET /api/qr/wallet
 
-**Description**: Lấy chi tiết một đơn hàng cụ thể, bao gồm danh sách sản phẩm và lịch sử thanh toán.
+### 1. Endpoint
+`GET /api/qr/wallet`
 
-**Headers**:
-- `Authorization: Bearer <token>` (bắt buộc)
+### 2. Request Body / Parameters
+`None`
 
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của đơn hàng |
+### 3. Response
+**Status 400**: Bad Request
 
-**Response**: 200 OK
 ```json
 {
-  "id": 2025,
-  "totalAmount": 155000.00,
-  "status": "COMPLETED",
-  "createdAt": "2025-03-04T15:23:00Z",
-  "updatedAt": "2025-03-05T10:15:00Z",
-  "recipientName": "Nguyễn Văn A",
-  "recipientPhone": "0987654321",
-  "deliveryAddress": "Số 123, đường ABC, quận Hai Bà Trưng, Hà Nội",
-  "note": "Không hành, nhiều ớt",
-  "paymentMethod": "SmartPay",
-  "itemCount": 2,
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "userId": "string",
+  "walletId": "string",
+  "receiverName": "string",
+  "accountNumber": "string",
+  "amount": 0,
+  "currency": "string",
+  "valid": true,
+  "transferReady": true,
+  "qrBase64": "string"
+}
+```
+
+---
+
+## GET /api/qr/wallet/download
+
+### 1. Endpoint
+`GET /api/qr/wallet/download`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+"string"
+```
+
+---
+
+## GET /api/products
+
+### 1. Endpoint
+`GET /api/products`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `limit` (query, integer) 
+- `search` (query, string) 
+- `categoryId` (query, integer) 
+- `restaurantId` (query, string) 
+- `status` (query, string) 
+- `sortBy` (query, string) 
+- `sortDir` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "data": [
+    {
+      "id": 0,
+      "name": "string",
+      "description": "string",
+      "price": 0,
+      "category": {
+        "id": 0,
+        "name": "string",
+        "icon": "string"
+      },
+      "restaurant": {
+        "id": "string",
+        "name": "string",
+        "logoBase64": "string"
+      },
+      "imageBase64": "string",
+      "status": "string",
+      "ratingAvg": 0,
+      "ratingCount": 0,
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "updatedAt": "2023-10-10T10:10:10.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 0,
+    "page": 0,
+    "limit": 0,
+    "totalPages": 0
+  }
+}
+```
+
+---
+
+## GET /api/products/{id}
+
+### 1. Endpoint
+`GET /api/products/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "name": "string",
+  "description": "string",
+  "price": 0,
+  "category": {
+    "id": 0,
+    "name": "string",
+    "icon": "string"
+  },
+  "restaurant": {
+    "id": "string",
+    "name": "string",
+    "logoBase64": "string"
+  },
+  "imageBase64": "string",
+  "status": "string",
+  "ratingAvg": 0,
+  "ratingCount": 0,
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## GET /api/orders/{id}
+
+### 1. Endpoint
+`GET /api/orders/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "totalAmount": 0,
+  "status": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z",
+  "recipientName": "string",
+  "recipientPhone": "string",
+  "deliveryAddress": "string",
+  "note": "string",
+  "paymentMethod": "string",
+  "itemCount": 0,
   "items": [
     {
-      "productId": 2,
-      "productName": "Phở Bò Gia Truyền",
-      "productImage": "data:image/jpeg;base64,/9j/4AAQ...",
-      "quantity": 1,
-      "priceAtTime": 65000.00,
-      "subtotal": 65000.00
-    },
-    {
-      "productId": 4,
-      "productName": "Trà Sữa Trân Châu",
-      "productImage": "data:image/jpeg;base64,/9j/4AAQ...",
-      "quantity": 2,
-      "priceAtTime": 45000.00,
-      "subtotal": 90000.00
+      "productId": 0,
+      "productName": "string",
+      "productImage": "string",
+      "quantity": 0,
+      "priceAtTime": 0,
+      "subtotal": 0
     }
   ],
   "paymentHistory": [
     {
-      "transactionId": 12345,
-      "amount": 155000.00,
-      "status": "COMPLETED",
-      "paymentMethod": "SmartPay",
-      "timestamp": "2025-03-04T15:23:05Z",
-      "referenceId": "2025"
+      "transactionId": 0,
+      "amount": 0,
+      "status": "string",
+      "paymentMethod": "string",
+      "timestamp": "2023-10-10T10:10:10.000Z",
+      "referenceId": "string"
     }
   ],
   "statusHistory": [
     {
-      "status": "PENDING",
-      "timestamp": "2025-03-04T15:23:00Z",
-      "note": "Đơn hàng đã được tạo"
-    },
-    {
-      "status": "COMPLETED",
-      "timestamp": "2025-03-05T10:15:00Z",
-      "note": "Giao hàng thành công"
-    }
-  ]
-}
-```
-
-**Errors**:
-- 401 Unauthorized: Token không hợp lệ
-- 403 Forbidden: Không có quyền xem đơn hàng này
-- 404 Not Found: Đơn hàng không tồn tại
-- 500 Internal Server Error: Lỗi máy chủ
-
----
-
-## 15. Admin Order Management API
-
-### 15.1 Get All Orders (Admin)
-**Endpoint**: `GET /api/admin/orders`
-
-**Description**: Lấy danh sách tất cả đơn hàng trong hệ thống, hỗ trợ phân trang, lọc và sắp xếp. Chỉ admin mới có quyền truy cập.
-
-**Headers**:
-- `Authorization: Bearer <token>` (yêu cầu role ADMIN hoặc SUPPORT)
-
-**Query Parameters**:
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| page | int | No | 0 | Số trang (bắt đầu từ 0) |
-| size | int | No | 20 | Số lượng bản ghi mỗi trang |
-| status | string | No | - | Lọc theo trạng thái: PENDING, CONFIRMED, PREPARING, DELIVERING, COMPLETED, CANCELLED |
-| userId | int | No | - | Lọc theo ID người dùng |
-| restaurantId | string | No | - | Lọc theo ID nhà hàng |
-| fromDate | string | No | - | Lọc từ ngày (yyyy-MM-dd) |
-| toDate | string | No | - | Lọc đến ngày (yyyy-MM-dd) |
-| search | string | No | - | Tìm kiếm theo tên người nhận, số điện thoại, địa chỉ |
-| sortBy | string | No | createdAt | Trường sắp xếp (createdAt, totalAmount, status) |
-| sortDir | string | No | desc | Hướng sắp xếp (asc/desc) |
-
-**Response**: 200 OK
-```json
-{
-  "content": [
-    {
-      "id": 2025,
-      "userId": 123,
-      "userName": "nguyenvana",
-      "fullName": "Nguyễn Văn A",
-      "totalAmount": 155000.00,
-      "status": "PENDING",
-      "paymentMethod": "SmartPay",
-      "recipientName": "Nguyễn Văn A",
-      "recipientPhone": "0987654321",
-      "deliveryAddress": "Số 123, đường ABC, quận Hai Bà Trưng, Hà Nội",
-      "note": "Không hành, nhiều ớt",
-      "createdAt": "2026-03-10T14:30:00Z",
-      "updatedAt": "2026-03-10T14:30:00Z"
-    }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 20,
-    "totalElements": 150,
-    "totalPages": 8
-  }
-}
-```
-
-**Errors**:
-- 401 Unauthorized: Token không hợp lệ
-- 403 Forbidden: Không có quyền truy cập (yêu cầu ADMIN role)
-- 500 Internal Server Error: Lỗi máy chủ
-
----
-
-### 15.2 Get Order Detail (Admin)
-**Endpoint**: `GET /api/admin/orders/{id}`
-
-**Description**: Lấy thông tin chi tiết của một đơn hàng, bao gồm danh sách sản phẩm, thông tin thanh toán và lịch sử cập nhật trạng thái.
-
-**Headers**:
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của đơn hàng |
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "user": {
-    "id": 123,
-    "userName": "nguyenvana",
-    "fullName": "Nguyễn Văn A",
-    "phone": "0987654321",
-    "email": "nguyenvana@example.com"
-  },
-  "restaurant": {
-    "id": "RS-9021",
-    "name": "SmartPay Quận 1",
-    "phone": "02838291234",
-    "address": "123 Nguyễn Huệ, Quận 1, TP.HCM"
-  },
-  "items": [
-    {
-      "productId": 2,
-      "productName": "Phở Bò Gia Truyền",
-      "quantity": 1,
-      "priceAtTime": 65000.00,
-      "subtotal": 65000.00,
-      "image": "data:image/png;base64,..."
-    },
-    {
-      "productId": 4,
-      "productName": "Trà Sữa Trân Châu",
-      "quantity": 2,
-      "priceAtTime": 45000.00,
-      "subtotal": 90000.00,
-      "image": "data:image/png;base64,..."
-    }
-  ],
-  "totalAmount": 155000.00,
-  "status": "PENDING",
-  "statusHistory": [
-    {
-      "status": "PENDING",
-      "timestamp": "2026-03-10T14:30:00Z",
-      "note": "Đơn hàng đã được tạo"
-    }
-  ],
-  "payment": {
-    "method": "SmartPay",
-    "transactionId": 12345,
-    "amount": 155000.00,
-    "status": "COMPLETED",
-    "paidAt": "2026-03-10T14:31:00Z"
-  },
-  "deliveryInfo": {
-    "recipientName": "Nguyễn Văn A",
-    "recipientPhone": "0987654321",
-    "deliveryAddress": "Số 123, đường ABC, quận Hai Bà Trưng, Hà Nội",
-    "note": "Không hành, nhiều ớt"
-  },
-  "createdAt": "2026-03-10T14:30:00Z",
-  "updatedAt": "2026-03-10T14:30:00Z"
-}
-```
-
-**Errors**:
-- 401 Unauthorized: Token không hợp lệ
-- 403 Forbidden: Không có quyền truy cập
-- 404 Not Found: Đơn hàng không tồn tại
-
----
-
-### 15.3 Update Order Status (Admin)
-**Endpoint**: `PUT /api/admin/orders/{id}/status`
-
-**Description**: Cập nhật trạng thái của đơn hàng. Các trạng thái hợp lệ: PENDING, CONFIRMED, PREPARING, DELIVERING, COMPLETED, CANCELLED.
-
-**Headers**:
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-- `Content-Type: application/json`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của đơn hàng |
-
-**Request Body**:
-```json
-{
-  "status": "CONFIRMED",
-  "note": "Đã xác nhận đơn hàng, đang chuẩn bị"
-}
-```
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "status": "CONFIRMED",
-  "updatedAt": "2026-03-10T15:00:00Z",
-  "message": "Order status updated successfully"
-}
-```
-
-**Errors**:
-- 400 Bad Request: Trạng thái không hợp lệ
-- 401 Unauthorized: Token không hợp lệ
-- 403 Forbidden: Không có quyền
-- 404 Not Found: Đơn hàng không tồn tại
-
----
-
-### 15.4 Cancel Order (Admin)
-**Endpoint**: `PUT /api/admin/orders/{id}/cancel`
-
-**Description**: Hủy đơn hàng. Nếu đơn hàng đã thanh toán, hệ thống sẽ tự động hoàn tiền vào ví người dùng.
-
-**Headers**:
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-- `Content-Type: application/json`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của đơn hàng |
-
-**Request Body** (optional):
-```json
-{
-  "reason": "Khách hàng yêu cầu hủy"
-}
-```
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "status": "CANCELLED",
-  "refundTransactionId": 12346,
-  "message": "Order cancelled and refund processed successfully"
-}
-```
-
-**Errors**:
-- 400 Bad Request: Đơn hàng đã bị hủy trước đó
-- 401 Unauthorized: Token không hợp lệ
-- 403 Forbidden: Không có quyền
-- 404 Not Found: Đơn hàng không tồn tại
-
----
-
-## 16. Admin Statistics API
-
-### 16.1 Get Overview Statistics
-**Endpoint**: `GET /api/admin/statistics/overview`
-
-**Description**: Lấy các chỉ số tổng quan cho dashboard admin.
-
-**Headers**:
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Query Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| fromDate | string | Ngày bắt đầu (yyyy-MM-dd) |
-| toDate | string | Ngày kết thúc (yyyy-MM-dd) |
-
-**Response**: 200 OK
-```json
-{
-  "totalOrders": 1250,
-  "totalRevenue": 87500000.50,
-  "averageOrderValue": 70000.00,
-  "ordersByStatus": {
-    "PENDING": 120,
-    "CONFIRMED": 85,
-    "PREPARING": 60,
-    "DELIVERING": 45,
-    "COMPLETED": 900,
-    "CANCELLED": 40
-  },
-  "revenueToday": 3500000.00,
-  "ordersToday": 45,
-  "newUsersToday": 12,
-  "topRestaurants": [
-    {
-      "restaurantId": "RS-9021",
-      "restaurantName": "SmartPay Quận 1",
-      "orderCount": 320,
-      "revenue": 22400000.00
+      "status": "string",
+      "timestamp": "2023-10-10T10:10:10.000Z",
+      "note": "string"
     }
   ]
 }
@@ -2194,1259 +4943,671 @@ curl -X GET "http://localhost:8080/api/admin/transactions?page=0&size=50" \
 
 ---
 
-### 16.2 Get Revenue Statistics
-**Endpoint**: `GET /api/admin/statistics/revenue`
+## GET /api/orders/tracking/{id}
 
-**Description**: Thống kê doanh thu theo ngày, tuần, tháng.
+### 1. Endpoint
+`GET /api/orders/tracking/{id}`
 
-**Headers**:
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
 
-**Query Parameters**:
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| groupBy | string | day | Nhóm theo: day, week, month |
-| fromDate | string | - | Ngày bắt đầu |
-| toDate | string | - | Ngày kết thúc |
+### 3. Response
+**Status 400**: Bad Request
 
-**Response**: 200 OK
 ```json
 {
-  "labels": ["2026-03-01", "2026-03-02", "2026-03-03"],
-  "revenue": [12500000, 13200000, 14800000],
-  "orderCount": [150, 160, 175]
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
----
+**Status 200**: OK
 
-### 16.3 Get Top Products
-**Endpoint**: `GET /api/admin/statistics/top-products`
-
-**Description**: Danh sách sản phẩm bán chạy theo số lượng hoặc doanh thu.
-
-**Headers**:
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Query Parameters**:
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| limit | int | 10 | Số lượng sản phẩm |
-| sortBy | string | quantity | Sắp xếp theo: quantity hoặc revenue |
-| fromDate | string | - | Ngày bắt đầu |
-| toDate | string | - | Ngày kết thúc |
-
-**Response**: 200 OK
-```json
-[
-  {
-    "productId": 2,
-    "productName": "Phở Bò Gia Truyền",
-    "quantitySold": 450,
-    "revenue": 29250000.00
-  },
-  {
-    "productId": 4,
-    "productName": "Trà Sữa Trân Châu",
-    "quantitySold": 380,
-    "revenue": 17100000.00
-  }
-]
-```
-
----
-
-## 17. Admin Review Management API
-
-### 17.1 Get All Reviews (Admin)
-**Endpoint**: `GET /api/admin/reviews`
-
-**Description**: Lấy danh sách tất cả đánh giá sản phẩm, hỗ trợ phân trang và lọc.
-
-**Headers**:
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Query Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| page | int | Số trang (default: 0) |
-| size | int | Số lượng mỗi trang (default: 20) |
-| productId | int | Lọc theo sản phẩm |
-| userId | int | Lọc theo người dùng |
-| rating | int | Lọc theo số sao (1-5) |
-| fromDate | string | Lọc từ ngày (yyyy-MM-dd) |
-
-**Response**: 200 OK
 ```json
 {
-  "content": [
+  "orderId": 0,
+  "currentStatus": "string",
+  "estimatedDeliveryTime": "2023-10-10T10:10:10.000Z",
+  "statusHistory": [
     {
-      "id": 1,
-      "user": {
-        "id": 123,
-        "fullName": "Nguyễn Văn A",
-        "avatarUrl": "https://..."
-      },
-      "product": {
-        "id": 2,
-        "name": "Phở Bò Gia Truyền"
-      },
-      "rating": 5,
-      "comment": "Rất ngon!",
-      "createdAt": "2026-03-05T10:00:00Z"
+      "status": "string",
+      "timestamp": "2023-10-10T10:10:10.000Z"
     }
   ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 20,
-    "totalElements": 100
+  "deliveryLocation": {
+    "lat": 0,
+    "lng": 0
   }
 }
 ```
 
 ---
 
-### 17.2 Delete Review (Admin)
-**Endpoint**: `DELETE /api/admin/reviews/{id}`
+## GET /api/notifications
 
-**Description**: Xóa một đánh giá không phù hợp.
+### 1. Endpoint
+`GET /api/notifications`
 
-**Headers**:
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `size` (query, integer) 
+- `unreadOnly` (query, boolean) 
 
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của đánh giá |
+### 3. Response
+**Status 400**: Bad Request
 
-**Response**: 204 No Content
-
-**Errors**:
-- 401 Unauthorized: Token không hợp lệ
-- 403 Forbidden: Không có quyền
-- 404 Not Found: Đánh giá không tồn tại
-
----
-
-## 18. User Order Management API
-
-### 18.1 Cancel Order
-**Endpoint**: `PUT /api/orders/{id}/cancel`
-
-**Description**: Cho phép người dùng hủy đơn hàng của chính họ khi đơn hàng còn ở trạng thái cho phép hủy (thường là PENDING hoặc CONFIRMED).
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của đơn hàng |
-
-**Request Body** (optional):
 ```json
 {
-  "reason": "Tôi muốn hủy đơn hàng vì lý do cá nhân"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "status": "CANCELLED",
-  "refundTransactionId": 12346,
-  "message": "Đơn hàng đã được hủy thành công và tiền đã được hoàn lại vào ví"
-}
-```
+**Status 200**: OK
 
-**Errors**:
-- 400 Bad Request: Đơn hàng không thể hủy (đã ở trạng thái DELIVERING hoặc COMPLETED)
-- 403 Forbidden: Không phải đơn hàng của user này
-- 404 Not Found: Đơn hàng không tồn tại
-
----
-
-### 18.2 Reorder
-**Endpoint**: `POST /api/orders/{id}/reorder`
-
-**Description**: Tạo một đơn hàng mới dựa trên đơn hàng cũ (sao chép danh sách sản phẩm, địa chỉ, ghi chú). Giá sản phẩm sẽ được lấy theo giá hiện tại.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của đơn hàng cũ |
-
-**Request Body** (optional):
-```json
-{
-  "deliveryAddress": "Địa chỉ mới (nếu muốn thay đổi)",
-  "note": "Ghi chú mới"
-}
-```
-
-**Response**: 201 Created
-```json
-{
-  "orderId": 2026,
-  "totalAmount": 155000.00,
-  "status": "PENDING",
-  "createdAt": "2026-03-11T09:30:00Z"
-}
-```
-
----
-
-### 18.3 Track Order
-**Endpoint**: `GET /api/orders/tracking/{id}`
-
-**Description**: Lấy thông tin theo dõi trạng thái đơn hàng chi tiết, bao gồm lịch sử thay đổi trạng thái và ước tính thời gian giao hàng.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của đơn hàng |
-
-**Response**: 200 OK
-```json
-{
-  "orderId": 2025,
-  "currentStatus": "PREPARING",
-  "estimatedDeliveryTime": "2026-03-11T10:30:00Z",
-  "statusHistory": [
-    { "status": "PENDING", "timestamp": "2026-03-11T09:00:00Z" },
-    { "status": "CONFIRMED", "timestamp": "2026-03-11T09:05:00Z" },
-    { "status": "PREPARING", "timestamp": "2026-03-11T09:15:00Z" }
-  ],
-  "deliveryLocation": { "lat": 10.8231, "lng": 106.6297 }
-}
-```
-
----
-
-## 19. User Review API
-
-### 19.1 Submit Review
-**Endpoint**: `POST /api/products/{id}/reviews`
-
-**Description**: Người dùng gửi đánh giá (rating và comment) cho một sản phẩm. Có thể cập nhật đánh giá nếu đã tồn tại.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của sản phẩm |
-
-**Request Body**:
-```json
-{
-  "rating": 5,
-  "comment": "Sản phẩm rất ngon, đóng gói cẩn thận"
-}
-```
-
-**Response**: 201 Created
-```json
-{
-  "id": 101,
-  "productId": 2,
-  "userId": 123,
-  "rating": 5,
-  "comment": "Sản phẩm rất ngon, đóng gói cẩn thận",
-  "createdAt": "2026-03-11T10:00:00Z"
-}
-```
-
----
-
-### 19.2 Update Review
-**Endpoint**: `PUT /api/reviews/{id}`
-
-**Description**: Chỉnh sửa nội dung đánh giá của chính user.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của review |
-
-**Request Body**:
-```json
-{
-  "rating": 4,
-  "comment": "Cập nhật: lần này hơi mặn một chút"
-}
-```
-
-**Response**: 200 OK - Trả về review đã cập nhật
-
-**Errors**:
-- 403 Forbidden: Không phải chủ sở hữu
-- 404 Not Found: Không tồn tại
-
----
-
-### 19.3 Delete Review
-**Endpoint**: `DELETE /api/reviews/{id}`
-
-**Description**: Xóa đánh giá của user.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của review |
-
-**Response**: 204 No Content
-
----
-
-## 20. Address Management API
-
-### 20.1 Get Addresses
-**Endpoint**: `GET /api/addresses`
-
-**Description**: Lấy tất cả địa chỉ giao hàng đã lưu của user hiện tại.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Response**: 200 OK
-```json
-[
-  {
-    "id": 1,
-    "recipientName": "Nguyễn Văn A",
-    "phone": "0987654321",
-    "address": "Số 123, đường ABC, phường XYZ, quận Hai Bà Trưng, Hà Nội",
-    "isDefault": true,
-    "createdAt": "2026-01-01T00:00:00Z"
-  }
-]
-```
-
----
-
-### 20.2 Create Address
-**Endpoint**: `POST /api/addresses`
-
-**Description**: Thêm một địa chỉ giao hàng mới.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-- `Content-Type: application/json`
-
-**Request Body**:
-```json
-{
-  "recipientName": "Nguyễn Văn A",
-  "phone": "0987654321",
-  "address": "Số 789, đường GHI, phường JKL, quận 3, TP.HCM",
-  "isDefault": false
-}
-```
-
-**Response**: 201 Created
-
----
-
-### 20.3 Update Address
-**Endpoint**: `PUT /api/addresses/{id}`
-
-**Description**: Cập nhật thông tin địa chỉ.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-- `Content-Type: application/json`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của địa chỉ |
-
-**Request Body**: Tương tự như thêm mới (có thể gửi một phần)
-
-**Response**: 200 OK
-
----
-
-### 20.4 Delete Address
-**Endpoint**: `DELETE /api/addresses/{id}`
-
-**Description**: Xóa một địa chỉ (không được xóa địa chỉ mặc định nếu là duy nhất).
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của địa chỉ |
-
-**Response**: 204 No Content
-
----
-
-### 20.5 Set Default Address
-**Endpoint**: `PUT /api/addresses/{id}/default`
-
-**Description**: Đặt một địa chỉ làm mặc định. Các địa chỉ khác của user sẽ tự động chuyển thành không mặc định.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của địa chỉ |
-
-**Response**: 200 OK
-
----
-
-## 21. Notification API
-
-### 21.1 Get Notifications
-**Endpoint**: `GET /api/notifications`
-
-**Description**: Lấy danh sách thông báo của user. Hỗ trợ phân trang.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Query Parameters**:
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| page | int | 0 | Số trang |
-| size | int | 20 | Số lượng mỗi trang |
-| unreadOnly | boolean | false | Chỉ lấy thông báo chưa đọc |
-
-**Response**: 200 OK
 ```json
 {
   "content": [
     {
-      "id": 1,
-      "type": "ORDER_STATUS",
-      "title": "Đơn hàng #2025 đã được giao",
-      "content": "Đơn hàng của bạn đã được giao thành công.",
-      "isRead": false,
-      "createdAt": "2026-03-11T11:00:00Z"
+      "id": 0,
+      "type": "string",
+      "title": "string",
+      "content": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "read": true
     }
   ],
   "pageNumber": 0,
-  "pageSize": 20,
-  "totalElements": 100,
-  "totalPages": 5
+  "pageSize": 0,
+  "totalElements": 0,
+  "totalPages": 0
 }
 ```
 
 ---
 
-### 21.2 Mark Notification as Read
-**Endpoint**: `PUT /api/notifications/{id}/read`
+## GET /api/me
 
-**Description**: Đánh dấu một thông báo là đã đọc.
+### 1. Endpoint
+`GET /api/me`
 
-**Headers**:
-- `Authorization: Bearer <token>`
+### 2. Request Body / Parameters
+`None`
 
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của thông báo |
+### 3. Response
+**Status 400**: Bad Request
 
-**Response**: 200 OK
-
----
-
-### 21.3 Mark All as Read
-**Endpoint**: `PUT /api/notifications/read-all`
-
-**Description**: Đánh dấu tất cả thông báo là đã đọc.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Response**: 200 OK
-```json
-"All notifications marked as read"
-```
-
----
-
-## 22. Card Management API
-
-### 22.1 Set Default Card
-**Endpoint**: `POST /api/cards/{id}/default`
-
-**Description**: Đặt một thẻ làm mặc định cho thanh toán.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của thẻ |
-
-**Response**: 200 OK
 ```json
 {
-  "id": 1,
-  "cardNumber": "**** **** **** 2103",
-  "isDefault": true,
-  "message": "Thẻ đã được đặt làm mặc định"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
+```
+
+**Status 200**: OK
+
+```json
+{}
 ```
 
 ---
 
-### 22.2 Delete Card
-**Endpoint**: `DELETE /api/cards/{id}`
+## GET /api/favorites/restaurants
 
-**Description**: Xóa thẻ khỏi danh sách. Không thể xóa thẻ mặc định nếu còn duy nhất.
+### 1. Endpoint
+`GET /api/favorites/restaurants`
 
-**Headers**:
-- `Authorization: Bearer <token>`
+### 2. Request Body / Parameters
+`None`
 
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của thẻ |
+### 3. Response
+**Status 400**: Bad Request
 
-**Response**: 204 No Content
-
----
-
-## 23. Favorite Restaurant API
-
-### 23.1 Add Favorite Restaurant
-**Endpoint**: `POST /api/favorites/restaurants/{id}`
-
-**Description**: Thêm một nhà hàng vào danh sách yêu thích của user.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | string | ID của nhà hàng |
-
-**Response**: 201 Created
 ```json
 {
-  "id": 1,
-  "restaurantId": "RS-9021",
-  "restaurantName": "SmartPay Quận 1",
-  "favoritedAt": "2026-03-11T12:00:00Z"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
----
+**Status 200**: OK
 
-### 23.2 Remove Favorite Restaurant
-**Endpoint**: `DELETE /api/favorites/restaurants/{id}`
-
-**Description**: Xóa nhà hàng khỏi danh sách yêu thích.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | string | ID của nhà hàng |
-
-**Response**: 204 No Content
-
----
-
-### 23.3 Get Favorite Restaurants
-**Endpoint**: `GET /api/favorites/restaurants`
-
-**Description**: Lấy danh sách nhà hàng yêu thích của user.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Response**: 200 OK
 ```json
 [
   {
-    "restaurantId": "RS-9021",
-    "restaurantName": "SmartPay Quận 1",
-    "logoBase64": "data:image/png;base64,...",
-    "address": "123 Nguyễn Huệ, Quận 1, TP.HCM",
-    "favoritedAt": "2026-03-11T12:00:00Z"
+    "id": 0,
+    "restaurantId": "string",
+    "restaurantName": "string",
+    "logoBase64": "string",
+    "address": "string",
+    "favoritedAt": "2023-10-10T10:10:10.000Z"
   }
 ]
 ```
 
 ---
 
-## 24. Support Ticket API
+## GET /api/face/list/{userId}
 
-### 24.1 Create Support Ticket
-**Endpoint**: `POST /api/support/tickets`
+### 1. Endpoint
+`GET /api/face/list/{userId}`
 
-**Description**: Người dùng gửi yêu cầu hỗ trợ (khiếu nại, thắc mắc) đến admin.
+### 2. Request Body / Parameters
+- `userId` (path, integer) *(required)*
 
-**Headers**:
-- `Authorization: Bearer <token>`
-- `Content-Type: application/json`
+### 3. Response
+**Status 400**: Bad Request
 
-**Request Body**:
 ```json
 {
-  "subject": "Đơn hàng giao thiếu món",
-  "message": "Tôi đặt đơn #2025 nhưng bị thiếu món Trà Sữa.",
-  "orderId": 2025,
-  "attachments": "[\"base64_encoded_image...\"]"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Response**: 201 Created
+**Status 200**: OK
+
 ```json
-{
-  "ticketId": 1001,
-  "status": "OPEN",
-  "createdAt": "2026-03-11T14:00:00Z",
-  "message": "Yêu cầu hỗ trợ đã được gửi. Chúng tôi sẽ phản hồi trong 24h."
-}
+[
+  {
+    "id": 0,
+    "userId": 0,
+    "pose": "string",
+    "createdAt": "2023-10-10T10:10:10.000Z"
+  }
+]
 ```
 
 ---
 
-## 25. Restaurant Owner API
+## GET /api/contacts/frequent
 
-Tất cả API trong nhóm này yêu cầu:
-- **Authentication**: JWT token (Bearer) của người dùng có role `RESTAURANT_OWNER`
-- **Authorization**: Chỉ cho phép chủ nhà hàng thao tác trên dữ liệu của chính nhà hàng họ
+### 1. Endpoint
+`GET /api/contacts/frequent`
 
-### 25.1 GET /api/restaurant-owner/orders
-**Description**: Lấy danh sách đơn hàng của nhà hàng.
+### 2. Request Body / Parameters
+- `limit` (query, integer) 
 
-**Headers**:
-- `Authorization: Bearer <token>`
+### 3. Response
+**Status 400**: Bad Request
 
-**Query Parameters**:
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| page | int | No | Số trang (default: 1) |
-| limit | int | No | Số lượng mỗi trang (default: 10) |
-| status | string | No | Lọc theo trạng thái |
-| sortBy | string | No | Trường sắp xếp (default: createdAt) |
-| sortDir | string | No | asc/desc (default: desc) |
-
-**Response**: 200 OK
 ```json
 {
-  "data": [
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "name": "string",
+    "avatarUrl": "string"
+  }
+]
+```
+
+---
+
+## GET /api/cards/{userId}/users
+
+### 1. Endpoint
+`GET /api/cards/{userId}/users`
+
+### 2. Request Body / Parameters
+- `userId` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "cardNumber": "string",
+    "holderName": "string",
+    "expiryDate": "string",
+    "cvv": "string",
+    "type": "string",
+    "bankName": "string",
+    "status": "string",
+    "last4": "string",
+    "balanceCard": 0
+  }
+]
+```
+
+---
+
+## GET /api/cards/deposit/history
+
+### 1. Endpoint
+`GET /api/cards/deposit/history`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "transactionId": 0,
+    "cardId": 0,
+    "cardNumber": "string",
+    "bankName": "string",
+    "amount": 0,
+    "description": "string",
+    "timestamp": "2023-10-10T10:10:10.000Z",
+    "status": "string"
+  }
+]
+```
+
+---
+
+## GET /api/bank-account
+
+### 1. Endpoint
+`GET /api/bank-account`
+
+### 2. Request Body / Parameters
+- `userId` (query, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
+```
+
+---
+
+## GET /api/analytics/spending
+
+### 1. Endpoint
+`GET /api/analytics/spending`
+
+### 2. Request Body / Parameters
+- `range` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "label": "string",
+    "value": 0
+  }
+]
+```
+
+---
+
+## GET /api/admin/wallets
+
+### 1. Endpoint
+`GET /api/admin/wallets`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `size` (query, integer) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "accountNumber": "string",
+    "availableBalance": 0,
+    "createdAt": "2023-10-10T10:10:10.000Z",
+    "status": "string",
+    "userId": 0,
+    "role": "string"
+  }
+]
+```
+
+---
+
+## GET /api/admin/users/{userId}/qrcodes
+
+### 1. Endpoint
+`GET /api/admin/users/{userId}/qrcodes`
+
+### 2. Request Body / Parameters
+- `userId` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "userId": 0,
+    "userFullName": "string",
+    "walletId": 0,
+    "codeValue": "string",
+    "type": "string",
+    "expiresAt": "2023-10-10T10:10:10.000Z",
+    "createdAt": "2023-10-10T10:10:10.000Z"
+  }
+]
+```
+
+---
+
+## GET /api/admin/users/{userId}/cards
+
+### 1. Endpoint
+`GET /api/admin/users/{userId}/cards`
+
+### 2. Request Body / Parameters
+- `userId` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "userId": 0,
+    "userFullName": "string",
+    "bankCode": "string",
+    "bankName": "string",
+    "accountNumber": "string",
+    "accountName": "string",
+    "status": "string",
+    "createdAt": "2023-10-10T10:10:10.000Z"
+  }
+]
+```
+
+---
+
+## GET /api/admin/transactions
+
+### 1. Endpoint
+`GET /api/admin/transactions`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "transactionId": "string",
+    "walletId": "string",
+    "partnerName": "string",
+    "direction": "string",
+    "amount": 0,
+    "status": "string",
+    "note": "string",
+    "createdAt": "2023-10-10T10:10:10.000Z",
+    "type": "string",
+    "referenceId": "string",
+    "success": true,
+    "userId": 0
+  }
+]
+```
+
+---
+
+## GET /api/admin/support-tickets
+
+### 1. Endpoint
+`GET /api/admin/support-tickets`
+
+### 2. Request Body / Parameters
+- `status` (query, string) 
+- `page` (query, integer) 
+- `size` (query, integer) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true,
+  "size": 0,
+  "content": [
     {
-      "id": 2025,
-      "orderCode": "#2025",
-      "userId": 123,
-      "customerName": "Nguyễn Văn A",
-      "customerPhone": "0987654321",
-      "totalAmount": 155000.00,
-      "status": "PENDING",
-      "paymentMethod": "SMARTPAY",
-      "createdAt": "2026-03-15T10:30:00Z",
-      "items": [
+      "id": 0,
+      "userId": 0,
+      "userName": "string",
+      "subject": "string",
+      "message": "string",
+      "orderId": 0,
+      "attachments": "string",
+      "status": "string",
+      "assignedTo": 0,
+      "assignedToName": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "updatedAt": "2023-10-10T10:10:10.000Z",
+      "replies": [
         {
-          "productId": 2,
-          "productName": "Phở Bò",
-          "quantity": 1,
-          "price": 65000.00
+          "id": 0,
+          "ticketId": 0,
+          "adminId": 0,
+          "adminName": "string",
+          "message": "string",
+          "createdAt": "2023-10-10T10:10:10.000Z"
         }
       ]
     }
   ],
-  "pagination": {
-    "total": 45,
-    "page": 1,
-    "limit": 10,
-    "totalPages": 5
-  }
-}
-```
-
-### 25.2 GET /api/restaurant-owner/orders/{id}
-**Description**: Lấy chi tiết một đơn hàng.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID đơn hàng |
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "orderCode": "#2025",
-  "userId": 123,
-  "customerName": "Nguyễn Văn A",
-  "customerPhone": "0987654321",
-  "deliveryAddress": "Số 123, đường ABC, Hai Bà Trưng, Hà Nội",
-  "note": "Không hành",
-  "totalAmount": 155000.00,
-  "status": "PENDING",
-  "paymentMethod": "SMARTPAY",
-  "paymentStatus": "PAID",
-  "transactionId": "TXN-123456",
-  "createdAt": "2026-03-15T10:30:00Z",
-  "items": [
-    {
-      "productId": 2,
-      "productName": "Phở Bò",
-      "quantity": 1,
-      "price": 65000.00,
-      "note": "Không hành"
-    }
-  ]
-}
-```
-
-### 25.3 PUT /api/restaurant-owner/orders/{id}/confirm
-**Description**: Xác nhận đơn hàng, chuyển từ PENDING sang CONFIRMED.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-- `Content-Type: application/json`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID đơn hàng |
-
-**Request Body** (optional):
-```json
-{
-  "estimatedReadyTime": "2026-03-15T11:00:00Z"
-}
-```
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "status": "CONFIRMED",
-  "message": "Order confirmed successfully"
-}
-```
-
-### 25.4 PUT /api/restaurant-owner/orders/{id}/reject
-**Description**: Từ chối đơn hàng, chuyển sang CANCELLED.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-- `Content-Type: application/json`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID đơn hàng |
-
-**Request Body**:
-```json
-{
-  "reason": "Hết nguyên liệu"
-}
-```
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "status": "CANCELLED",
-  "message": "Order rejected"
-}
-```
-
-### 25.5 PUT /api/restaurant-owner/orders/{id}/ready
-**Description**: Báo món đã sẵn sàng để shipper lấy.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID đơn hàng |
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "status": "READY_FOR_PICKUP",
-  "message": "Order is ready for pickup"
-}
-```
-
-### 25.6 GET /api/restaurant-owner/products
-**Description**: Lấy danh sách sản phẩm của nhà hàng.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Query Parameters**:
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| page | int | No | Số trang (default: 1) |
-| limit | int | No | Số lượng mỗi trang (default: 10) |
-| search | string | No | Tìm kiếm |
-| status | string | No | available/unavailable |
-
-**Response**: 200 OK
-```json
-{
-  "data": [
-    {
-      "id": 101,
-      "name": "Phở Bò Đặc Biệt",
-      "description": "Phở bò với thịt tái, nạm, gầu",
-      "price": 75000.00,
-      "imageBase64": "data:image/png;base64,...",
-      "categoryId": 2,
-      "status": "available",
-      "createdAt": "2026-03-15T10:00:00Z"
-    }
-  ],
-  "pagination": {
-    "total": 20,
-    "page": 1,
-    "limit": 10,
-    "totalPages": 2
-  }
-}
-```
-
-### 25.7 GET /api/restaurant-owner/products/{id}
-**Description**: Lấy chi tiết sản phẩm.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID sản phẩm |
-
-### 25.8 POST /api/restaurant-owner/products
-**Description**: Thêm sản phẩm mới.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-- `Content-Type: application/json`
-
-**Request Body**:
-```json
-{
-  "name": "Phở Bò Đặc Biệt",
-  "description": "Phở bò với thịt tái, nạm, gầu",
-  "price": 75000.00,
-  "imageBase64": "data:image/png;base64,...",
-  "categoryId": 2,
-  "status": "available"
-}
-```
-
-### 25.9 PUT /api/restaurant-owner/products/{id}
-**Description**: Cập nhật sản phẩm.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-- `Content-Type: application/json`
-
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID sản phẩm |
-
-### 25.10 DELETE /api/restaurant-owner/products/{id}
-**Description**: Xóa sản phẩm (soft delete).
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-### 25.11 PUT /api/restaurant-owner/restaurant/status
-**Description**: Cập nhật trạng thái hoạt động của nhà hàng.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-- `Content-Type: application/json`
-
-**Request Body**:
-```json
-{
-  "isOpen": false
-}
-```
-
----
-
-## 26. Shipper API
-
-Tất cả API yêu cầu JWT token với role `SHIPPER`.
-
-### 26.1 GET /api/shipper/orders
-**Description**: Lấy danh sách đơn hàng.
-
-**Headers**:
-- `Authorization: Bearer <token>`
-
-**Query Parameters**:
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| page | int | No | Số trang |
-| limit | int | No | Số lượng mỗi trang |
-| status | string | No | Lọc theo trạng thái |
-| assigned | boolean | No | true = đơn đã gán, false = đơn chưa có shipper |
-
-**Response**: 200 OK
-```json
-{
-  "data": [
-    {
-      "id": 2025,
-      "orderCode": "#2025",
-      "restaurantName": "Phở Thìn",
-      "restaurantAddress": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
-      "customerName": "Nguyễn Văn A",
-      "customerPhone": "0987654321",
-      "deliveryAddress": "Số 123, đường ABC, Hai Bà Trưng, Hà Nội",
-      "totalAmount": 155000.00,
-      "status": "READY_FOR_PICKUP",
-      "paymentMethod": "SMARTPAY",
-      "createdAt": "2026-03-15T10:30:00Z"
-    }
-  ],
-  "pagination": {
-    "total": 20,
-    "page": 1,
-    "limit": 10,
-    "totalPages": 2
-  }
-}
-```
-
-### 26.2 GET /api/shipper/orders/{id}
-**Description**: Lấy chi tiết đơn hàng.
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "orderCode": "#2025",
-  "restaurant": {
-    "name": "Phở Thìn",
-    "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
-    "phone": "02439712738",
-    "latitude": 21.0285,
-    "longitude": 105.8542
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": true,
+    "unsorted": true
   },
-  "customer": {
-    "name": "Nguyễn Văn A",
-    "phone": "0987654321",
-    "address": "Số 123, đường ABC, Hai Bà Trưng, Hà Nội",
-    "latitude": 21.0285,
-    "longitude": 105.8542
+  "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "sorted": true,
+      "unsorted": true
+    },
+    "paged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "unpaged": true
   },
-  "items": [
+  "empty": true
+}
+```
+
+---
+
+## GET /api/admin/support-tickets/{id}
+
+### 1. Endpoint
+`GET /api/admin/support-tickets/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "userId": 0,
+  "userName": "string",
+  "subject": "string",
+  "message": "string",
+  "orderId": 0,
+  "attachments": "string",
+  "status": "string",
+  "assignedTo": 0,
+  "assignedToName": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z",
+  "replies": [
     {
-      "productName": "Phở Bò",
-      "quantity": 1,
-      "note": "Không hành"
-    }
-  ],
-  "totalAmount": 155000.00,
-  "paymentMethod": "SMARTPAY",
-  "paymentStatus": "PAID",
-  "note": "Gọi trước khi giao",
-  "status": "READY_FOR_PICKUP",
-  "createdAt": "2026-03-15T10:30:00Z"
-}
-```
-
-### 26.3 PUT /api/shipper/orders/{id}/accept
-**Description**: Shipper nhận đơn.
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "status": "READY_FOR_PICKUP",
-  "message": "Order accepted"
-}
-```
-
-### 26.4 PUT /api/shipper/orders/{id}/picked-up
-**Description**: Xác nhận đã lấy hàng. Chuyển sang DELIVERING.
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "status": "DELIVERING",
-  "message": "Picked up, on the way"
-}
-```
-
-### 26.5 PUT /api/shipper/orders/{id}/delivered
-**Description**: Báo giao hàng thành công.
-
-**Request Body** (optional):
-```json
-{
-  "photoBase64": "data:image/jpeg;base64,..."
-}
-```
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "status": "COMPLETED",
-  "message": "Delivered successfully"
-}
-```
-
-### 26.6 PUT /api/shipper/orders/{id}/failed
-**Description**: Báo giao hàng thất bại.
-
-**Request Body**:
-```json
-{
-  "reason": "Khách không nghe máy",
-  "photoBase64": "data:image/jpeg;base64,..."
-}
-```
-
-**Response**: 200 OK
-```json
-{
-  "id": 2025,
-  "status": "DELIVERY_FAILED",
-  "message": "Delivery failed, waiting for further instructions"
-}
-```
-
----
-
-# C. ADMIN APIs
-
-## 27. POST /api/auth/admin/register
-**Description**: Admin đăng ký user với vai trò cụ thể.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Request Body**:
-```json
-{
-  "userName": "shipper01",
-  "email": "shipper01@example.com", 
-  "phone": "0987654321",
-  "fullName": "Nguyễn Văn Shipper",
-  "passwordHash": "hashedPassword",
-  "role": "SHIPPER" // ADMIN, SUPPORT, RESTAURANT_OWNER, SHIPPER
-}
-```
-
-**Response**: 201 Created
-```json
-{
-  "id": 123,
-  "userName": "shipper01",
-  "email": "shipper01@example.com",
-  "role": "SHIPPER",
-  "message": "User created successfully"
-}
-```
-
-**Errors**: 400, 401, 403
-
----
-
-## 28. GET /api/admin/shippers
-**Description**: Danh sách tài xế (phân trang, tìm kiếm, lọc theo trạng thái online).
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Query Parameters**:
-- `page`: int (default 1)
-- `limit`: int (default 10) 
-- `search`: string (tìm theo tên, SĐT, email)
-- `isOnline`: boolean (lọc theo trạng thái online)
-
-**Response**: 200 OK
-```json
-{
-  "data": [
-    {
-      "userId": 123,
-      "fullName": "Trần Văn B",
-      "phone": "0988111222",
-      "email": "shipper@example.com",
-      "vehicleType": "Xe máy",
-      "vehiclePlate": "29A-12345",
-      "isOnline": true,
-      "isActive": true,
-      "createdAt": "2026-03-15T10:30:00Z"
-    }
-  ],
-  "pagination": {
-    "total": 45,
-    "page": 1,
-    "limit": 10,
-    "totalPages": 5
-  }
-}
-```
-
----
-
-## 29. GET /api/admin/shippers/{id}
-**Description**: Chi tiết tài xế (kèm lịch sử giao hàng).
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Response**: 200 OK
-```json
-{
-  "userId": 123,
-  "fullName": "Trần Văn B",
-  "phone": "0988111222", 
-  "email": "shipper@example.com",
-  "isActive": true,
-  "createdAt": "2026-03-15T10:30:00Z",
-  "vehicleType": "Xe máy",
-  "vehiclePlate": "29A-12345",
-  "isOnline": true,
-  "currentLat": 21.0285,
-  "currentLng": 105.8542,
-  "totalOrders": 320,
-  "completedOrders": 295
-}
-```
-
----
-
-## 30. PUT /api/admin/shippers/{id}/lock
-**Description**: Khóa tài khoản tài xế.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Request Body** (optional):
-```json
-{
-  "reason": "Vi phạm giao hàng"
-}
-```
-
-**Response**: 200 OK
-```json
-{
-  "message": "Shipper locked successfully"
-}
-```
-
----
-
-## 31. PUT /api/admin/shippers/{id}/unlock
-**Description**: Mở khóa tài khoản tài xế.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Response**: 200 OK
-```json
-{
-  "message": "Shipper unlocked successfully"
-}
-```
-
----
-
-## 32. GET /api/admin/restaurant-owners
-**Description**: Danh sách chủ nhà hàng (phân trang, tìm kiếm).
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Query Parameters**:
-- `page`: int (default 1)
-- `limit`: int (default 10)
-- `search`: string (tìm theo tên, SĐT, email)
-
-**Response**: 200 OK
-```json
-{
-  "data": [
-    {
-      "userId": 456,
-      "fullName": "Nguyễn Văn A",
-      "phone": "0987654321",
-      "email": "owner@example.com",
-      "isActive": true,
-      "createdAt": "2026-03-15T10:30:00Z"
-    }
-  ],
-  "pagination": {
-    "total": 25,
-    "page": 1,
-    "limit": 10,
-    "totalPages": 3
-  }
-}
-```
-
----
-
-## 33. GET /api/admin/restaurant-owners/{id}
-**Description**: Chi tiết chủ nhà hàng.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Response**: 200 OK
-```json
-{
-  "userId": 456,
-  "fullName": "Nguyễn Văn A",
-  "phone": "0987654321",
-  "email": "owner@example.com", 
-  "isActive": true,
-  "createdAt": "2026-03-15T10:30:00Z",
-  "restaurants": [
-    {
-      "id": "RS-1234",
-      "name": "Phở Thìn Lò Đúc",
-      "phone": "02439712738",
-      "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
-      "status": true,
-      "productCount": 25,
-      "createdAt": "2026-03-15T10:30:00Z"
+      "id": 0,
+      "ticketId": 0,
+      "adminId": 0,
+      "adminName": "string",
+      "message": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z"
     }
   ]
 }
@@ -3454,604 +5615,1753 @@ Tất cả API yêu cầu JWT token với role `SHIPPER`.
 
 ---
 
-## 34. PUT /api/admin/restaurant-owners/{id}/lock
-**Description**: Khóa tài khoản chủ nhà hàng.
+## GET /api/admin/statistics/top-products
 
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
+### 1. Endpoint
+`GET /api/admin/statistics/top-products`
 
-**Request Body** (optional):
+### 2. Request Body / Parameters
+- `limit` (query, integer) 
+- `sortBy` (query, string) 
+- `fromDate` (query, string) 
+- `toDate` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
 ```json
 {
-  "reason": "Vi phạm quy định"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Response**: 200 OK
-```json
-{
-  "message": "Restaurant owner locked successfully"
-}
-```
+**Status 200**: OK
 
----
-
-## 35. PUT /api/admin/restaurant-owners/{id}/unlock
-**Description**: Mở khóa tài khoản chủ nhà hàng.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu ADMIN role)
-
-**Response**: 200 OK
-```json
-{
-  "message": "Restaurant owner unlocked successfully"
-}
-```
-
----
-
-## 36-39. SUPPORT TICKETS APIs
-**Description**: Quản lý yêu cầu hỗ trợ (TODO - cần implement SupportTicket entity).
-
-- GET /api/admin/support-tickets - Danh sách tickets
-- GET /api/admin/support-tickets/{id} - Chi tiết ticket  
-- PUT /api/admin/support-tickets/{id}/reply - Trả lời ticket
-- PUT /api/admin/support-tickets/{id}/status - Cập nhật trạng thái
-
----
-
-# D. CHUNG (Multi-role APIs)
-
-## 40. POST /api/upload
-**Description**: Upload file ảnh (hỗ trợ multipart/form-data).
-
-**Headers**: 
-- `Authorization: Bearer <token>` (cho phép nhiều role: ADMIN, RESTAURANT_OWNER, SHIPPER, USER)
-- `Content-Type: multipart/form-data`
-
-**Form Data**:
-- `file`: file ảnh (tối đa 5MB, chỉ chấp nhận image/*)
-
-**Response**: 200 OK
-```json
-{
-  "url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
-  "base64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
-  "error": null
-}
-```
-
-**Errors**: 
-- 400: File không hợp lệ (rỗng, quá 5MB, không phải ảnh)
-- 401: Chưa đăng nhập
-
----
-
-# E. RESTAURANT OWNER APIs (Bổ sung)
-
-## 41. GET /api/restaurant-owner/reviews  
-**Description**: Lấy danh sách đánh giá của nhà hàng.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
-
-**Query Parameters**:
-- `page`: int (default 1)
-- `limit`: int (default 10) 
-- `rating`: int (lọc theo số sao 1-5)
-
-**Response**: 200 OK
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "userName": "Nguyễn Văn A",
-      "rating": 5,
-      "comment": "Ngon tuyệt vời, phục vụ nhanh",
-      "createdAt": "2026-03-15T10:30:00Z"
-    }
-  ],
-  "pagination": {
-    "total": 120,
-    "page": 1, 
-    "limit": 10,
-    "totalPages": 12
-  }
-}
-```
-
----
-
-## 42. GET /api/restaurant-owner/statistics/overview
-**Description**: Thống kê tổng quan của nhà hàng.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
-
-**Response**: 200 OK
-```json
-{
-  "todayOrders": 12,
-  "todayRevenue": 2450000,
-  "pendingOrders": 5,
-  "preparingOrders": 3,
-  "completedOrders": 120,
-  "cancelledOrders": 2
-}
-```
-
----
-
-## 43. GET /api/restaurant-owner/statistics/revenue
-**Description**: Thống kê doanh thu theo ngày/tuần/tháng.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
-
-**Query Parameters**:
-- `groupBy`: string (day, week, month)
-- `fromDate`: string (yyyy-MM-dd)
-- `toDate`: string (yyyy-MM-dd)
-
-**Response**: 200 OK
-```json
-{
-  "labels": ["2026-03-01", "2026-03-02", "2026-03-03"],
-  "revenue": [1250000, 1320000, 1180000]
-}
-```
-
----
-
-## 44. GET /api/restaurant-owner/statistics/top-products
-**Description**: Top sản phẩm bán chạy.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
-
-**Query Parameters**:
-- `limit`: int (default 10)
-- `fromDate`: string (yyyy-MM-dd)
-- `toDate`: string (yyyy-MM-dd)
-
-**Response**: 200 OK
 ```json
 [
   {
-    "productId": 2,
-    "productName": "Phở Bò Đặc Biệt",
-    "quantitySold": 45,
-    "revenue": 2925000
+    "productId": 0,
+    "productName": "string",
+    "quantitySold": 0,
+    "revenue": 0
   }
 ]
 ```
 
 ---
 
-## 45. PUT /api/restaurant-owner/restaurant
-**Description**: Cập nhật thông tin nhà hàng.
+## GET /api/admin/statistics/revenue
 
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
+### 1. Endpoint
+`GET /api/admin/statistics/revenue`
 
-**Request Body**:
+### 2. Request Body / Parameters
+- `groupBy` (query, string) 
+- `fromDate` (query, string) 
+- `toDate` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
 ```json
 {
-  "name": "Phở Thìn Lò Đúc",
-  "phone": "02439712738",
-  "address": "13 Lò Đúc, Hai Bà Trưng, Hà Nội",
-  "logoBase64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
-  "openingHours": "08:00-22:00"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Response**: 200 OK (trả về thông tin nhà hàng sau cập nhật)
+**Status 200**: OK
 
----
-
-## 46. PUT /api/restaurant-owner/restaurant/status  
-**Description**: Cập nhật trạng thái hoạt động (mở/đóng).
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu RESTAURANT_OWNER role)
-
-**Request Body**:
 ```json
 {
-  "isOpen": false
-}
-```
-
-**Response**: 200 OK
-```json
-{
-  "message": "Restaurant status updated",
-  "isOpen": false
-}
-```
-
----
-
-# F. SHIPPER APIs (Bổ sung)
-
-## 47. GET /api/shipper/profile
-**Description**: Lấy thông tin profile mở rộng của shipper.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu SHIPPER role)
-
-**Response**: 200 OK
-```json
-{
-  "userId": 123,
-  "fullName": "Trần Văn B",
-  "phone": "0988111222",
-  "vehicleType": "Xe máy",
-  "vehiclePlate": "29A-12345", 
-  "isOnline": true,
-  "currentLat": 21.0285,
-  "currentLng": 105.8542
+  "labels": [
+    "string"
+  ],
+  "revenue": [
+    0
+  ],
+  "orderCount": [
+    0
+  ]
 }
 ```
 
 ---
 
-## 48. PUT /api/shipper/profile
-**Description**: Cập nhật thông tin profile.
+## GET /api/admin/statistics/overview
 
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu SHIPPER role)
+### 1. Endpoint
+`GET /api/admin/statistics/overview`
 
-**Request Body**:
+### 2. Request Body / Parameters
+- `fromDate` (query, string) 
+- `toDate` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
 ```json
 {
-  "vehicleType": "Xe tay ga",
-  "vehiclePlate": "29B-67890"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Response**: 200 OK (trả về profile sau cập nhật)
+**Status 200**: OK
 
----
-
-## 49. PUT /api/shipper/status
-**Description**: Cập nhật trạng thái online/offline.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu SHIPPER role)
-
-**Request Body**:
 ```json
 {
-  "isOnline": true
-}
-```
-
-**Response**: 200 OK
-```json
-{
-  "isOnline": true,
-  "message": "Status updated"
-}
-```
-
----
-
-## 50. POST /api/shipper/location
-**Description**: Cập nhật tọa độ hiện tại.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu SHIPPER role)
-
-**Request Body**:
-```json
-{
-  "lat": 21.0285,
-  "lng": 105.8542
-}
-```
-
-**Response**: 200 OK
-
----
-
-## 51. GET /api/shipper/statistics
-**Description**: Thống kê cá nhân của shipper.
-
-**Headers**: 
-- `Authorization: Bearer <token>` (yêu cầu SHIPPER role)
-
-**Response**: 200 OK
-```json
-{
-  "totalDelivered": 320,
-  "totalDistance": 1240.5,
+  "totalOrders": 0,
   "totalRevenue": 0,
-  "todayDelivered": 12
+  "averageOrderValue": 0,
+  "ordersByStatus": {},
+  "revenueToday": 0,
+  "ordersToday": 0,
+  "newUsersToday": 0,
+  "topRestaurants": [
+    {
+      "restaurantId": "string",
+      "restaurantName": "string",
+      "orderCount": 0,
+      "revenue": 0
+    }
+  ]
 }
 ```
 
 ---
 
-### 6.5 Delete User (Admin)
-**Endpoint**: `DELETE /api/admin/users/{id}`
+## GET /api/admin/shippers
 
-**Description**: Xóa tài khoản người dùng khỏi hệ thống. Không thể xóa tài khoản ADMIN. Việc xóa user sẽ tự động xóa:
-- Ví (wallet) liên quan
-- Tất cả giao dịch (transactions) của ví đó
+### 1. Endpoint
+`GET /api/admin/shippers`
 
-**Headers**:
-- `Authorization: Bearer <token>` (bắt buộc, role ADMIN)
+### 2. Request Body / Parameters
+- `search` (query, string) 
+- `isOnline` (query, boolean) 
+- `page` (query, integer) 
+- `size` (query, integer) 
 
-**Path Parameters**:
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| id | int | ID của người dùng cần xóa |
+### 3. Response
+**Status 400**: Bad Request
 
-**Response**: 200 OK
 ```json
 {
-  "message": "User and associated wallet deleted successfully"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Errors**: 
-- 404: User not found
-- 403: Cannot delete admin user
-- 401: Unauthorized (không có quyền ADMIN)
+**Status 200**: OK
 
-**Lưu ý**: Cascade được cấu hình để tự động xóa wallet và transactions, đảm bảo toàn vẹn dữ liệu.
-
----
-
-### 6.6 Create User (Admin)
-**Endpoint**: `POST /api/admin/users`
-
-**Description**: Tạo tài khoản người dùng mới (giống như register nhưng dành cho admin). Tự động tạo ví cho user mới.
-
-**Headers**:
-- `Authorization: Bearer <token>` (bắt buộc, role ADMIN)
-- `Content-Type: application/json`
-
-**Request Body**:
 ```json
 {
-  "userName": "Long2",
-  "fullName": "Bao Long Trinh2",
-  "email": "longtrinh.280722004@gmail.com",
-  "phone": "0365838902",
-  "passwordHash": "Long@2004",
-  "role": "USER"
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true,
+  "size": 0,
+  "content": [
+    {
+      "id": 0,
+      "userName": "string",
+      "fullName": "string",
+      "email": "string",
+      "phone": "string",
+      "avatarUrl": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "statistics": {
+        "totalOrders": 0,
+        "completedOrders": 0,
+        "failedOrders": 0,
+        "totalEarnings": 0,
+        "avgRating": 0,
+        "dailyStats": [
+          {
+            "date": "string",
+            "orders": 0,
+            "earnings": 0
+          }
+        ]
+      },
+      "active": true
+    }
+  ],
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": true,
+    "unsorted": true
+  },
+  "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "sorted": true,
+      "unsorted": true
+    },
+    "paged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "unpaged": true
+  },
+  "empty": true
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| userName | string | Yes | Tên đăng nhập |
-| fullName | string | Yes | Họ và tên đầy đủ |
-| email | string | Yes | Email |
-| phone | string | Yes | Số điện thoại |
-| passwordHash | string | Yes | Mật khẩu |
-| role | enum | Yes | USER, ADMIN, SHIPPER, RESTAURANT_OWNER, SUPPORT |
+---
 
-**Response**: 200 OK
+## GET /api/admin/shippers/{id}
+
+### 1. Endpoint
+`GET /api/admin/shippers/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
 ```json
 {
-  "message": "User created successfully by admin",
-  "userId": 15,
-  "accountNumber": "0365838902",
-  "walletId": "WALLET15"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Errors**:
-- 400: Invalid request / Username hoặc Email hoặc Phone đã tồn tại
-- 401: Unauthorized (không có quyền ADMIN)
-- 403: Forbidden
+**Status 200**: OK
 
----
-
-**Lưu ý**: Các APIs từ 1-26 đã có trong tài liệu gốc, các APIs từ 27-51 là APIs mới được bổ sung trong phiên bản này.
-
----
-
-# G. AUTHENTICATION APIs (Bổ sung)
-
-## 52. POST /api/auth/forgot-password
-**Description**: Gửi mã OTP xác thực đến email để khôi phục mật khẩu.
-
-**Request Body**:
 ```json
 {
-  "email": "user@example.com"
+  "id": 0,
+  "userName": "string",
+  "fullName": "string",
+  "email": "string",
+  "phone": "string",
+  "avatarUrl": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "statistics": {
+    "totalOrders": 0,
+    "completedOrders": 0,
+    "failedOrders": 0,
+    "totalEarnings": 0,
+    "avgRating": 0,
+    "dailyStats": [
+      {
+        "date": "string",
+        "orders": 0,
+        "earnings": 0
+      }
+    ]
+  },
+  "active": true
 }
 ```
 
-**Response**: 200 OK
+---
+
+## GET /api/admin/shippers/{id}/statistics
+
+### 1. Endpoint
+`GET /api/admin/shippers/{id}/statistics`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+- `fromDate` (query, string) 
+- `toDate` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
 ```json
 {
-  "message": "OTP đã được gửi đến email của bạn"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Errors**: 
-- 400: Email không hợp lệ hoặc không tồn tại
-- 500: Lỗi gửi email
+**Status 200**: OK
 
-**Ghi chú**: 
-- OTP có hiệu lực 5 phút
-- OTP gồm 6 chữ số ngẫu nhiên
-- Email được gửi bất đồng bộ
-
----
-
-## 53. POST /api/auth/verify-otp
-**Description**: Xác thực mã OTP đã nhận qua email.
-
-**Request Body**:
 ```json
 {
-  "email": "user@example.com",
-  "otpCode": "123456",
-  "purpose": "RESET_PASSWORD"
+  "totalOrders": 0,
+  "completedOrders": 0,
+  "failedOrders": 0,
+  "totalEarnings": 0,
+  "avgRating": 0,
+  "dailyStats": [
+    {
+      "date": "string",
+      "orders": 0,
+      "earnings": 0
+    }
+  ]
 }
 ```
 
-**Response**: 200 OK
+---
+
+## GET /api/admin/shippers/{id}/orders
+
+### 1. Endpoint
+`GET /api/admin/shippers/{id}/orders`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+- `status` (query, string) 
+- `fromDate` (query, string) 
+- `toDate` (query, string) 
+- `page` (query, integer) 
+- `size` (query, integer) 
+
+### 3. Response
+**Status 400**: Bad Request
+
 ```json
 {
-  "message": "Xác thực OTP thành công"
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
 }
 ```
 
-**Errors**: 
-- 400: OTP không hợp lệ hoặc đã hết hạn
-- 400: Email không hợp lệ
-- 400: Thiếu thông tin required
+**Status 200**: OK
 
-**Ghi chú**:
-- `purpose` có thể là: `RESET_PASSWORD`, `EMAIL_VERIFICATION`, etc.
-- OTP sau khi xác thực sẽ bị vô hiệu hóa
-- Chỉ chấp nhận OTP 6 chữ số
+```json
+{
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true,
+  "size": 0,
+  "content": [
+    {
+      "id": 0,
+      "userId": 0,
+      "totalAmount": 0,
+      "status": "string",
+      "deliveryAddress": "string",
+      "recipientName": "string",
+      "recipientPhone": "string",
+      "note": "string",
+      "paymentMethod": "string",
+      "restaurantId": "string",
+      "restaurant": {
+        "id": "string",
+        "name": "string",
+        "phone": "string",
+        "email": "string",
+        "address": "string",
+        "logoBase64": "string",
+        "status": true,
+        "productCount": 0,
+        "createdAt": "2023-10-10T10:10:10.000Z",
+        "updatedAt": "2023-10-10T10:10:10.000Z",
+        "deletedAt": "2023-10-10T10:10:10.000Z",
+        "ownerId": 0,
+        "products": [
+          {
+            "id": 0,
+            "name": "string",
+            "description": "string",
+            "price": 0,
+            "imageBase64": "string",
+            "categoryId": 0,
+            "restaurantId": "string",
+            "ratingAvg": 0,
+            "ratingCount": 0,
+            "status": "string",
+            "createdAt": "2023-10-10T10:10:10.000Z",
+            "updatedAt": "2023-10-10T10:10:10.000Z",
+            "deletedAt": "2023-10-10T10:10:10.000Z",
+            "category": {
+              "id": 0,
+              "name": "string",
+              "icon": "string",
+              "orderIndex": 0,
+              "createdAt": "2023-10-10T10:10:10.000Z",
+              "updatedAt": "2023-10-10T10:10:10.000Z",
+              "products": [
+                "Circular reference: Product"
+              ]
+            },
+            "restaurant": "Circular reference: Restaurant",
+            "reviews": [
+              {
+                "id": 0,
+                "userId": 0,
+                "productId": 0,
+                "rating": 0,
+                "comment": "string",
+                "createdAt": "2023-10-10T10:10:10.000Z",
+                "user": {
+                  "id": 0,
+                  "userName": "string",
+                  "email": "string",
+                  "phone": "string",
+                  "fullName": "string",
+                  "avatar": "string",
+                  "dateOfBirth": "string",
+                  "address": "string",
+                  "passwordHash": "string",
+                  "pinHash": "string",
+                  "role": "string",
+                  "createdAt": "2023-10-10T10:10:10.000Z",
+                  "updatedAt": "2023-10-10T10:10:10.000Z",
+                  "wallet": {
+                    "id": 0,
+                    "code": "string",
+                    "currency": "string",
+                    "balance": 0,
+                    "availableBalance": 0,
+                    "status": "string",
+                    "accountNumber": "string",
+                    "createdAt": "2023-10-10T10:10:10.000Z",
+                    "updatedAt": "2023-10-10T10:10:10.000Z",
+                    "transactions": [
+                      {
+                        "id": 0,
+                        "wallet": "Circular reference: Wallet",
+                        "type": "string",
+                        "direction": "string",
+                        "amount": 0,
+                        "fee": 0,
+                        "balanceBefore": 0,
+                        "balanceAfter": 0,
+                        "status": "string",
+                        "referenceId": "string",
+                        "idempotencyKey": "string",
+                        "relatedTxId": 0,
+                        "metadata": "string",
+                        "createdAt": "2023-10-10T10:10:10.000Z",
+                        "updatedAt": "2023-10-10T10:10:10.000Z"
+                      }
+                    ]
+                  },
+                  "avatarUrl": "string",
+                  "membership": "string",
+                  "active": true,
+                  "verified": true
+                },
+                "product": "Circular reference: Product"
+              }
+            ]
+          }
+        ]
+      },
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "updatedAt": "2023-10-10T10:10:10.000Z",
+      "shipperId": 0,
+      "rejectedReason": "string",
+      "deliveryFailedReason": "string",
+      "confirmedAt": "2023-10-10T10:10:10.000Z",
+      "readyAt": "2023-10-10T10:10:10.000Z",
+      "pickedUpAt": "2023-10-10T10:10:10.000Z",
+      "deliveredAt": "2023-10-10T10:10:10.000Z",
+      "user": {
+        "id": 0,
+        "userName": "string",
+        "email": "string",
+        "phone": "string",
+        "fullName": "string",
+        "avatar": "string",
+        "dateOfBirth": "string",
+        "address": "string",
+        "passwordHash": "string",
+        "pinHash": "string",
+        "role": "string",
+        "createdAt": "2023-10-10T10:10:10.000Z",
+        "updatedAt": "2023-10-10T10:10:10.000Z",
+        "wallet": {
+          "id": 0,
+          "code": "string",
+          "currency": "string",
+          "balance": 0,
+          "availableBalance": 0,
+          "status": "string",
+          "accountNumber": "string",
+          "createdAt": "2023-10-10T10:10:10.000Z",
+          "updatedAt": "2023-10-10T10:10:10.000Z",
+          "transactions": [
+            {
+              "id": 0,
+              "wallet": "Circular reference: Wallet",
+              "type": "string",
+              "direction": "string",
+              "amount": 0,
+              "fee": 0,
+              "balanceBefore": 0,
+              "balanceAfter": 0,
+              "status": "string",
+              "referenceId": "string",
+              "idempotencyKey": "string",
+              "relatedTxId": 0,
+              "metadata": "string",
+              "createdAt": "2023-10-10T10:10:10.000Z",
+              "updatedAt": "2023-10-10T10:10:10.000Z"
+            }
+          ]
+        },
+        "avatarUrl": "string",
+        "membership": "string",
+        "active": true,
+        "verified": true
+      },
+      "orderItems": [
+        {
+          "id": 0,
+          "orderId": 0,
+          "productId": 0,
+          "quantity": 0,
+          "priceAtTime": 0,
+          "note": "string",
+          "order": "Circular reference: Order",
+          "product": {
+            "id": 0,
+            "name": "string",
+            "description": "string",
+            "price": 0,
+            "imageBase64": "string",
+            "categoryId": 0,
+            "restaurantId": "string",
+            "ratingAvg": 0,
+            "ratingCount": 0,
+            "status": "string",
+            "createdAt": "2023-10-10T10:10:10.000Z",
+            "updatedAt": "2023-10-10T10:10:10.000Z",
+            "deletedAt": "2023-10-10T10:10:10.000Z",
+            "category": {
+              "id": 0,
+              "name": "string",
+              "icon": "string",
+              "orderIndex": 0,
+              "createdAt": "2023-10-10T10:10:10.000Z",
+              "updatedAt": "2023-10-10T10:10:10.000Z",
+              "products": [
+                "Circular reference: Product"
+              ]
+            },
+            "restaurant": {
+              "id": "string",
+              "name": "string",
+              "phone": "string",
+              "email": "string",
+              "address": "string",
+              "logoBase64": "string",
+              "status": true,
+              "productCount": 0,
+              "createdAt": "2023-10-10T10:10:10.000Z",
+              "updatedAt": "2023-10-10T10:10:10.000Z",
+              "deletedAt": "2023-10-10T10:10:10.000Z",
+              "ownerId": 0,
+              "products": [
+                "Circular reference: Product"
+              ]
+            },
+            "reviews": [
+              {
+                "id": 0,
+                "userId": 0,
+                "productId": 0,
+                "rating": 0,
+                "comment": "string",
+                "createdAt": "2023-10-10T10:10:10.000Z",
+                "user": {
+                  "id": 0,
+                  "userName": "string",
+                  "email": "string",
+                  "phone": "string",
+                  "fullName": "string",
+                  "avatar": "string",
+                  "dateOfBirth": "string",
+                  "address": "string",
+                  "passwordHash": "string",
+                  "pinHash": "string",
+                  "role": "string",
+                  "createdAt": "2023-10-10T10:10:10.000Z",
+                  "updatedAt": "2023-10-10T10:10:10.000Z",
+                  "wallet": {
+                    "id": 0,
+                    "code": "string",
+                    "currency": "string",
+                    "balance": 0,
+                    "availableBalance": 0,
+                    "status": "string",
+                    "accountNumber": "string",
+                    "createdAt": "2023-10-10T10:10:10.000Z",
+                    "updatedAt": "2023-10-10T10:10:10.000Z",
+                    "transactions": [
+                      {
+                        "id": 0,
+                        "wallet": "Circular reference: Wallet",
+                        "type": "string",
+                        "direction": "string",
+                        "amount": 0,
+                        "fee": 0,
+                        "balanceBefore": 0,
+                        "balanceAfter": 0,
+                        "status": "string",
+                        "referenceId": "string",
+                        "idempotencyKey": "string",
+                        "relatedTxId": 0,
+                        "metadata": "string",
+                        "createdAt": "2023-10-10T10:10:10.000Z",
+                        "updatedAt": "2023-10-10T10:10:10.000Z"
+                      }
+                    ]
+                  },
+                  "avatarUrl": "string",
+                  "membership": "string",
+                  "active": true,
+                  "verified": true
+                },
+                "product": "Circular reference: Product"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": true,
+    "unsorted": true
+  },
+  "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "sorted": true,
+      "unsorted": true
+    },
+    "paged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "unpaged": true
+  },
+  "empty": true
+}
+```
 
 ---
 
-**Tổng số APIs hiện tại: 53 APIs** (26 cũ + 27 mới)
+## GET /api/admin/reviews
+
+### 1. Endpoint
+`GET /api/admin/reviews`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `size` (query, integer) 
+- `productId` (query, integer) 
+- `userId` (query, integer) 
+- `rating` (query, integer) 
+- `fromDate` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true,
+  "size": 0,
+  "content": [
+    {
+      "id": 0,
+      "user": {
+        "id": 0,
+        "fullName": "string",
+        "avatarUrl": "string"
+      },
+      "product": {
+        "id": 0,
+        "name": "string"
+      },
+      "rating": 0,
+      "comment": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z"
+    }
+  ],
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": true,
+    "unsorted": true
+  },
+  "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "sorted": true,
+      "unsorted": true
+    },
+    "paged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "unpaged": true
+  },
+  "empty": true
+}
+```
 
 ---
 
-# H. API SUMMARY REPORT (Báo cáo tổng hợp)
+## GET /api/admin/restaurants/export
 
-## Danh sách APIs theo nhóm chức năng
+**Summary:** Export restaurants to CSV
 
-### 1. Authentication APIs (5 APIs)
-| STT | Endpoint | Method | Mô tả |
-|-----|----------|--------|-------|
-| 1 | `/api/auth/register` | POST | Đăng ký tài khoản mới |
-| 2 | `/api/auth/login` | POST | Đăng nhập |
-| 3 | `/api/auth/admin/register` | POST | Admin tạo tài khoản có role |
-| 4 | `/api/auth/forgot-password` | POST | Gửi OTP qua email |
-| 5 | `/api/auth/verify-otp` | POST | Xác thực OTP |
+### 1. Endpoint
+`GET /api/admin/restaurants/export`
 
-### 2. User Management APIs (6 APIs)
-| STT | Endpoint | Method | Mô tả |
-|-----|----------|--------|-------|
-| 1 | `/api/userManager/all` | GET | Lấy danh sách tất cả users |
-| 2 | `/api/userManager/lock/{id}` | PUT | Khóa tài khoản user |
-| 3 | `/api/userManager/unlock/{id}` | PUT | Mở khóa tài khoản user |
-| 4 | `/api/userManager/update/{id}` | PUT | Cập nhật thông tin user |
-| 5 | `/api/admin/users/{id}` | DELETE | Xóa user (kèm wallet, transactions) |
-| 6 | `/api/admin/users` | POST | Tạo user mới (giống register) |
+### 2. Request Body / Parameters
+- `search` (query, string) 
+- `status` (query, boolean) 
 
-### 3. Wallet APIs (8 APIs)
-| STT | Endpoint | Method | Mô tả |
-|-----|----------|--------|-------|
-| 1 | `/api/wallet/balance` | GET | Xem số dư ví |
-| 2 | `/api/wallets/available-balance` | GET | Xem số dư khả dụng |
-| 3 | `/api/wallet/me` | GET | Thông tin ví của user hiện tại |
-| 4 | `/api/wallets/search` | GET | Tìm ví theo số điện thoại |
-| 5 | `/api/admin/wallets` | GET | Admin lấy danh sách tất cả ví |
-| 6 | `/api/admin/wallets/lock/{id}` | PUT | Khóa ví |
-| 7 | `/api/admin/wallets/unlock/{id}` | PUT | Mở khóa ví |
-| 8 | `/api/admin/wallets/topup` | POST | Nạp tiền vào ví |
+### 3. Response
+**Status 400**: Bad Request
 
-### 4. Transaction APIs (8 APIs)
-| STT | Endpoint | Method | Mô tả |
-|-----|----------|--------|-------|
-| 1 | `/api/transfers` | POST | Chuyển tiền |
-| 2 | `/api/transfers/history` | GET | Lịch sử chuyển tiền |
-| 3 | `/api/transfers/{id}` | GET | Chi tiết giao dịch chuyển tiền |
-| 4 | `/api/deposit` | POST | Nạp tiền vào ví |
-| 5 | `/api/deposit/wallet-by-username/{userName}` | GET | Lấy ví theo username |
-| 6 | `/api/transactions/history` | GET | Lịch sử giao dịch |
-| 7 | `/api/admin/transactions` | GET | Admin lấy tất cả giao dịch |
-| 8 | `/api/wallets/{walletId}/withdraw` | POST | Rút tiền từ ví |
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
 
-### 5. Shipper APIs (4 APIs)
-| STT | Endpoint | Method | Mô tả |
-|-----|----------|--------|-------|
-| 1 | `/api/shipper/orders/available` | GET | Lấy danh sách đơn hàng khả dụng |
-| 2 | `/api/shipper/orders/{id}/accept` | POST | Nhận đơn hàng |
-| 3 | `/api/shipper/location` | POST | Cập nhật vị trí shipper |
-| 4 | `/api/shipper/statistics` | GET | Thống kê shipper |
+**Status 200**: OK
 
-### 6. Order APIs (5 APIs)
-| STT | Endpoint | Method | Mô tả |
-|-----|----------|--------|-------|
-| 1 | `/api/orders` | POST | Tạo đơn hàng mới |
-| 2 | `/api/orders` | GET | Lấy danh sách đơn hàng |
-| 3 | `/api/orders/{id}` | GET | Chi tiết đơn hàng |
-| 4 | `/api/orders/{id}/cancel` | PUT | Hủy đơn hàng |
-| 5 | `/api/orders/{id}/status` | PUT | Cập nhật trạng thái đơn hàng |
-
-### 7. Restaurant APIs (8 APIs)
-| STT | Endpoint | Method | Mô tả |
-|-----|----------|--------|-------|
-| 1 | `/api/restaurants` | GET | Lấy danh sách nhà hàng |
-| 2 | `/api/restaurants/{id}` | GET | Chi tiết nhà hàng |
-| 3 | `/api/restaurants/{id}/menu` | GET | Lấy menu nhà hàng |
-| 4 | `/api/restaurant-owner/restaurant` | GET | Lấy nhà hàng của owner |
-| 5 | `/api/restaurant-owner/restaurant` | POST | Tạo nhà hàng mới |
-| 6 | `/api/restaurant-owner/restaurant/{id}` | PUT | Cập nhật nhà hàng |
-| 7 | `/api/restaurant-owner/menu-items` | POST | Thêm món ăn vào menu |
-| 8 | `/api/restaurant-owner/menu-items/{id}` | PUT | Cập nhật món ăn |
-
-### 8. Admin Management APIs (6 APIs)
-| STT | Endpoint | Method | Mô tả |
-|-----|----------|--------|-------|
-| 1 | `/api/admin/restaurant-owners` | GET | Lấy danh sách restaurant owners |
-| 2 | `/api/admin/restaurant-owners/{id}/lock` | PUT | Khóa restaurant owner |
-| 3 | `/api/admin/restaurant-owners/{id}/unlock` | PUT | Mở khóa restaurant owner |
-| 4 | `/api/admin/shippers` | GET | Lấy danh sách shippers |
-| 5 | `/api/admin/shippers/{id}/lock` | PUT | Khóa shipper |
-| 6 | `/api/admin/shippers/{id}/unlock` | PUT | Mở khóa shipper |
-
-### 9. Card & Payment APIs (4 APIs)
-| STT | Endpoint | Method | Mô tả |
-|-----|----------|--------|-------|
-| 1 | `/api/cards` | GET | Lấy danh sách thẻ |
-| 2 | `/api/cards` | POST | Thêm thẻ mới |
-| 3 | `/api/cards/{id}/default` | PUT | Đặt thẻ mặc định |
-| 4 | `/api/cards/{id}` | DELETE | Xóa thẻ |
-
-### 10. QR Code APIs (3 APIs)
-| STT | Endpoint | Method | Mô tả |
-|-----|----------|--------|-------|
-| 1 | `/api/qr/wallet/me` | GET | Lấy QR code ví của user |
-| 2 | `/api/qr/generate` | POST | Tạo QR code với số tiền |
-| 3 | `/api/qr/scan` | POST | Quét và xử lý QR code |
-
-## Thống kê tổng quan
-
-| Nhóm chức năng | Số lượng APIs |
-|----------------|---------------|
-| Authentication | 5 |
-| User Management | 6 |
-| Wallet | 8 |
-| Transaction | 8 |
-| Shipper | 4 |
-| Order | 5 |
-| Restaurant | 8 |
-| Admin Management | 6 |
-| Card & Payment | 4 |
-| QR Code | 3 |
-| **TỔNG CỘNG** | **53 APIs** |
-
-## Phân quyền theo Role
-
-| Role | APIs có thể truy cập |
-|------|---------------------|
-| PUBLIC | `/api/auth/*` (trừ admin/register) |
-| USER | Wallet, Transaction, Order, Card APIs |
-| SHIPPER | Shipper APIs + User APIs |
-| RESTAURANT_OWNER | Restaurant Owner APIs + User APIs |
-| ADMIN | Tất cả Admin APIs + User APIs |
-| SUPPORT | APIs hỗ trợ khách hàng |
+```json
+"string"
+```
 
 ---
 
-**Ngày cập nhật**: March 18, 2026
-**Phiên bản**: v2.0
-**Tác giả**: DATN Development Team
+## GET /api/admin/restaurants/check-name
+
+**Summary:** Check if restaurant name exists
+
+### 1. Endpoint
+`GET /api/admin/restaurants/check-name`
+
+### 2. Request Body / Parameters
+- `name` (query, string) *(required)*
+- `excludeId` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "exists": true
+}
+```
+
+---
+
+## GET /api/admin/restaurant-owners
+
+### 1. Endpoint
+`GET /api/admin/restaurant-owners`
+
+### 2. Request Body / Parameters
+- `search` (query, string) 
+- `page` (query, integer) 
+- `size` (query, integer) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true,
+  "size": 0,
+  "content": [
+    {
+      "id": 0,
+      "userName": "string",
+      "fullName": "string",
+      "email": "string",
+      "phone": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "restaurants": [
+        {
+          "id": "string",
+          "name": "string",
+          "status": true,
+          "productCount": 0
+        }
+      ],
+      "active": true
+    }
+  ],
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": true,
+    "unsorted": true
+  },
+  "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "sorted": true,
+      "unsorted": true
+    },
+    "paged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "unpaged": true
+  },
+  "empty": true
+}
+```
+
+---
+
+## GET /api/admin/restaurant-owners/{id}
+
+### 1. Endpoint
+`GET /api/admin/restaurant-owners/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "userName": "string",
+  "fullName": "string",
+  "email": "string",
+  "phone": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "restaurants": [
+    {
+      "id": "string",
+      "name": "string",
+      "status": true,
+      "productCount": 0
+    }
+  ],
+  "active": true
+}
+```
+
+---
+
+## GET /api/admin/restaurant-owners/{id}/statistics
+
+### 1. Endpoint
+`GET /api/admin/restaurant-owners/{id}/statistics`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+- `fromDate` (query, string) 
+- `toDate` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "totalRevenue": 0,
+  "totalOrders": 0,
+  "avgOrderValue": 0,
+  "restaurants": [
+    {
+      "restaurantId": "string",
+      "name": "string",
+      "revenue": 0,
+      "orders": 0
+    }
+  ]
+}
+```
+
+---
+
+## GET /api/admin/restaurant-owners/{id}/restaurants
+
+### 1. Endpoint
+`GET /api/admin/restaurant-owners/{id}/restaurants`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": "string",
+    "name": "string",
+    "status": true,
+    "productCount": 0
+  }
+]
+```
+
+---
+
+## GET /api/admin/orders
+
+### 1. Endpoint
+`GET /api/admin/orders`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `size` (query, integer) 
+- `status` (query, string) 
+- `userId` (query, integer) 
+- `restaurantId` (query, string) 
+- `fromDate` (query, string) 
+- `toDate` (query, string) 
+- `search` (query, string) 
+- `sortBy` (query, string) 
+- `sortDir` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true,
+  "size": 0,
+  "content": [
+    {
+      "id": 0,
+      "userId": 0,
+      "userName": "string",
+      "fullName": "string",
+      "totalAmount": 0,
+      "status": "string",
+      "paymentMethod": "string",
+      "recipientName": "string",
+      "recipientPhone": "string",
+      "deliveryAddress": "string",
+      "note": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "updatedAt": "2023-10-10T10:10:10.000Z"
+    }
+  ],
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": true,
+    "unsorted": true
+  },
+  "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "sorted": true,
+      "unsorted": true
+    },
+    "paged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "unpaged": true
+  },
+  "empty": true
+}
+```
+
+---
+
+## GET /api/admin/orders/{id}
+
+### 1. Endpoint
+`GET /api/admin/orders/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "user": {
+    "id": 0,
+    "userName": "string",
+    "fullName": "string",
+    "phone": "string",
+    "email": "string"
+  },
+  "restaurant": {
+    "id": "string",
+    "name": "string",
+    "phone": "string",
+    "address": "string"
+  },
+  "items": [
+    {
+      "productId": 0,
+      "productName": "string",
+      "quantity": 0,
+      "priceAtTime": 0,
+      "subtotal": 0,
+      "image": "string"
+    }
+  ],
+  "totalAmount": 0,
+  "status": "string",
+  "statusHistory": [
+    {
+      "status": "string",
+      "updatedAt": "2023-10-10T10:10:10.000Z",
+      "updatedBy": "string"
+    }
+  ],
+  "payment": {
+    "method": "string",
+    "transactionId": 0,
+    "amount": 0,
+    "status": "string",
+    "paidAt": "2023-10-10T10:10:10.000Z"
+  },
+  "deliveryInfo": {
+    "recipientName": "string",
+    "recipientPhone": "string",
+    "deliveryAddress": "string",
+    "note": "string"
+  },
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "updatedAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## GET /api/admin/export/users
+
+### 1. Endpoint
+`GET /api/admin/export/users`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+"string"
+```
+
+---
+
+## GET /api/admin/export/transactions
+
+### 1. Endpoint
+`GET /api/admin/export/transactions`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+"string"
+```
+
+---
+
+## GET /api/admin/export/orders
+
+### 1. Endpoint
+`GET /api/admin/export/orders`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+"string"
+```
+
+---
+
+## GET /api/admin/dashboard/stats
+
+### 1. Endpoint
+`GET /api/admin/dashboard/stats`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "totalUsers": 0,
+  "newUsersToday": 0,
+  "totalWallets": 0,
+  "activeWallets": 0,
+  "totalTransactions": 0,
+  "transactionsToday": 0,
+  "totalRevenue": 0,
+  "revenueToday": 0,
+  "totalOrders": 0,
+  "ordersToday": 0
+}
+```
+
+---
+
+## GET /api/admin/dashboard/charts
+
+### 1. Endpoint
+`GET /api/admin/dashboard/charts`
+
+### 2. Request Body / Parameters
+- `period` (query, string) 
+- `startDate` (query, string) 
+- `endDate` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "revenue": [
+    {
+      "date": "string",
+      "value": 0
+    }
+  ],
+  "transactions": [
+    {
+      "date": "string",
+      "count": 0
+    }
+  ],
+  "newUsers": [
+    {
+      "date": "string",
+      "count": 0
+    }
+  ]
+}
+```
+
+---
+
+## GET /api/admin/categories/export
+
+**Summary:** Export categories to Excel
+
+### 1. Endpoint
+`GET /api/admin/categories/export`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+"string"
+```
+
+---
+
+## GET /api/admin/categories/check-name
+
+**Summary:** Check if category name exists
+
+### 1. Endpoint
+`GET /api/admin/categories/check-name`
+
+### 2. Request Body / Parameters
+- `name` (query, string) *(required)*
+- `excludeId` (query, integer) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "exists": true
+}
+```
+
+---
+
+## GET /api/admin/cards/{id}
+
+### 1. Endpoint
+`GET /api/admin/cards/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "userId": 0,
+  "userFullName": "string",
+  "bankCode": "string",
+  "bankName": "string",
+  "accountNumber": "string",
+  "accountName": "string",
+  "status": "string",
+  "createdAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## GET /api/admin/audit-logs
+
+### 1. Endpoint
+`GET /api/admin/audit-logs`
+
+### 2. Request Body / Parameters
+- `page` (query, integer) 
+- `size` (query, integer) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "totalElements": 0,
+  "totalPages": 0,
+  "first": true,
+  "last": true,
+  "size": 0,
+  "content": [
+    {
+      "id": 0,
+      "adminId": 0,
+      "adminName": "string",
+      "actionType": "string",
+      "targetType": "string",
+      "targetId": 0,
+      "reason": "string",
+      "metadata": "string",
+      "createdAt": "2023-10-10T10:10:10.000Z"
+    }
+  ],
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": true,
+    "unsorted": true
+  },
+  "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "sorted": true,
+      "unsorted": true
+    },
+    "paged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "unpaged": true
+  },
+  "empty": true
+}
+```
+
+---
+
+## GET /api/E-Wallet/deposits/wallet/{id}
+
+### 1. Endpoint
+`GET /api/E-Wallet/deposits/wallet/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "id": 0,
+  "balance": 0,
+  "availableBalance": 0
+}
+```
+
+---
+
+## GET /api/E-Wallet/deposits/wallet/{id}/recent-deposits
+
+### 1. Endpoint
+`GET /api/E-Wallet/deposits/wallet/{id}/recent-deposits`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "amount": 0,
+    "referenceId": "string",
+    "status": "string",
+    "createdAt": "2023-10-10T10:10:10.000Z"
+  }
+]
+```
+
+---
+
+## GET /api/E-Wallet/deposits/wallet-by-username/{userName}
+
+### 1. Endpoint
+`GET /api/E-Wallet/deposits/wallet-by-username/{userName}`
+
+### 2. Request Body / Parameters
+- `userName` (path, string) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "walletId": 0,
+  "balance": 0
+}
+```
+
+---
+
+## DELETE /api/face/{embeddingId}
+
+### 1. Endpoint
+`DELETE /api/face/{embeddingId}`
+
+### 2. Request Body / Parameters
+- `embeddingId` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
+```
+
+---
+
+## DELETE /api/cards/{id}
+
+### 1. Endpoint
+`DELETE /api/cards/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## DELETE /api/admin/users/{id}
+
+### 1. Endpoint
+`DELETE /api/admin/users/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "message": "string"
+}
+```
+
+---
+
+## DELETE /api/admin/reviews/{id}
+
+### 1. Endpoint
+`DELETE /api/admin/reviews/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+
+## DELETE /api/admin/qrcodes/{id}
+
+### 1. Endpoint
+`DELETE /api/admin/qrcodes/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
+
+---
+

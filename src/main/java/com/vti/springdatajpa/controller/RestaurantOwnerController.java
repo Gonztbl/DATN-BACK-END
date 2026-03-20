@@ -1,5 +1,6 @@
 package com.vti.springdatajpa.controller;
 
+import com.vti.springdatajpa.dto.*;
 import com.vti.springdatajpa.entity.Order;
 import com.vti.springdatajpa.entity.Product;
 import com.vti.springdatajpa.entity.Restaurant;
@@ -9,11 +10,13 @@ import com.vti.springdatajpa.repository.ProductRepository;
 import com.vti.springdatajpa.repository.RestaurantRepository;
 import com.vti.springdatajpa.repository.UserRepository;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,18 +47,134 @@ public class RestaurantOwnerController {
         this.userRepository = userRepository;
     }
 
+    // ==================== RESTAURANT MANAGEMENT ====================
+
+    @GetMapping("/my-restaurant")
+    public ResponseEntity<?> getMyRestaurant() {
+        User user = getCurrentUser();
+
+        // Check if role is RESTAURANT_OWNER
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            return roleForbiddenResponse();
+        }
+
+        List<Restaurant> restaurants = restaurantRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
+        
+        // Status 404 if no restaurant exists
+        if (restaurants.isEmpty()) {
+            return restaurantNotFoundResponse();
+        }
+
+        Restaurant restaurant = restaurants.get(0);
+        return ResponseEntity.ok(mapToMyRestaurantDTO(restaurant));
+    }
+
+    @GetMapping("/revenue")
+    public ResponseEntity<?> getRevenue(
+            @RequestParam(required = false, defaultValue = "today") String period,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate) {
+
+        User user = getCurrentUser();
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            return roleForbiddenResponse();
+        }
+
+        List<Restaurant> restaurants = restaurantRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
+        if (restaurants.isEmpty()) {
+            return restaurantNotFoundResponse();
+        }
+        Restaurant restaurant = restaurants.get(0);
+
+        LocalDateTime start;
+        LocalDateTime end = LocalDateTime.now();
+
+        try {
+            if (fromDate != null && !fromDate.isEmpty()) {
+                start = LocalDateTime.parse(fromDate);
+                if (toDate != null && !toDate.isEmpty()) {
+                    end = LocalDateTime.parse(toDate);
+                }
+            } else {
+                switch (period.toLowerCase()) {
+                    case "week":
+                        start = end.minusWeeks(1);
+                        break;
+                    case "month":
+                        start = end.minusMonths(1);
+                        break;
+                    case "today":
+                    default:
+                        start = end.toLocalDate().atStartOfDay();
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(
+                    400, "Bad Request", "Invalid date format or period", e.getMessage(), LocalDateTime.now().toString()
+            ));
+        }
+
+        BigDecimal revenue = orderRepository.sumTotalAmountByRestaurantIdAndCreatedAtBetween(
+                restaurant.getId(), start, end);
+        if (revenue == null) revenue = BigDecimal.ZERO;
+
+        long orderCount = orderRepository.countByRestaurantIdAndCreatedAtBetween(
+                restaurant.getId(), start, end);
+
+        return ResponseEntity.ok(RevenueResponseDTO.builder()
+                .revenue(revenue)
+                .orderCount(orderCount)
+                .period(period)
+                .build());
+    }
+
+    private MyRestaurantResponseDTO mapToMyRestaurantDTO(Restaurant restaurant) {
+        return MyRestaurantResponseDTO.builder()
+                .id(restaurant.getId())
+                .name(restaurant.getName())
+                .address(restaurant.getAddress())
+                .phone(restaurant.getPhone())
+                .email(restaurant.getEmail())
+                .description(restaurant.getDescription())
+                .logoBase64(restaurant.getLogoBase64())
+                .status(restaurant.getStatus() ? "OPEN" : "CLOSED")
+                .ownerId(restaurant.getOwnerId())
+                .createdAt(restaurant.getCreatedAt())
+                .categoryId(restaurant.getCategoryId())
+                .build();
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class ErrorResponse {
+        private int status;
+        private String error;
+        private String message;
+        private Object details;
+        private String timestamp;
+    }
+
     // ==================== ORDER MANAGEMENT ====================
 
     @GetMapping("/orders")
-    public ResponseEntity<OrdersResponse> getOrders(
+    public ResponseEntity<?> getOrders(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
 
-        Integer ownerId = getCurrentUserId();
-        Restaurant restaurant = getRestaurantByOwner(ownerId);
+        User user = getCurrentUser();
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            return roleForbiddenResponse();
+        }
+
+        List<Restaurant> restaurants = restaurantRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
+        if (restaurants.isEmpty()) {
+            return restaurantNotFoundResponse();
+        }
+        Restaurant restaurant = restaurants.get(0);
 
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(direction, sortBy));
@@ -182,7 +301,7 @@ public class RestaurantOwnerController {
     // ==================== PRODUCT MANAGEMENT ====================
 
     @GetMapping("/products")
-    public ResponseEntity<ProductsResponse> getProducts(
+    public ResponseEntity<?> getProducts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit,
             @RequestParam(required = false) String search,
@@ -190,8 +309,16 @@ public class RestaurantOwnerController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir) {
 
-        Integer ownerId = getCurrentUserId();
-        Restaurant restaurant = getRestaurantByOwner(ownerId);
+        User user = getCurrentUser();
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            return roleForbiddenResponse();
+        }
+
+        List<Restaurant> restaurants = restaurantRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
+        if (restaurants.isEmpty()) {
+            return restaurantNotFoundResponse();
+        }
+        Restaurant restaurant = restaurants.get(0);
 
         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(direction, sortBy));
@@ -221,9 +348,17 @@ public class RestaurantOwnerController {
     }
 
     @GetMapping("/products/{id}")
-    public ResponseEntity<ProductDTO> getProductDetail(@PathVariable Integer id) {
-        Integer ownerId = getCurrentUserId();
-        Restaurant restaurant = getRestaurantByOwner(ownerId);
+    public ResponseEntity<?> getProductDetail(@PathVariable Integer id) {
+        User user = getCurrentUser();
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            return roleForbiddenResponse();
+        }
+
+        List<Restaurant> restaurants = restaurantRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
+        if (restaurants.isEmpty()) {
+            return restaurantNotFoundResponse();
+        }
+        Restaurant restaurant = restaurants.get(0);
 
         Product product = productRepository.findByIdAndRestaurantIdAndDeletedAtIsNull(id, restaurant.getId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -232,9 +367,17 @@ public class RestaurantOwnerController {
     }
 
     @PostMapping("/products")
-    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody CreateProductRequest request) {
-        Integer ownerId = getCurrentUserId();
-        Restaurant restaurant = getRestaurantByOwner(ownerId);
+    public ResponseEntity<?> createProduct(@Valid @RequestBody CreateProductRequest request) {
+        User user = getCurrentUser();
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            return roleForbiddenResponse();
+        }
+
+        List<Restaurant> restaurants = restaurantRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
+        if (restaurants.isEmpty()) {
+            return restaurantNotFoundResponse();
+        }
+        Restaurant restaurant = restaurants.get(0);
 
         Product product = new Product();
         product.setName(request.getName());
@@ -243,19 +386,33 @@ public class RestaurantOwnerController {
         product.setImageBase64(request.getImageBase64());
         product.setCategoryId(request.getCategoryId());
         product.setRestaurantId(restaurant.getId());
-        product.setStatus(request.getStatus() != null ? request.getStatus() : "available");
+        String status = request.getStatus();
+        if (status == null || status.isBlank()) {
+            status = "available";
+        } else {
+            status = status.toLowerCase();
+        }
+        product.setStatus(status);
 
         Product saved = productRepository.save(product);
         return ResponseEntity.ok(mapToProductDTO(saved));
     }
 
     @PutMapping("/products/{id}")
-    public ResponseEntity<ProductDTO> updateProduct(
+    public ResponseEntity<?> updateProduct(
             @PathVariable Integer id,
             @Valid @RequestBody UpdateProductRequest request) {
 
-        Integer ownerId = getCurrentUserId();
-        Restaurant restaurant = getRestaurantByOwner(ownerId);
+        User user = getCurrentUser();
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            return roleForbiddenResponse();
+        }
+
+        List<Restaurant> restaurants = restaurantRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
+        if (restaurants.isEmpty()) {
+            return restaurantNotFoundResponse();
+        }
+        Restaurant restaurant = restaurants.get(0);
 
         Product product = productRepository.findByIdAndRestaurantIdAndDeletedAtIsNull(id, restaurant.getId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -267,18 +424,57 @@ public class RestaurantOwnerController {
             product.setImageBase64(request.getImageBase64());
         }
         product.setCategoryId(request.getCategoryId());
-        if (request.getStatus() != null) {
-            product.setStatus(request.getStatus());
+        if (request.getStatus() != null && !request.getStatus().isBlank()) {
+            product.setStatus(request.getStatus().toLowerCase());
+        } else if (product.getStatus() == null || product.getStatus().isBlank()) {
+            product.setStatus("available");
         }
 
         Product saved = productRepository.save(product);
         return ResponseEntity.ok(mapToProductDTO(saved));
     }
 
+    @PutMapping("/products/{id}/status")
+    public ResponseEntity<?> updateProductStatus(
+            @PathVariable Integer id,
+            @RequestBody java.util.Map<String, String> body) {
+
+        User user = getCurrentUser();
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            return roleForbiddenResponse();
+        }
+
+        List<Restaurant> restaurants = restaurantRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
+        if (restaurants.isEmpty()) {
+            return restaurantNotFoundResponse();
+        }
+        Restaurant restaurant = restaurants.get(0);
+
+        Product product = productRepository.findByIdAndRestaurantIdAndDeletedAtIsNull(id, restaurant.getId())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        String status = body.get("status");
+        if (status == null || status.isBlank()) {
+            return ResponseEntity.badRequest().body("Status is required");
+        }
+
+        product.setStatus(status.toLowerCase());
+        Product saved = productRepository.save(product);
+        return ResponseEntity.ok(mapToProductDTO(saved));
+    }
+
     @DeleteMapping("/products/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
-        Integer ownerId = getCurrentUserId();
-        Restaurant restaurant = getRestaurantByOwner(ownerId);
+    public ResponseEntity<?> deleteProduct(@PathVariable Integer id) {
+        User user = getCurrentUser();
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            return roleForbiddenResponse();
+        }
+
+        List<Restaurant> restaurants = restaurantRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
+        if (restaurants.isEmpty()) {
+            return restaurantNotFoundResponse();
+        }
+        Restaurant restaurant = restaurants.get(0);
 
         Product product = productRepository.findByIdAndRestaurantIdAndDeletedAtIsNull(id, restaurant.getId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -292,11 +488,19 @@ public class RestaurantOwnerController {
     // ==================== RESTAURANT STATUS ====================
 
     @PutMapping("/restaurant/status")
-    public ResponseEntity<RestaurantStatusResponse> updateRestaurantStatus(
+    public ResponseEntity<?> updateRestaurantStatus(
             @Valid @RequestBody UpdateRestaurantStatusRequest request) {
 
-        Integer ownerId = getCurrentUserId();
-        Restaurant restaurant = getRestaurantByOwner(ownerId);
+        User user = getCurrentUser();
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            return roleForbiddenResponse();
+        }
+
+        List<Restaurant> restaurants = restaurantRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
+        if (restaurants.isEmpty()) {
+            return restaurantNotFoundResponse();
+        }
+        Restaurant restaurant = restaurants.get(0);
 
         restaurant.setStatus(request.getIsOpen());
         restaurantRepository.save(restaurant);
@@ -311,12 +515,41 @@ public class RestaurantOwnerController {
 
     // ==================== HELPER METHODS ====================
 
-    private Integer getCurrentUserId() {
+    private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        
+        if (principal instanceof User) {
+            return (User) principal;
+        }
+        
         String username = authentication.getName();
-        User user = userRepository.findByUserName(username)
+        return userRepository.findByUserName(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return user.getId();
+    }
+
+    private ResponseEntity<ErrorResponse> roleForbiddenResponse() {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(
+                403,
+                "Forbidden",
+                "You do not have RESTAURANT_OWNER role",
+                null,
+                LocalDateTime.now().toString()
+        ));
+    }
+
+    private ResponseEntity<ErrorResponse> restaurantNotFoundResponse() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
+                404,
+                "Not Found",
+                "You do not own any restaurant yet",
+                null,
+                LocalDateTime.now().toString()
+        ));
+    }
+
+    private Integer getCurrentUserId() {
+        return getCurrentUser().getId();
     }
 
     private Restaurant getRestaurantByOwner(Integer ownerId) {

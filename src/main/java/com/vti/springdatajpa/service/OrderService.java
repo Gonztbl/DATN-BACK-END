@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
+import com.vti.springdatajpa.dto.OrderRequestDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,8 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final TransactionRepository transactionRepository;
+    private final ProductRepository productRepository;
+    private final OrderItemRepository orderItemRepository;
 
     /**
      * Get paginated orders for user with optional status filter
@@ -317,6 +321,88 @@ public class OrderService {
         response.setDeliveryLocation(location);
 
         return response;
+    }
+
+    /**
+     * Create a new order
+     */
+    @Transactional
+    public OrderResponseDTO createOrder(OrderRequestDTO request, Integer userId) {
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new RuntimeException("Order must have at least one item");
+        }
+
+        // Calculate total and validate products
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        String restaurantId = null;
+        
+        List<OrderItem> orderItems = new ArrayList<>();
+
+        for (OrderRequestDTO.OrderItemRequestDTO itemReq : request.getItems()) {
+            Integer prodId = Integer.parseInt(itemReq.getProductId());
+            Product product = productRepository.findByIdAndDeletedAtIsNull(prodId)
+                    .orElseThrow(() -> new RuntimeException("Product not found: " + prodId));
+
+            // 1. Check if product is available (status must be "available" - case insensitive)
+            String productStatus = product.getStatus();
+            boolean isProductAvailable = productStatus == null || 
+                                       productStatus.isBlank() || 
+                                       "available".equalsIgnoreCase(productStatus);
+            
+            if (!isProductAvailable) {
+                throw new RuntimeException("Product is not available: " + product.getName());
+            }
+
+            // 2. Check if restaurant is active and not deleted
+            Restaurant restaurant = product.getRestaurant();
+            if (restaurant == null || (restaurant.getStatus() != null && !restaurant.getStatus()) || restaurant.getDeletedAt() != null) {
+                throw new RuntimeException("Restaurant is currently unavailable: " + 
+                    (restaurant != null ? restaurant.getName() : "Unknown"));
+            }
+
+            // Validate or set restaurantId
+            if (restaurantId == null) {
+                restaurantId = product.getRestaurantId();
+                // If request provides restaurantId, validate it matches
+                if (request.getRestaurantId() != null && !request.getRestaurantId().equals(restaurantId)) {
+                    throw new RuntimeException("Product does not belong to the specified restaurant: " + product.getName());
+                }
+            } else if (!restaurantId.equals(product.getRestaurantId())) {
+                throw new RuntimeException("All products in one order must be from the same restaurant");
+            }
+
+            BigDecimal itemPrice = product.getPrice();
+            BigDecimal subtotal = itemPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+            totalAmount = totalAmount.add(subtotal);
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProductId(prodId);
+            orderItem.setQuantity(itemReq.getQuantity());
+            orderItem.setPriceAtTime(itemPrice); // Use DB price for security
+            orderItem.setNote(request.getNote());
+            orderItems.add(orderItem);
+        }
+
+        Order order = new Order();
+        order.setUserId(userId);
+        order.setTotalAmount(totalAmount);
+        order.setStatus(Order.OrderStatus.PENDING);
+        order.setDeliveryAddress(request.getDeliveryAddress());
+        order.setRecipientName(request.getRecipientName());
+        order.setRecipientPhone(request.getRecipientPhone());
+        order.setNote(request.getNote());
+        order.setPaymentMethod(request.getPaymentMethod());
+        order.setRestaurantId(restaurantId);
+
+        Order savedOrder = orderRepository.save(order);
+
+        // Associate items with the saved order and save them
+        for (OrderItem item : orderItems) {
+            item.setOrderId(savedOrder.getId());
+            orderItemRepository.save(item);
+        }
+
+        return getOrderDetail(savedOrder.getId(), userId);
     }
 
     // DTO classes for responses

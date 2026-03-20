@@ -11,6 +11,8 @@ public class AdminOrderResponseDTO {
     private Integer userId;
     private String userName;
     private String fullName;
+    private String restaurantId;
+    private String restaurantName;
     private BigDecimal totalAmount;
     private String status;
     private String paymentMethod;

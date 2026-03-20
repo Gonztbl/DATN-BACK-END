@@ -167,6 +167,15 @@ public class ProductService {
         System.out.println("Product deleted successfully with ID: " + id);
     }
 
+    public ProductDetailDTO updateProductStatus(Integer id, String status) {
+        Product product = productRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+        
+        product.setStatus(status.toLowerCase());
+        Product savedProduct = productRepository.save(product);
+        return convertToDetailDTO(savedProduct);
+    }
+
     private ProductDetailDTO convertToDetailDTO(Product product) {
         ProductDetailDTO dto = modelMapper.map(product, ProductDetailDTO.class);
 

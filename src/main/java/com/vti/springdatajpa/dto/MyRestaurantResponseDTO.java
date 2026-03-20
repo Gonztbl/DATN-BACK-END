@@ -1,0 +1,26 @@
+package com.vti.springdatajpa.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class MyRestaurantResponseDTO {
+    private String id;
+    private String name;
+    private String address;
+    private String phone;
+    private String email;
+    private String description;
+    private String logoBase64;
+    private String status;           // OPEN / CLOSED / PENDING
+    private Integer ownerId;
+    private LocalDateTime createdAt;
+    private Integer categoryId;
+}

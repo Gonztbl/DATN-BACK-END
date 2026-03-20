@@ -66,6 +66,16 @@ public class OrderController {
     }
 
     /**
+     * POST /api/orders - Create a new order
+     */
+    @PostMapping
+    public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody com.vti.springdatajpa.dto.OrderRequestDTO request) {
+        Integer userId = getCurrentUserId();
+        OrderResponseDTO order = orderService.createOrder(request, userId);
+        return ResponseEntity.status(201).body(order);
+    }
+
+    /**
      * GET /api/orders/{id} - Get order detail by ID
      */
     @GetMapping("/{id}")

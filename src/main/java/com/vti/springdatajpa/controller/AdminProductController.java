@@ -63,6 +63,20 @@ public class AdminProductController {
         return ResponseEntity.ok(updatedProduct);
     }
 
+    @PutMapping("/{id}/status")
+    @Operation(summary = "Update product status", description = "Update the active status of a product")
+    public ResponseEntity<ProductDetailDTO> updateProductStatus(
+            @Parameter(description = "Product ID") @PathVariable Integer id,
+            @Parameter(description = "Status update payload") @RequestBody java.util.Map<String, String> body) {
+        
+        String status = body.get("status");
+        if (status == null || status.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        ProductDetailDTO updatedProduct = productService.updateProductStatus(id, status);
+        return ResponseEntity.ok(updatedProduct);
+    }
+
     @DeleteMapping(value = "/{id}")
     @Operation(summary = "Delete product", description = "Delete a product (soft delete)")
     public ResponseEntity<Void> deleteProduct(

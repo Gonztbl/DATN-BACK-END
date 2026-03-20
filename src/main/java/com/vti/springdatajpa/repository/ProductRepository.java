@@ -4,9 +4,11 @@ import com.vti.springdatajpa.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,4 +61,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Page<Product> findByRestaurantIdAndStatusAndDeletedAtIsNull(String restaurantId, String status, Pageable pageable);
 
     Optional<Product> findByIdAndRestaurantIdAndDeletedAtIsNull(Integer id, String restaurantId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Product p SET p.deletedAt = CURRENT_TIMESTAMP WHERE p.restaurantId = :restaurantId AND p.deletedAt IS NULL")
+    void softDeleteByRestaurantId(@Param("restaurantId") String restaurantId);
 }

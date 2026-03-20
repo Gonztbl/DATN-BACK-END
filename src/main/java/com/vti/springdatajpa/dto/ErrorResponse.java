@@ -10,18 +10,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ErrorResponse {
-    private String message;
     private int status;
-    private LocalDateTime timestamp;
+    private String error;
+    private String message;
+    private String details;
+    private java.time.LocalDateTime timestamp;
 
-    public ErrorResponse(String message, int status) {
-        this.message = message;
+    public ErrorResponse(int status, String error, String message, String details) {
         this.status = status;
-        this.timestamp = LocalDateTime.now();
-    }
-
-    public ErrorResponse(String message) {
+        this.error = error;
         this.message = message;
-        this.timestamp = LocalDateTime.now();
+        this.details = details;
+        this.timestamp = java.time.LocalDateTime.now();
     }
 }

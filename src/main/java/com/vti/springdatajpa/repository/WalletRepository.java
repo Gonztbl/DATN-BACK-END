@@ -3,6 +3,7 @@ package com.vti.springdatajpa.repository;
 import com.vti.springdatajpa.dto.WalletSelectDTO;
 import com.vti.springdatajpa.entity.Wallet;
 import jakarta.persistence.LockModeType;
+import com.vti.springdatajpa.entity.enums.WalletStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -46,4 +47,5 @@ public interface WalletRepository extends JpaRepository<Wallet, Integer> {
             @Param("phone") String phone
     );
 
+    long countByStatus(WalletStatus status);
 }

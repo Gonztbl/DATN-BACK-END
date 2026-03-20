@@ -108,6 +108,16 @@ public class AdminOrderController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * DELETE /api/admin/orders/{id} - Delete order (admin only)
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Integer id) {
+        verifyAdminAccess();
+        adminOrderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
+    }
+
     private void verifyAdminAccess() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String identity;

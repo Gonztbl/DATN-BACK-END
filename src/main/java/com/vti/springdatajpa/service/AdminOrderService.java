@@ -142,6 +142,18 @@ public class AdminOrderService {
         return response;
     }
 
+    /**
+     * Delete order (admin)
+     */
+    @Transactional
+    public void deleteOrder(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        
+        // Cascade deletion of OrderItems is handled by JPA (cascade = CascadeType.ALL)
+        orderRepository.delete(order);
+    }
+
     private AdminOrderResponseDTO mapToAdminOrderResponseDTO(Order order) {
         AdminOrderResponseDTO dto = new AdminOrderResponseDTO();
         dto.setId(order.getId());
@@ -160,6 +172,14 @@ public class AdminOrderService {
         if (order.getUser() != null) {
             dto.setUserName(order.getUser().getUserName());
             dto.setFullName(order.getUser().getFullName());
+        }
+
+        // Set restaurant info if available
+        if (order.getRestaurant() != null) {
+            dto.setRestaurantId(order.getRestaurant().getId());
+            dto.setRestaurantName(order.getRestaurant().getName());
+        } else if (order.getRestaurantId() != null) {
+            dto.setRestaurantId(order.getRestaurantId());
         }
 
         return dto;

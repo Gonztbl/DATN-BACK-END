@@ -2,7 +2,11 @@ package com.vti.springdatajpa.service;
 
 import com.vti.springdatajpa.dto.*;
 import com.vti.springdatajpa.entity.Restaurant;
+import com.vti.springdatajpa.entity.User;
+import com.vti.springdatajpa.entity.enums.Role;
+import com.vti.springdatajpa.repository.ProductRepository;
 import com.vti.springdatajpa.repository.RestaurantRepository;
+import com.vti.springdatajpa.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -24,6 +28,8 @@ import java.util.stream.Collectors;
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
     public RestaurantPageResponseDTO getRestaurants(int page, int limit, String search, Boolean status, String sortBy, String sortDir) {
@@ -75,14 +81,26 @@ public class RestaurantService {
     }
 
     public RestaurantDetailDTO createRestaurant(RestaurantCreateRequestDTO request) {
+        // Find user by userId
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
+                
+        // Verify user has RESTAURANT_OWNER role
+        if (user.getRole() != Role.RESTAURANT_OWNER) {
+            throw new RuntimeException("User does not have RESTAURANT_OWNER role");
+        }
+        
         // Check if name already exists
         if (restaurantRepository.existsByNameAndDeletedAtIsNull(request.getName())) {
             throw new RuntimeException("Restaurant name already exists: " + request.getName());
         }
         
         Restaurant restaurant = modelMapper.map(request, Restaurant.class);
+        restaurant.setOwnerId(user.getId());
         restaurant.setProductCount(0);
         restaurant.setDeletedAt(null);
+        restaurant.setDescription(request.getDescription());
+        restaurant.setCategoryId(request.getCategoryId());
         
         Restaurant savedRestaurant = restaurantRepository.save(restaurant);
         
@@ -117,6 +135,12 @@ public class RestaurantService {
         if (request.getStatus() != null) {
             restaurant.setStatus(request.getStatus());
         }
+        if (request.getDescription() != null) {
+            restaurant.setDescription(request.getDescription());
+        }
+        if (request.getCategoryId() != null) {
+            restaurant.setCategoryId(request.getCategoryId());
+        }
         
         Restaurant updatedRestaurant = restaurantRepository.save(restaurant);
         
@@ -127,10 +151,8 @@ public class RestaurantService {
         Restaurant restaurant = restaurantRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found with id: " + id));
         
-        // Check if restaurant has products
-        if (restaurantRepository.hasProducts(id)) {
-            throw new RuntimeException("Cannot delete restaurant because it has associated products");
-        }
+        // Soft delete all associated products
+        productRepository.softDeleteByRestaurantId(id);
         
         // Soft delete
         restaurant.setDeletedAt(LocalDateTime.now());
