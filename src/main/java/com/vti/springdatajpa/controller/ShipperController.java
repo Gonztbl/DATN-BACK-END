@@ -65,13 +65,7 @@ public class ShipperController {
                 }
             } else {
                 // Get available orders (READY_FOR_PICKUP with no shipper)
-                List<Order> availableOrders = orderRepository.findByStatusAndShipperIdIsNull(Order.OrderStatus.READY_FOR_PICKUP);
-                // Convert to Page
-                ordersPage = new org.springframework.data.domain.PageImpl<>(
-                        availableOrders.subList(0, Math.min(limit, availableOrders.size())),
-                        pageable,
-                        availableOrders.size()
-                );
+                ordersPage = orderRepository.findByStatusAndShipperIdIsNull(Order.OrderStatus.READY_FOR_PICKUP, pageable);
             }
         } else {
             // Default: get assigned orders
@@ -234,10 +228,19 @@ public class ShipperController {
 
     private Integer getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof User) {
+            return ((User) principal).getId();
+        }
+
         String username = authentication.getName();
-        User user = userRepository.findByUserName(username)
+        return userRepository.findByUserName(username)
+                .map(User::getId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return user.getId();
     }
 
     private ShipperOrderDTO mapToShipperOrderDTO(Order order) {
@@ -265,6 +268,9 @@ public class ShipperController {
         dto.setStatus(order.getStatus().name());
         dto.setPaymentMethod(order.getPaymentMethod());
         dto.setCreatedAt(order.getCreatedAt());
+        dto.setReadyAt(order.getReadyAt());
+        dto.setPickedUpAt(order.getPickedUpAt());
+        dto.setDeliveredAt(order.getDeliveredAt());
 
         return dto;
     }
@@ -318,6 +324,9 @@ public class ShipperController {
         dto.setNote(order.getNote());
         dto.setStatus(order.getStatus().name());
         dto.setCreatedAt(order.getCreatedAt());
+        dto.setReadyAt(order.getReadyAt());
+        dto.setPickedUpAt(order.getPickedUpAt());
+        dto.setDeliveredAt(order.getDeliveredAt());
 
         return dto;
     }
@@ -343,6 +352,9 @@ public class ShipperController {
         private String status;
         private String paymentMethod;
         private LocalDateTime createdAt;
+        private LocalDateTime readyAt;
+        private LocalDateTime pickedUpAt;
+        private LocalDateTime deliveredAt;
     }
 
     @Data
@@ -358,6 +370,9 @@ public class ShipperController {
         private String note;
         private String status;
         private LocalDateTime createdAt;
+        private LocalDateTime readyAt;
+        private LocalDateTime pickedUpAt;
+        private LocalDateTime deliveredAt;
     }
 
     @Data

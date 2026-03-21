@@ -23,7 +23,7 @@ public class AdminShipperController {
     private final AdminShipperService adminShipperService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<org.springframework.data.domain.Page<ShipperDetailDTO>> getShippers(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Boolean isOnline,
@@ -34,13 +34,13 @@ public class AdminShipperController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<ShipperDetailDTO> getShipperDetail(@PathVariable Integer id) {
         return ResponseEntity.ok(adminShipperService.getShipperDetail(id));
     }
 
     @GetMapping("/{id}/orders")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<Page<Order>> getShipperOrders(
             @PathVariable Integer id,
             @RequestParam(required = false) String status,
@@ -54,7 +54,7 @@ public class AdminShipperController {
     }
 
     @GetMapping("/{id}/statistics")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<ShipperStatisticsDTO> getShipperStatistics(
             @PathVariable Integer id,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
@@ -63,14 +63,14 @@ public class AdminShipperController {
     }
 
     @PutMapping("/{id}/lock")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> lockShipper(@PathVariable Integer id) {
         adminShipperService.lockShipper(id);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/unlock")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> unlockShipper(@PathVariable Integer id) {
         adminShipperService.unlockShipper(id);
         return ResponseEntity.ok().build();

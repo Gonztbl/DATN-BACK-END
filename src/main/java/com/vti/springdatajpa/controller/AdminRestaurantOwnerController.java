@@ -20,7 +20,7 @@ public class AdminRestaurantOwnerController {
     private final AdminRestaurantOwnerService adminRestaurantOwnerService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<org.springframework.data.domain.Page<RestaurantOwnerDetailDTO>> getRestaurantOwners(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
@@ -30,19 +30,19 @@ public class AdminRestaurantOwnerController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<RestaurantOwnerDetailDTO> getOwnerDetail(@PathVariable Integer id) {
         return ResponseEntity.ok(adminRestaurantOwnerService.getOwnerDetail(id));
     }
 
     @GetMapping("/{id}/restaurants")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<List<RestaurantOwnerDetailDTO.RestaurantOverviewDTO>> getOwnerRestaurants(@PathVariable Integer id) {
         return ResponseEntity.ok(adminRestaurantOwnerService.getOwnerRestaurants(id));
     }
 
     @GetMapping("/{id}/statistics")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<OwnerStatisticsDTO> getOwnerStatistics(
             @PathVariable Integer id,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
@@ -51,14 +51,14 @@ public class AdminRestaurantOwnerController {
     }
 
     @PutMapping("/{id}/lock")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> lockOwner(@PathVariable Integer id) {
         adminRestaurantOwnerService.lockRestaurantOwner(id);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/unlock")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> unlockOwner(@PathVariable Integer id) {
         adminRestaurantOwnerService.unlockRestaurantOwner(id);
         return ResponseEntity.ok().build();

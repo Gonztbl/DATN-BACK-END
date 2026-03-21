@@ -53,6 +53,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/products/**").permitAll()
 
                         // Admin-only endpoints (general rule AFTER specific rules)
+                        .requestMatchers("/api/admin/shippers/**").hasAnyRole("ADMIN", "SUPPORT")
+                        .requestMatchers("/api/admin/restaurant-owners/**").hasAnyRole("ADMIN", "SUPPORT")
+                        .requestMatchers("/api/admin/dashboard/**").hasAnyRole("ADMIN", "SUPPORT")
+                        .requestMatchers("/api/admin/support-tickets/**").hasAnyRole("ADMIN", "SUPPORT")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // Restaurant Owner endpoints

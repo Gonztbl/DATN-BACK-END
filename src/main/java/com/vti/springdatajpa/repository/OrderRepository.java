@@ -37,6 +37,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     Page<Order> findByShipperIdAndStatus(Integer shipperId, Order.OrderStatus status, Pageable pageable);
 
     List<Order> findByStatusAndShipperIdIsNull(Order.OrderStatus status);
+    Page<Order> findByStatusAndShipperIdIsNull(Order.OrderStatus status, Pageable pageable);
 
     Optional<Order> findByIdAndShipperId(Integer id, Integer shipperId);
 

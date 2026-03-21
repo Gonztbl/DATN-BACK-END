@@ -17,13 +17,13 @@ public class AdminSettingsController {
     private final AdminSettingsService adminSettingsService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SystemConfigDTO>> getSettings() {
         return ResponseEntity.ok(adminSettingsService.getAllSettings());
     }
 
     @PutMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SystemConfigDTO>> updateSettings(@RequestBody List<SystemConfigDTO> settings) {
         return ResponseEntity.ok(adminSettingsService.updateSettings(settings));
     }

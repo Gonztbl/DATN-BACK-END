@@ -18,7 +18,7 @@ public class AdminExportController {
     private final AdminExportService adminExportService;
 
     @GetMapping("/users")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> exportUsers() {
         byte[] csvData = adminExportService.exportUsersToCsv();
         return ResponseEntity.ok()
@@ -38,7 +38,7 @@ public class AdminExportController {
     }
 
     @GetMapping("/orders")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> exportOrders() {
         byte[] csvData = adminExportService.exportOrdersToCsv();
         return ResponseEntity.ok()

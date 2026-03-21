@@ -452,11 +452,7 @@
 **Status 200**: OK
 
 ```json
-{
-  "restaurantId": "string",
-  "isOpen": true,
-  "updatedAt": "2023-10-10T10:10:10.000Z"
-}
+{}
 ```
 
 ---
@@ -485,16 +481,7 @@
 **Status 200**: OK
 
 ```json
-{
-  "id": 0,
-  "name": "string",
-  "description": "string",
-  "price": 0,
-  "imageBase64": "string",
-  "categoryId": 0,
-  "status": "string",
-  "createdAt": "2023-10-10T10:10:10.000Z"
-}
+{}
 ```
 
 ---
@@ -532,16 +519,7 @@
 **Status 200**: OK
 
 ```json
-{
-  "id": 0,
-  "name": "string",
-  "description": "string",
-  "price": 0,
-  "imageBase64": "string",
-  "categoryId": 0,
-  "status": "string",
-  "createdAt": "2023-10-10T10:10:10.000Z"
-}
+{}
 ```
 
 ---
@@ -569,7 +547,40 @@
 
 **Status 200**: OK
 
-`No JSON response body`
+```json
+{}
+```
+
+---
+
+## PUT /api/restaurant-owner/products/{id}/status
+
+### 1. Endpoint
+`PUT /api/restaurant-owner/products/{id}/status`
+
+### 2. Request Body / Parameters
+```json
+{}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
+```
 
 ---
 
@@ -1146,7 +1157,9 @@
   "email": "string",
   "address": "string",
   "logoBase64": "string",
-  "status": true
+  "status": true,
+  "description": "string",
+  "categoryId": 0
 }
 ```
 
@@ -2038,6 +2051,18 @@
 {
   "totalElements": 0,
   "totalPages": 0,
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 0,
+    "paged": true,
+    "unpaged": true,
+    "offset": 0,
+    "sort": {
+      "unsorted": true,
+      "sorted": true,
+      "empty": true
+    }
+  },
   "first": true,
   "last": true,
   "size": 0,
@@ -2055,23 +2080,11 @@
   ],
   "number": 0,
   "sort": {
-    "empty": true,
+    "unsorted": true,
     "sorted": true,
-    "unsorted": true
+    "empty": true
   },
   "numberOfElements": 0,
-  "pageable": {
-    "offset": 0,
-    "sort": {
-      "empty": true,
-      "sorted": true,
-      "unsorted": true
-    },
-    "paged": true,
-    "pageSize": 0,
-    "pageNumber": 0,
-    "unpaged": true
-  },
   "empty": true
 }
 ```
@@ -2216,26 +2229,7 @@
 **Status 200**: OK
 
 ```json
-{
-  "data": [
-    {
-      "id": 0,
-      "name": "string",
-      "description": "string",
-      "price": 0,
-      "imageBase64": "string",
-      "categoryId": 0,
-      "status": "string",
-      "createdAt": "2023-10-10T10:10:10.000Z"
-    }
-  ],
-  "pagination": {
-    "total": 0,
-    "page": 0,
-    "limit": 0,
-    "totalPages": 0
-  }
-}
+{}
 ```
 
 ---
@@ -2273,16 +2267,7 @@
 **Status 200**: OK
 
 ```json
-{
-  "id": 0,
-  "name": "string",
-  "description": "string",
-  "price": 0,
-  "imageBase64": "string",
-  "categoryId": 0,
-  "status": "string",
-  "createdAt": "2023-10-10T10:10:10.000Z"
-}
+{}
 ```
 
 ---
@@ -2524,6 +2509,18 @@
 {
   "totalElements": 0,
   "totalPages": 0,
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 0,
+    "paged": true,
+    "unpaged": true,
+    "offset": 0,
+    "sort": {
+      "unsorted": true,
+      "sorted": true,
+      "empty": true
+    }
+  },
   "first": true,
   "last": true,
   "size": 0,
@@ -2550,6 +2547,11 @@
           "subtotal": 0
         }
       ],
+      "restaurant": {
+        "id": "string",
+        "name": "string",
+        "logoBase64": "string"
+      },
       "paymentHistory": [
         {
           "transactionId": 0,
@@ -2571,23 +2573,11 @@
   ],
   "number": 0,
   "sort": {
-    "empty": true,
+    "unsorted": true,
     "sorted": true,
-    "unsorted": true
+    "empty": true
   },
   "numberOfElements": 0,
-  "pageable": {
-    "offset": 0,
-    "sort": {
-      "empty": true,
-      "sorted": true,
-      "unsorted": true
-    },
-    "paged": true,
-    "pageSize": 0,
-    "pageNumber": 0,
-    "unpaged": true
-  },
   "empty": true
 }
 ```
@@ -2658,6 +2648,11 @@
       "subtotal": 0
     }
   ],
+  "restaurant": {
+    "id": "string",
+    "name": "string",
+    "logoBase64": "string"
+  },
   "paymentHistory": [
     {
       "transactionId": 0,
@@ -3560,7 +3555,10 @@
   "email": "string",
   "address": "string",
   "logoBase64": "string",
-  "status": true
+  "status": true,
+  "description": "string",
+  "categoryId": 0,
+  "userId": 0
 }
 ```
 
@@ -4361,6 +4359,8 @@
           "updatedAt": "2023-10-10T10:10:10.000Z",
           "deletedAt": "2023-10-10T10:10:10.000Z",
           "ownerId": 0,
+          "description": "string",
+          "categoryId": 0,
           "products": [
             "Circular reference: Product"
           ]
@@ -4419,8 +4419,8 @@
               },
               "avatarUrl": "string",
               "membership": "string",
-              "active": true,
-              "verified": true
+              "verified": true,
+              "active": true
             },
             "product": "Circular reference: Product"
           }
@@ -4575,6 +4575,37 @@
 
 ---
 
+## GET /api/restaurant-owner/revenue
+
+### 1. Endpoint
+`GET /api/restaurant-owner/revenue`
+
+### 2. Request Body / Parameters
+- `period` (query, string) 
+- `fromDate` (query, string) 
+- `toDate` (query, string) 
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
+```
+
+---
+
 ## GET /api/restaurant-owner/orders
 
 ### 1. Endpoint
@@ -4603,37 +4634,7 @@
 **Status 200**: OK
 
 ```json
-{
-  "data": [
-    {
-      "id": 0,
-      "orderCode": "string",
-      "userId": 0,
-      "customerName": "string",
-      "customerPhone": "string",
-      "totalAmount": 0,
-      "status": "string",
-      "paymentMethod": "string",
-      "createdAt": "2023-10-10T10:10:10.000Z",
-      "items": [
-        {
-          "productId": 0,
-          "productName": "string",
-          "productImage": "string",
-          "quantity": 0,
-          "priceAtTime": 0,
-          "subtotal": 0
-        }
-      ]
-    }
-  ],
-  "pagination": {
-    "total": 0,
-    "page": 0,
-    "limit": 0,
-    "totalPages": 0
-  }
-}
+{}
 ```
 
 ---
@@ -4686,6 +4687,35 @@
     }
   ]
 }
+```
+
+---
+
+## GET /api/restaurant-owner/my-restaurant
+
+### 1. Endpoint
+`GET /api/restaurant-owner/my-restaurant`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{}
 ```
 
 ---
@@ -4921,6 +4951,11 @@
       "subtotal": 0
     }
   ],
+  "restaurant": {
+    "id": "string",
+    "name": "string",
+    "logoBase64": "string"
+  },
   "paymentHistory": [
     {
       "transactionId": 0,
@@ -5164,6 +5199,46 @@
     "id": 0,
     "name": "string",
     "avatarUrl": "string"
+  }
+]
+```
+
+---
+
+## GET /api/categories
+
+**Summary:** Get all categories
+
+### 1. Endpoint
+`GET /api/categories`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+[
+  {
+    "id": 0,
+    "name": "string",
+    "icon": "string",
+    "orderIndex": 0,
+    "createdAt": "2023-10-10T10:10:10.000Z",
+    "updatedAt": "2023-10-10T10:10:10.000Z"
   }
 ]
 ```
@@ -5509,6 +5584,18 @@
 {
   "totalElements": 0,
   "totalPages": 0,
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 0,
+    "paged": true,
+    "unpaged": true,
+    "offset": 0,
+    "sort": {
+      "unsorted": true,
+      "sorted": true,
+      "empty": true
+    }
+  },
   "first": true,
   "last": true,
   "size": 0,
@@ -5540,23 +5627,11 @@
   ],
   "number": 0,
   "sort": {
-    "empty": true,
+    "unsorted": true,
     "sorted": true,
-    "unsorted": true
+    "empty": true
   },
   "numberOfElements": 0,
-  "pageable": {
-    "offset": 0,
-    "sort": {
-      "empty": true,
-      "sorted": true,
-      "unsorted": true
-    },
-    "paged": true,
-    "pageSize": 0,
-    "pageNumber": 0,
-    "unpaged": true
-  },
   "empty": true
 }
 ```
@@ -5771,6 +5846,18 @@
 {
   "totalElements": 0,
   "totalPages": 0,
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 0,
+    "paged": true,
+    "unpaged": true,
+    "offset": 0,
+    "sort": {
+      "unsorted": true,
+      "sorted": true,
+      "empty": true
+    }
+  },
   "first": true,
   "last": true,
   "size": 0,
@@ -5802,23 +5889,11 @@
   ],
   "number": 0,
   "sort": {
-    "empty": true,
+    "unsorted": true,
     "sorted": true,
-    "unsorted": true
+    "empty": true
   },
   "numberOfElements": 0,
-  "pageable": {
-    "offset": 0,
-    "sort": {
-      "empty": true,
-      "sorted": true,
-      "unsorted": true
-    },
-    "paged": true,
-    "pageSize": 0,
-    "pageNumber": 0,
-    "unpaged": true
-  },
   "empty": true
 }
 ```
@@ -5953,6 +6028,18 @@
 {
   "totalElements": 0,
   "totalPages": 0,
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 0,
+    "paged": true,
+    "unpaged": true,
+    "offset": 0,
+    "sort": {
+      "unsorted": true,
+      "sorted": true,
+      "empty": true
+    }
+  },
   "first": true,
   "last": true,
   "size": 0,
@@ -5981,6 +6068,8 @@
         "updatedAt": "2023-10-10T10:10:10.000Z",
         "deletedAt": "2023-10-10T10:10:10.000Z",
         "ownerId": 0,
+        "description": "string",
+        "categoryId": 0,
         "products": [
           {
             "id": 0,
@@ -6062,8 +6151,8 @@
                   },
                   "avatarUrl": "string",
                   "membership": "string",
-                  "active": true,
-                  "verified": true
+                  "verified": true,
+                  "active": true
                 },
                 "product": "Circular reference: Product"
               }
@@ -6126,8 +6215,8 @@
         },
         "avatarUrl": "string",
         "membership": "string",
-        "active": true,
-        "verified": true
+        "verified": true,
+        "active": true
       },
       "orderItems": [
         {
@@ -6176,6 +6265,8 @@
               "updatedAt": "2023-10-10T10:10:10.000Z",
               "deletedAt": "2023-10-10T10:10:10.000Z",
               "ownerId": 0,
+              "description": "string",
+              "categoryId": 0,
               "products": [
                 "Circular reference: Product"
               ]
@@ -6234,8 +6325,8 @@
                   },
                   "avatarUrl": "string",
                   "membership": "string",
-                  "active": true,
-                  "verified": true
+                  "verified": true,
+                  "active": true
                 },
                 "product": "Circular reference: Product"
               }
@@ -6247,23 +6338,11 @@
   ],
   "number": 0,
   "sort": {
-    "empty": true,
+    "unsorted": true,
     "sorted": true,
-    "unsorted": true
+    "empty": true
   },
   "numberOfElements": 0,
-  "pageable": {
-    "offset": 0,
-    "sort": {
-      "empty": true,
-      "sorted": true,
-      "unsorted": true
-    },
-    "paged": true,
-    "pageSize": 0,
-    "pageNumber": 0,
-    "unpaged": true
-  },
   "empty": true
 }
 ```
@@ -6302,6 +6381,18 @@
 {
   "totalElements": 0,
   "totalPages": 0,
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 0,
+    "paged": true,
+    "unpaged": true,
+    "offset": 0,
+    "sort": {
+      "unsorted": true,
+      "sorted": true,
+      "empty": true
+    }
+  },
   "first": true,
   "last": true,
   "size": 0,
@@ -6324,23 +6415,11 @@
   ],
   "number": 0,
   "sort": {
-    "empty": true,
+    "unsorted": true,
     "sorted": true,
-    "unsorted": true
+    "empty": true
   },
   "numberOfElements": 0,
-  "pageable": {
-    "offset": 0,
-    "sort": {
-      "empty": true,
-      "sorted": true,
-      "unsorted": true
-    },
-    "paged": true,
-    "pageSize": 0,
-    "pageNumber": 0,
-    "unpaged": true
-  },
   "empty": true
 }
 ```
@@ -6442,6 +6521,18 @@
 {
   "totalElements": 0,
   "totalPages": 0,
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 0,
+    "paged": true,
+    "unpaged": true,
+    "offset": 0,
+    "sort": {
+      "unsorted": true,
+      "sorted": true,
+      "empty": true
+    }
+  },
   "first": true,
   "last": true,
   "size": 0,
@@ -6466,23 +6557,11 @@
   ],
   "number": 0,
   "sort": {
-    "empty": true,
+    "unsorted": true,
     "sorted": true,
-    "unsorted": true
+    "empty": true
   },
   "numberOfElements": 0,
-  "pageable": {
-    "offset": 0,
-    "sort": {
-      "empty": true,
-      "sorted": true,
-      "unsorted": true
-    },
-    "paged": true,
-    "pageSize": 0,
-    "pageNumber": 0,
-    "unpaged": true
-  },
   "empty": true
 }
 ```
@@ -6649,6 +6728,18 @@
 {
   "totalElements": 0,
   "totalPages": 0,
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 0,
+    "paged": true,
+    "unpaged": true,
+    "offset": 0,
+    "sort": {
+      "unsorted": true,
+      "sorted": true,
+      "empty": true
+    }
+  },
   "first": true,
   "last": true,
   "size": 0,
@@ -6658,6 +6749,8 @@
       "userId": 0,
       "userName": "string",
       "fullName": "string",
+      "restaurantId": "string",
+      "restaurantName": "string",
       "totalAmount": 0,
       "status": "string",
       "paymentMethod": "string",
@@ -6671,23 +6764,11 @@
   ],
   "number": 0,
   "sort": {
-    "empty": true,
+    "unsorted": true,
     "sorted": true,
-    "unsorted": true
+    "empty": true
   },
   "numberOfElements": 0,
-  "pageable": {
-    "offset": 0,
-    "sort": {
-      "empty": true,
-      "sorted": true,
-      "unsorted": true
-    },
-    "paged": true,
-    "pageSize": 0,
-    "pageNumber": 0,
-    "unpaged": true
-  },
   "empty": true
 }
 ```
@@ -6769,6 +6850,33 @@
   "updatedAt": "2023-10-10T10:10:10.000Z"
 }
 ```
+
+---
+
+## DELETE /api/admin/orders/{id}
+
+### 1. Endpoint
+`DELETE /api/admin/orders/{id}`
+
+### 2. Request Body / Parameters
+- `id` (path, integer) *(required)*
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+`No JSON response body`
 
 ---
 
@@ -7081,6 +7189,18 @@
 {
   "totalElements": 0,
   "totalPages": 0,
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 0,
+    "paged": true,
+    "unpaged": true,
+    "offset": 0,
+    "sort": {
+      "unsorted": true,
+      "sorted": true,
+      "empty": true
+    }
+  },
   "first": true,
   "last": true,
   "size": 0,
@@ -7099,23 +7219,11 @@
   ],
   "number": 0,
   "sort": {
-    "empty": true,
+    "unsorted": true,
     "sorted": true,
-    "unsorted": true
+    "empty": true
   },
   "numberOfElements": 0,
-  "pageable": {
-    "offset": 0,
-    "sort": {
-      "empty": true,
-      "sorted": true,
-      "unsorted": true
-    },
-    "paged": true,
-    "pageSize": 0,
-    "pageNumber": 0,
-    "unpaged": true
-  },
   "empty": true
 }
 ```

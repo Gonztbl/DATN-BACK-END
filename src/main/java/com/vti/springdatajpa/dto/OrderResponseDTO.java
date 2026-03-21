@@ -20,6 +20,14 @@ public class OrderResponseDTO {
     private String paymentMethod;
     private Integer itemCount;
     private List<OrderItemDTO> items;
+    private RestaurantInfoDTO restaurant;
+
+    @Data
+    public static class RestaurantInfoDTO {
+        private String id;
+        private String name;
+        private String logoBase64;
+    }
 
     // For detail endpoint
     private List<PaymentHistoryDTO> paymentHistory;

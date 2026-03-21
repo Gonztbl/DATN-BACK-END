@@ -21,7 +21,7 @@ public class AdminSupportTicketController {
     private final AdminSupportTicketService adminSupportTicketService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<Page<SupportTicketDTO>> getAllTickets(
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
@@ -31,13 +31,13 @@ public class AdminSupportTicketController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<SupportTicketDTO> getTicketDetail(@PathVariable Integer id) {
         return ResponseEntity.ok(adminSupportTicketService.getTicketDetail(id));
     }
 
     @PostMapping("/{id}/reply")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<SupportTicketDTO> replyToTicket(
             @PathVariable Integer id,
             @RequestBody AdminTicketUpdateRequestDTO request) {
@@ -48,7 +48,7 @@ public class AdminSupportTicketController {
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<SupportTicketDTO> updateTicketStatus(
             @PathVariable Integer id,
             @RequestBody AdminTicketUpdateRequestDTO request) {
@@ -56,7 +56,7 @@ public class AdminSupportTicketController {
     }
 
     @PutMapping("/{id}/assign")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<SupportTicketDTO> assignTicket(
             @PathVariable Integer id,
             @RequestBody AdminTicketUpdateRequestDTO request) {

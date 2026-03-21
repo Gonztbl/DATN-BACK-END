@@ -17,13 +17,13 @@ public class AdminQRCodeController {
     private final AdminQRCodeService adminQRCodeService;
 
     @GetMapping("/users/{userId}/qrcodes")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AdminQRCodeDTO>> getUserQRCodes(@PathVariable Integer userId) {
         return ResponseEntity.ok(adminQRCodeService.getUserQRCodes(userId));
     }
 
     @DeleteMapping("/qrcodes/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteQRCode(@PathVariable Integer id) {
         adminQRCodeService.deleteQRCode(id);
         return ResponseEntity.noContent().build();

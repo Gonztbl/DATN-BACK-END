@@ -18,25 +18,25 @@ public class AdminCardController {
     private final AdminCardService adminCardService;
 
     @GetMapping("/users/{userId}/cards")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AdminCardDTO>> getUserCards(@PathVariable Integer userId) {
         return ResponseEntity.ok(adminCardService.getUserCards(userId));
     }
 
     @GetMapping("/cards/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminCardDTO> getCardDetail(@PathVariable Integer id) {
         return ResponseEntity.ok(adminCardService.getCardDetail(id));
     }
 
     @PutMapping("/cards/{id}/lock")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminCardDTO> lockCard(@PathVariable Integer id) {
         return ResponseEntity.ok(adminCardService.updateCardStatus(id, BankAccountStatus.REVOKED));
     }
 
     @PutMapping("/cards/{id}/unlock")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminCardDTO> unlockCard(@PathVariable Integer id) {
         return ResponseEntity.ok(adminCardService.updateCardStatus(id, BankAccountStatus.ACTIVE));
     }

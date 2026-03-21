@@ -62,6 +62,20 @@ public class OrderService {
         dto.setDeliveryAddress(order.getDeliveryAddress());
         dto.setPaymentMethod(order.getPaymentMethod());
 
+        // Map restaurant info
+        if (order.getRestaurant() != null) {
+            OrderResponseDTO.RestaurantInfoDTO restDTO = new OrderResponseDTO.RestaurantInfoDTO();
+            restDTO.setId(order.getRestaurant().getId());
+            restDTO.setName(order.getRestaurant().getName());
+            restDTO.setLogoBase64(order.getRestaurant().getLogoBase64());
+            dto.setRestaurant(restDTO);
+        } else if (order.getRestaurantId() != null) {
+            // Fallback if restaurant is not loaded but ID exists
+            OrderResponseDTO.RestaurantInfoDTO restDTO = new OrderResponseDTO.RestaurantInfoDTO();
+            restDTO.setId(order.getRestaurantId());
+            dto.setRestaurant(restDTO);
+        }
+
         // Map items with product info
         List<OrderResponseDTO.OrderItemDTO> itemDTOs = new ArrayList<>();
         int totalCount = 0;

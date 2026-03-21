@@ -19,13 +19,13 @@ public class AdminDashboardController {
     private final AdminDashboardService adminDashboardService;
 
     @GetMapping("/stats")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<DashboardStatsDTO> getStats() {
         return ResponseEntity.ok(adminDashboardService.getStats());
     }
 
     @GetMapping("/charts")
-    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SUPPORT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPPORT')")
     public ResponseEntity<ChartDataDTO> getCharts(
             @RequestParam(required = false, defaultValue = "day") String period,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
