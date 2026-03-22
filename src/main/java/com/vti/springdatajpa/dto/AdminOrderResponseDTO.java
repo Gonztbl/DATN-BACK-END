@@ -22,4 +22,5 @@ public class AdminOrderResponseDTO {
     private String note;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer shipperId;
 }

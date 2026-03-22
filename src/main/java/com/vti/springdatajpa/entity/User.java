@@ -64,6 +64,9 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Wallet wallet;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private ShipperProfile shipperProfile;
+
     private String avatarUrl;
 
     @Column(name = "membership")

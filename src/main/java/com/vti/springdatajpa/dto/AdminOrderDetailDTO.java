@@ -19,6 +19,7 @@ public class AdminOrderDetailDTO {
     private AdminOrderDeliveryDTO deliveryInfo;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer shipperId;
 
     @Data
     public static class AdminOrderUserDTO {

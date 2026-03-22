@@ -19,6 +19,7 @@ public class ShipperDetailDTO {
     private String phone;
     private String avatarUrl;
     private boolean isActive;
+    private boolean isOnline;
     private LocalDateTime createdAt;
     private ShipperStatisticsDTO statistics;
 }

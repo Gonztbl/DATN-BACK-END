@@ -54,9 +54,12 @@ public class AdminOrderService {
                 .filter(o -> fromDate == null || !o.getCreatedAt().isBefore(fromDate))
                 .filter(o -> toDate == null || !o.getCreatedAt().isAfter(toDate))
                 .filter(o -> search == null || search.isEmpty() ||
+                        (String.valueOf(o.getId()).contains(search)) ||
                         (o.getRecipientName() != null && o.getRecipientName().toLowerCase().contains(search.toLowerCase())) ||
                         (o.getRecipientPhone() != null && o.getRecipientPhone().contains(search)) ||
-                        (o.getDeliveryAddress() != null && o.getDeliveryAddress().toLowerCase().contains(search.toLowerCase())))
+                        (o.getDeliveryAddress() != null && o.getDeliveryAddress().toLowerCase().contains(search.toLowerCase())) ||
+                        (o.getUser() != null && o.getUser().getUserName() != null && o.getUser().getUserName().toLowerCase().contains(search.toLowerCase())) ||
+                        (o.getUser() != null && o.getUser().getFullName() != null && o.getUser().getFullName().toLowerCase().contains(search.toLowerCase())))
                 .sorted((o1, o2) -> {
                     // Default sort by createdAt desc
                     return o2.getCreatedAt().compareTo(o1.getCreatedAt());
@@ -167,6 +170,7 @@ public class AdminOrderService {
         dto.setNote(order.getNote());
         dto.setCreatedAt(order.getCreatedAt());
         dto.setUpdatedAt(order.getUpdatedAt());
+        dto.setShipperId(order.getShipperId());
 
         // Set user info if available
         if (order.getUser() != null) {
@@ -192,6 +196,7 @@ public class AdminOrderService {
         dto.setStatus(order.getStatus().name());
         dto.setCreatedAt(order.getCreatedAt());
         dto.setUpdatedAt(order.getUpdatedAt());
+        dto.setShipperId(order.getShipperId());
 
         // User info
         if (order.getUser() != null) {

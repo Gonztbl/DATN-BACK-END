@@ -9,6 +9,8 @@ import com.vti.springdatajpa.repository.OrderRepository;
 import com.vti.springdatajpa.repository.ProductRepository;
 import com.vti.springdatajpa.repository.RestaurantRepository;
 import com.vti.springdatajpa.repository.UserRepository;
+import com.vti.springdatajpa.service.WalletService;
+import com.vti.springdatajpa.dto.WalletBalanceDTO;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,16 +37,19 @@ public class RestaurantOwnerController {
     private final RestaurantRepository restaurantRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final WalletService walletService;
 
     public RestaurantOwnerController(
             OrderRepository orderRepository,
             RestaurantRepository restaurantRepository,
             ProductRepository productRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            WalletService walletService) {
         this.orderRepository = orderRepository;
         this.restaurantRepository = restaurantRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.walletService = walletService;
     }
 
     // ==================== RESTAURANT MANAGEMENT ====================
@@ -127,6 +132,17 @@ public class RestaurantOwnerController {
                 .orderCount(orderCount)
                 .period(period)
                 .build());
+    }
+
+    @GetMapping("/wallet/balance")
+    public ResponseEntity<WalletBalanceDTO> getWalletBalance() {
+        User user = getCurrentUser();
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            throw new RuntimeException("Forbidden: You do not have RESTAURANT_OWNER role");
+        }
+        
+        Object identity = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.ok(walletService.getBalance(identity));
     }
 
     private MyRestaurantResponseDTO mapToMyRestaurantDTO(Restaurant restaurant) {

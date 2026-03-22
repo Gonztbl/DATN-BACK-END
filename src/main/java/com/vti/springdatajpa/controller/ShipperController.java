@@ -6,6 +6,9 @@ import com.vti.springdatajpa.entity.User;
 import com.vti.springdatajpa.repository.OrderRepository;
 import com.vti.springdatajpa.repository.RestaurantRepository;
 import com.vti.springdatajpa.repository.UserRepository;
+import com.vti.springdatajpa.service.WalletService;
+import com.vti.springdatajpa.service.TransactionService;
+import com.vti.springdatajpa.dto.WalletBalanceDTO;
 import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,9 @@ public class ShipperController {
     private final OrderRepository orderRepository;
     private final RestaurantRepository restaurantRepository;
     private final UserRepository userRepository;
+    private final com.vti.springdatajpa.repository.ShipperProfileRepository shipperProfileRepository;
+    private final WalletService walletService;
+    private final TransactionService transactionService;
 
     // ==================== ORDER MANAGEMENT ====================
 
@@ -186,6 +192,14 @@ public class ShipperController {
         order.setDeliveredAt(LocalDateTime.now());
         // Save photo if provided
         // TODO: Handle photo upload
+        
+        // Process wallet payments (skip if COD)
+        if (order.getRestaurantId() != null) {
+            Restaurant restaurant = restaurantRepository.findById(order.getRestaurantId())
+                    .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+            transactionService.processOrderDeliveryPayment(order, restaurant.getOwnerId());
+        }
+        
         orderRepository.save(order);
 
         OrderStatusResponse response = new OrderStatusResponse();
@@ -221,6 +235,39 @@ public class ShipperController {
         response.setStatus(order.getStatus().name());
         response.setMessage("Delivery failed, waiting for further instructions");
 
+        return ResponseEntity.ok(response);
+    }
+
+    // ==================== PROFILE MANAGEMENT ====================
+
+    @GetMapping("/status")
+    public ResponseEntity<ShipperStatusResponse> getStatus() {
+        Integer shipperId = getCurrentUserId();
+        com.vti.springdatajpa.entity.ShipperProfile profile = shipperProfileRepository.findByUserId(shipperId)
+                .orElseThrow(() -> new RuntimeException("Shipper profile not found"));
+
+        ShipperStatusResponse response = new ShipperStatusResponse();
+        response.setOnline(profile.getIsOnline());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/wallet/balance")
+    public ResponseEntity<WalletBalanceDTO> getWalletBalance() {
+        Object identity = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.ok(walletService.getBalance(identity));
+    }
+
+    @PutMapping("/status")
+    public ResponseEntity<ShipperStatusResponse> toggleStatus(@RequestBody ShipperStatusRequest request) {
+        Integer shipperId = getCurrentUserId();
+        com.vti.springdatajpa.entity.ShipperProfile profile = shipperProfileRepository.findByUserId(shipperId)
+                .orElseThrow(() -> new RuntimeException("Shipper profile not found"));
+
+        profile.setIsOnline(request.isOnline());
+        shipperProfileRepository.save(profile);
+
+        ShipperStatusResponse response = new ShipperStatusResponse();
+        response.setOnline(profile.getIsOnline());
         return ResponseEntity.ok(response);
     }
 
@@ -429,6 +476,16 @@ public class ShipperController {
     public static class DeliveryFailedRequest {
         private String reason;
         private String photoBase64;
+    }
+
+    @Data
+    public static class ShipperStatusRequest {
+        private boolean online;
+    }
+
+    @Data
+    public static class ShipperStatusResponse {
+        private boolean online;
     }
 
     @Data

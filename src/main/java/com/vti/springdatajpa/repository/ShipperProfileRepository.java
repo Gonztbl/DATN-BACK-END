@@ -13,13 +13,13 @@ public interface ShipperProfileRepository extends JpaRepository<ShipperProfile, 
     
     Optional<ShipperProfile> findByUserId(Integer userId);
     
-    @Query("SELECT sp FROM ShipperProfile sp JOIN sp.user u WHERE " +
+    @Query("SELECT u FROM User u LEFT JOIN u.shipperProfile sp WHERE u.role = com.vti.springdatajpa.entity.enums.Role.SHIPPER AND " +
            "(:search IS NULL OR " +
            "LOWER(u.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(u.phone) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
-           "(:isOnline IS NULL OR sp.isOnline = :isOnline)")
-    org.springframework.data.domain.Page<ShipperProfile> findShippersWithFilters(
+           "(:isOnline IS NULL OR (sp IS NOT NULL AND sp.isOnline = :isOnline) OR (:isOnline = false AND sp IS NULL))")
+    org.springframework.data.domain.Page<com.vti.springdatajpa.entity.User> findShippersWithFilters(
             @Param("search") String search,
             @Param("isOnline") Boolean isOnline,
             org.springframework.data.domain.Pageable pageable);

@@ -276,4 +276,77 @@ public class TransactionService {
                         return response;
                 }
         }
+
+        @Transactional
+        public void processOrderDeliveryPayment(Order order, Integer restaurantOwnerId) {
+                // If the payment method is Cash On Delivery (COD), do not process wallet transfers.
+                if ("COD".equalsIgnoreCase(order.getPaymentMethod())) {
+                        return;
+                }
+
+                Double totalAmount = order.getTotalAmount().doubleValue();
+                Double restaurantShare = totalAmount * 0.95;
+                Double shipperShare = totalAmount - restaurantShare; // 5%
+
+                // Find wallets
+                Wallet customerWallet = walletRepository.findByUserId(order.getUserId())
+                                .orElseThrow(() -> new RuntimeException("Customer wallet not found"));
+                
+                Wallet restaurantWallet = walletRepository.findByUserId(restaurantOwnerId)
+                                .orElseThrow(() -> new RuntimeException("Restaurant owner wallet not found"));
+
+                Wallet shipperWallet = walletRepository.findByUserId(order.getShipperId())
+                                .orElseThrow(() -> new RuntimeException("Shipper wallet not found"));
+
+                // 1. Deduct from Customer
+                if (customerWallet.getAvailableBalance() < totalAmount) {
+                        throw new RuntimeException("Customer has insufficient wallet balance for order completion");
+                }
+                customerWallet.setBalance(customerWallet.getBalance() - totalAmount);
+                customerWallet.setAvailableBalance(customerWallet.getAvailableBalance() - totalAmount);
+                walletRepository.save(customerWallet);
+
+                Transaction txOut = new Transaction();
+                txOut.setWallet(customerWallet);
+                txOut.setAmount(totalAmount);
+                txOut.setType(TransactionType.TRANSFER_OUT);
+                txOut.setDirection(TransactionDirection.OUT);
+                txOut.setStatus(TransactionStatus.COMPLETED);
+                txOut.setCreatedAt(LocalDateTime.now());
+                txOut.setReferenceId(String.valueOf(order.getId()));
+                txOut.setMetadata("Payment for Order #" + order.getId());
+                transactionRepository.save(txOut);
+
+                // 2. Credit to Restaurant Owner
+                restaurantWallet.setBalance(restaurantWallet.getBalance() + restaurantShare);
+                restaurantWallet.setAvailableBalance(restaurantWallet.getAvailableBalance() + restaurantShare);
+                walletRepository.save(restaurantWallet);
+
+                Transaction txInRest = new Transaction();
+                txInRest.setWallet(restaurantWallet);
+                txInRest.setAmount(restaurantShare);
+                txInRest.setType(TransactionType.DEPOSIT);
+                txInRest.setDirection(TransactionDirection.IN);
+                txInRest.setStatus(TransactionStatus.COMPLETED);
+                txInRest.setCreatedAt(LocalDateTime.now());
+                txInRest.setReferenceId(String.valueOf(order.getId()));
+                txInRest.setMetadata("Revenue (95%) for Order #" + order.getId());
+                transactionRepository.save(txInRest);
+
+                // 3. Credit to Shipper
+                shipperWallet.setBalance(shipperWallet.getBalance() + shipperShare);
+                shipperWallet.setAvailableBalance(shipperWallet.getAvailableBalance() + shipperShare);
+                walletRepository.save(shipperWallet);
+
+                Transaction txInShipper = new Transaction();
+                txInShipper.setWallet(shipperWallet);
+                txInShipper.setAmount(shipperShare);
+                txInShipper.setType(TransactionType.DEPOSIT);
+                txInShipper.setDirection(TransactionDirection.IN);
+                txInShipper.setStatus(TransactionStatus.COMPLETED);
+                txInShipper.setCreatedAt(LocalDateTime.now());
+                txInShipper.setReferenceId(String.valueOf(order.getId()));
+                txInShipper.setMetadata("Shipping fee (5%) for Order #" + order.getId());
+                transactionRepository.save(txInShipper);
+        }
 }

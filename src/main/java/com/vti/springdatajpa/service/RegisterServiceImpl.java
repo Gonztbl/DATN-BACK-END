@@ -5,6 +5,7 @@ import com.vti.springdatajpa.entity.Wallet;
 import com.vti.springdatajpa.entity.enums.Role;
 import com.vti.springdatajpa.entity.enums.WalletStatus;
 import com.vti.springdatajpa.repository.RegisterRepository;
+import com.vti.springdatajpa.repository.ShipperProfileRepository;
 import com.vti.springdatajpa.repository.WalletRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,13 +17,16 @@ public class RegisterServiceImpl implements RegisterService {
 
     private final RegisterRepository registerRepository;
     private final WalletRepository walletRepository;
+    private final ShipperProfileRepository shipperProfileRepository;
     private final PasswordEncoder passwordEncoder;
 
     public RegisterServiceImpl(RegisterRepository registerRepository,
                                WalletRepository walletRepository,
+                               ShipperProfileRepository shipperProfileRepository,
                                PasswordEncoder passwordEncoder) {
         this.registerRepository = registerRepository;
         this.walletRepository = walletRepository;
+        this.shipperProfileRepository = shipperProfileRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -104,6 +108,16 @@ public class RegisterServiceImpl implements RegisterService {
         wallet.setCreatedAt(java.time.LocalDateTime.now());
 
         walletRepository.save(wallet);
+
+        // Create ShipperProfile if role is SHIPPER
+        if (savedUser.getRole() == Role.SHIPPER) {
+            com.vti.springdatajpa.entity.ShipperProfile profile = new com.vti.springdatajpa.entity.ShipperProfile();
+            profile.setUserId(savedUser.getId());
+            profile.setIsOnline(false);
+            profile.setCreatedAt(java.time.LocalDateTime.now());
+            profile.setUpdatedAt(java.time.LocalDateTime.now());
+            shipperProfileRepository.save(profile);
+        }
 
         return savedUser;
     }

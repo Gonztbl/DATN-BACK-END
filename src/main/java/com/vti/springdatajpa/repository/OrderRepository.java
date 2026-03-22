@@ -41,6 +41,9 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     Optional<Order> findByIdAndShipperId(Integer id, Integer shipperId);
 
+    Page<Order> findByShipperIdAndCreatedAtBetween(Integer shipperId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Page<Order> findByShipperIdAndStatusAndCreatedAtBetween(Integer shipperId, Order.OrderStatus status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
     void deleteByUserId(Integer userId);
     void deleteByShipperId(Integer shipperId);
 
@@ -49,6 +52,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     long countByShipperId(Integer shipperId);
     long countByShipperIdAndStatus(Integer shipperId, Order.OrderStatus status);
     long countByShipperIdAndCreatedAtBetween(Integer shipperId, LocalDateTime startDate, LocalDateTime endDate);
+    long countByShipperIdAndStatusAndCreatedAtBetween(Integer shipperId, Order.OrderStatus status, LocalDateTime startDate, LocalDateTime endDate);
 
     @org.springframework.data.jpa.repository.Query("SELECT SUM(o.totalAmount) FROM Order o")
     BigDecimal sumTotalAmount();

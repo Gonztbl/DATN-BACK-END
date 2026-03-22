@@ -97,12 +97,17 @@ public class AdminShipperService {
             }
         }
 
-        // Ideally, we'd use Specifications for multiple optional filters.
-        // For simplicity with generic count methods available, if only status is used:
+        // Default date range if not provided
+        if (fromDate == null) fromDate = LocalDate.of(2000, 1, 1);
+        if (toDate == null) toDate = LocalDate.now();
+
+        LocalDateTime startDt = fromDate.atStartOfDay();
+        LocalDateTime endDt = toDate.atTime(LocalTime.MAX);
+
         if (status != null) {
-            return orderRepository.findByShipperIdAndStatus(id, status, pageable);
+            return orderRepository.findByShipperIdAndStatusAndCreatedAtBetween(id, status, startDt, endDt, pageable);
         } else {
-            return orderRepository.findByShipperId(id, pageable);
+            return orderRepository.findByShipperIdAndCreatedAtBetween(id, startDt, endDt, pageable);
         }
     }
 
@@ -116,9 +121,8 @@ public class AdminShipperService {
         LocalDateTime endDt = toDate.atTime(LocalTime.MAX);
 
         long totalOrders = orderRepository.countByShipperIdAndCreatedAtBetween(id, startDt, endDt);
-        // Approximation as direct count by status + dates may require custom query
-        long completedOrders = orderRepository.countByShipperIdAndStatus(id, Order.OrderStatus.COMPLETED);
-        long failedOrders = orderRepository.countByShipperIdAndStatus(id, Order.OrderStatus.DELIVERY_FAILED);
+        long completedOrders = orderRepository.countByShipperIdAndStatusAndCreatedAtBetween(id, Order.OrderStatus.COMPLETED, startDt, endDt);
+        long failedOrders = orderRepository.countByShipperIdAndStatusAndCreatedAtBetween(id, Order.OrderStatus.DELIVERY_FAILED, startDt, endDt);
 
         BigDecimal totalEarnings = BigDecimal.ZERO;
         Integer walletId = walletRepository.findByUserId(id).map(Wallet::getId).orElse(null);
@@ -157,12 +161,16 @@ public class AdminShipperService {
     }
 
     public Page<ShipperDetailDTO> getShippers(String search, Boolean isOnline, Pageable pageable) {
-        Page<com.vti.springdatajpa.entity.ShipperProfile> profiles = shipperProfileRepository.findShippersWithFilters(search, isOnline, pageable);
-        return profiles.map(this::mapToDetailDTO);
+        Page<com.vti.springdatajpa.entity.User> users = shipperProfileRepository.findShippersWithFilters(search, isOnline, pageable);
+        return users.map(this::mapToDetailDTOFromUser);
     }
 
-    private ShipperDetailDTO mapToDetailDTO(com.vti.springdatajpa.entity.ShipperProfile profile) {
-        User user = profile.getUser();
+    private ShipperDetailDTO mapToDetailDTOFromUser(com.vti.springdatajpa.entity.User user) {
+        boolean isOnline = false;
+        if (user.getShipperProfile() != null) {
+            isOnline = user.getShipperProfile().getIsOnline();
+        }
+
         return ShipperDetailDTO.builder()
                 .id(user.getId())
                 .userName(user.getUserName())
@@ -170,6 +178,7 @@ public class AdminShipperService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .isActive(user.isActive())
+                .isOnline(isOnline)
                 .createdAt(user.getCreatedAt())
                 .build();
     }
