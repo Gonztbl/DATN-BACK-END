@@ -54,6 +54,9 @@ public class Restaurant {
     @Column(name = "category_id")
     private Integer categoryId;
 
+    @Column(columnDefinition = "TEXT")
+    private String schedule;
+
     @OneToMany(mappedBy = "restaurant")
     private List<Product> products;
 

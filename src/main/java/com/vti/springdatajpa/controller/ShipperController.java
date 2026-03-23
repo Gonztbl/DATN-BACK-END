@@ -9,6 +9,7 @@ import com.vti.springdatajpa.repository.UserRepository;
 import com.vti.springdatajpa.service.WalletService;
 import com.vti.springdatajpa.service.TransactionService;
 import com.vti.springdatajpa.dto.WalletBalanceDTO;
+import com.vti.springdatajpa.dto.ShipperVehicleDTO;
 import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -244,7 +245,12 @@ public class ShipperController {
     public ResponseEntity<ShipperStatusResponse> getStatus() {
         Integer shipperId = getCurrentUserId();
         com.vti.springdatajpa.entity.ShipperProfile profile = shipperProfileRepository.findByUserId(shipperId)
-                .orElseThrow(() -> new RuntimeException("Shipper profile not found"));
+                .orElseGet(() -> {
+                    com.vti.springdatajpa.entity.ShipperProfile newProfile = new com.vti.springdatajpa.entity.ShipperProfile();
+                    newProfile.setUserId(shipperId);
+                    newProfile.setIsOnline(false);
+                    return shipperProfileRepository.save(newProfile);
+                });
 
         ShipperStatusResponse response = new ShipperStatusResponse();
         response.setOnline(profile.getIsOnline());
@@ -261,13 +267,56 @@ public class ShipperController {
     public ResponseEntity<ShipperStatusResponse> toggleStatus(@RequestBody ShipperStatusRequest request) {
         Integer shipperId = getCurrentUserId();
         com.vti.springdatajpa.entity.ShipperProfile profile = shipperProfileRepository.findByUserId(shipperId)
-                .orElseThrow(() -> new RuntimeException("Shipper profile not found"));
+                .orElseGet(() -> {
+                    com.vti.springdatajpa.entity.ShipperProfile newProfile = new com.vti.springdatajpa.entity.ShipperProfile();
+                    newProfile.setUserId(shipperId);
+                    newProfile.setIsOnline(false);
+                    return shipperProfileRepository.save(newProfile);
+                });
 
         profile.setIsOnline(request.isOnline());
         shipperProfileRepository.save(profile);
 
         ShipperStatusResponse response = new ShipperStatusResponse();
         response.setOnline(profile.getIsOnline());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/vehicle")
+    public ResponseEntity<ShipperVehicleDTO> getVehicle() {
+        Integer shipperId = getCurrentUserId();
+        com.vti.springdatajpa.entity.ShipperProfile profile = shipperProfileRepository.findByUserId(shipperId)
+                .orElseGet(() -> {
+                    com.vti.springdatajpa.entity.ShipperProfile newProfile = new com.vti.springdatajpa.entity.ShipperProfile();
+                    newProfile.setUserId(shipperId);
+                    newProfile.setIsOnline(false);
+                    return shipperProfileRepository.save(newProfile);
+                });
+
+        ShipperVehicleDTO response = new ShipperVehicleDTO();
+        response.setVehicleType(profile.getVehicleType());
+        response.setVehiclePlate(profile.getVehiclePlate());
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/vehicle")
+    public ResponseEntity<ShipperVehicleDTO> updateVehicle(@RequestBody ShipperVehicleDTO request) {
+        Integer shipperId = getCurrentUserId();
+        com.vti.springdatajpa.entity.ShipperProfile profile = shipperProfileRepository.findByUserId(shipperId)
+                .orElseGet(() -> {
+                    com.vti.springdatajpa.entity.ShipperProfile newProfile = new com.vti.springdatajpa.entity.ShipperProfile();
+                    newProfile.setUserId(shipperId);
+                    newProfile.setIsOnline(false);
+                    return shipperProfileRepository.save(newProfile);
+                });
+
+        profile.setVehicleType(request.getVehicleType());
+        profile.setVehiclePlate(request.getVehiclePlate());
+        shipperProfileRepository.save(profile);
+
+        ShipperVehicleDTO response = new ShipperVehicleDTO();
+        response.setVehicleType(profile.getVehicleType());
+        response.setVehiclePlate(profile.getVehiclePlate());
         return ResponseEntity.ok(response);
     }
 

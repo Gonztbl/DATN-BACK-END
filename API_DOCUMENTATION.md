@@ -214,6 +214,72 @@
 
 ---
 
+## GET /api/shipper/status
+
+### 1. Endpoint
+`GET /api/shipper/status`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "online": true
+}
+```
+
+---
+
+## PUT /api/shipper/status
+
+### 1. Endpoint
+`PUT /api/shipper/status`
+
+### 2. Request Body / Parameters
+```json
+{
+  "online": true
+}
+```
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "online": true
+}
+```
+
+---
+
 ## PUT /api/shipper/orders/{id}/picked-up
 
 ### 1. Endpoint
@@ -2049,20 +2115,8 @@
 
 ```json
 {
-  "totalElements": 0,
   "totalPages": 0,
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 0,
-    "paged": true,
-    "unpaged": true,
-    "offset": 0,
-    "sort": {
-      "unsorted": true,
-      "sorted": true,
-      "empty": true
-    }
-  },
+  "totalElements": 0,
   "first": true,
   "last": true,
   "size": 0,
@@ -2080,11 +2134,23 @@
   ],
   "number": 0,
   "sort": {
+    "empty": true,
     "unsorted": true,
-    "sorted": true,
-    "empty": true
+    "sorted": true
   },
   "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "unsorted": true,
+      "sorted": true
+    },
+    "unpaged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "paged": true
+  },
   "empty": true
 }
 ```
@@ -2507,20 +2573,8 @@
 
 ```json
 {
-  "totalElements": 0,
   "totalPages": 0,
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 0,
-    "paged": true,
-    "unpaged": true,
-    "offset": 0,
-    "sort": {
-      "unsorted": true,
-      "sorted": true,
-      "empty": true
-    }
-  },
+  "totalElements": 0,
   "first": true,
   "last": true,
   "size": 0,
@@ -2573,11 +2627,23 @@
   ],
   "number": 0,
   "sort": {
+    "empty": true,
     "unsorted": true,
-    "sorted": true,
-    "empty": true
+    "sorted": true
   },
   "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "unsorted": true,
+      "sorted": true
+    },
+    "unpaged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "paged": true
+  },
   "empty": true
 }
 ```
@@ -4417,10 +4483,22 @@
                   }
                 ]
               },
+              "shipperProfile": {
+                "id": 0,
+                "userId": 0,
+                "vehicleType": "string",
+                "vehiclePlate": "string",
+                "isOnline": true,
+                "currentLat": 0,
+                "currentLng": 0,
+                "createdAt": "2023-10-10T10:10:10.000Z",
+                "updatedAt": "2023-10-10T10:10:10.000Z",
+                "user": "Circular reference: User"
+              },
               "avatarUrl": "string",
               "membership": "string",
-              "verified": true,
-              "active": true
+              "active": true,
+              "verified": true
             },
             "product": "Circular reference: Product"
           }
@@ -4458,6 +4536,38 @@
 
 ```json
 "string"
+```
+
+---
+
+## GET /api/shipper/wallet/balance
+
+### 1. Endpoint
+`GET /api/shipper/wallet/balance`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "balance": 0,
+  "monthlyChangePercent": 0
+}
 ```
 
 ---
@@ -4504,7 +4614,10 @@
       "totalAmount": 0,
       "status": "string",
       "paymentMethod": "string",
-      "createdAt": "2023-10-10T10:10:10.000Z"
+      "createdAt": "2023-10-10T10:10:10.000Z",
+      "readyAt": "2023-10-10T10:10:10.000Z",
+      "pickedUpAt": "2023-10-10T10:10:10.000Z",
+      "deliveredAt": "2023-10-10T10:10:10.000Z"
     }
   ],
   "pagination": {
@@ -4569,7 +4682,42 @@
   "paymentStatus": "string",
   "note": "string",
   "status": "string",
-  "createdAt": "2023-10-10T10:10:10.000Z"
+  "createdAt": "2023-10-10T10:10:10.000Z",
+  "readyAt": "2023-10-10T10:10:10.000Z",
+  "pickedUpAt": "2023-10-10T10:10:10.000Z",
+  "deliveredAt": "2023-10-10T10:10:10.000Z"
+}
+```
+
+---
+
+## GET /api/restaurant-owner/wallet/balance
+
+### 1. Endpoint
+`GET /api/restaurant-owner/wallet/balance`
+
+### 2. Request Body / Parameters
+`None`
+
+### 3. Response
+**Status 400**: Bad Request
+
+```json
+{
+  "status": 0,
+  "error": "string",
+  "message": "string",
+  "details": "string",
+  "timestamp": "2023-10-10T10:10:10.000Z"
+}
+```
+
+**Status 200**: OK
+
+```json
+{
+  "balance": 0,
+  "monthlyChangePercent": 0
 }
 ```
 
@@ -5582,20 +5730,8 @@
 
 ```json
 {
-  "totalElements": 0,
   "totalPages": 0,
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 0,
-    "paged": true,
-    "unpaged": true,
-    "offset": 0,
-    "sort": {
-      "unsorted": true,
-      "sorted": true,
-      "empty": true
-    }
-  },
+  "totalElements": 0,
   "first": true,
   "last": true,
   "size": 0,
@@ -5627,11 +5763,23 @@
   ],
   "number": 0,
   "sort": {
+    "empty": true,
     "unsorted": true,
-    "sorted": true,
-    "empty": true
+    "sorted": true
   },
   "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "unsorted": true,
+      "sorted": true
+    },
+    "unpaged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "paged": true
+  },
   "empty": true
 }
 ```
@@ -5844,20 +5992,8 @@
 
 ```json
 {
-  "totalElements": 0,
   "totalPages": 0,
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 0,
-    "paged": true,
-    "unpaged": true,
-    "offset": 0,
-    "sort": {
-      "unsorted": true,
-      "sorted": true,
-      "empty": true
-    }
-  },
+  "totalElements": 0,
   "first": true,
   "last": true,
   "size": 0,
@@ -5884,16 +6020,29 @@
           }
         ]
       },
-      "active": true
+      "active": true,
+      "online": true
     }
   ],
   "number": 0,
   "sort": {
+    "empty": true,
     "unsorted": true,
-    "sorted": true,
-    "empty": true
+    "sorted": true
   },
   "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "unsorted": true,
+      "sorted": true
+    },
+    "unpaged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "paged": true
+  },
   "empty": true
 }
 ```
@@ -5946,7 +6095,8 @@
       }
     ]
   },
-  "active": true
+  "active": true,
+  "online": true
 }
 ```
 
@@ -6026,20 +6176,8 @@
 
 ```json
 {
-  "totalElements": 0,
   "totalPages": 0,
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 0,
-    "paged": true,
-    "unpaged": true,
-    "offset": 0,
-    "sort": {
-      "unsorted": true,
-      "sorted": true,
-      "empty": true
-    }
-  },
+  "totalElements": 0,
   "first": true,
   "last": true,
   "size": 0,
@@ -6149,10 +6287,22 @@
                       }
                     ]
                   },
+                  "shipperProfile": {
+                    "id": 0,
+                    "userId": 0,
+                    "vehicleType": "string",
+                    "vehiclePlate": "string",
+                    "isOnline": true,
+                    "currentLat": 0,
+                    "currentLng": 0,
+                    "createdAt": "2023-10-10T10:10:10.000Z",
+                    "updatedAt": "2023-10-10T10:10:10.000Z",
+                    "user": "Circular reference: User"
+                  },
                   "avatarUrl": "string",
                   "membership": "string",
-                  "verified": true,
-                  "active": true
+                  "active": true,
+                  "verified": true
                 },
                 "product": "Circular reference: Product"
               }
@@ -6213,10 +6363,22 @@
             }
           ]
         },
+        "shipperProfile": {
+          "id": 0,
+          "userId": 0,
+          "vehicleType": "string",
+          "vehiclePlate": "string",
+          "isOnline": true,
+          "currentLat": 0,
+          "currentLng": 0,
+          "createdAt": "2023-10-10T10:10:10.000Z",
+          "updatedAt": "2023-10-10T10:10:10.000Z",
+          "user": "Circular reference: User"
+        },
         "avatarUrl": "string",
         "membership": "string",
-        "verified": true,
-        "active": true
+        "active": true,
+        "verified": true
       },
       "orderItems": [
         {
@@ -6323,10 +6485,22 @@
                       }
                     ]
                   },
+                  "shipperProfile": {
+                    "id": 0,
+                    "userId": 0,
+                    "vehicleType": "string",
+                    "vehiclePlate": "string",
+                    "isOnline": true,
+                    "currentLat": 0,
+                    "currentLng": 0,
+                    "createdAt": "2023-10-10T10:10:10.000Z",
+                    "updatedAt": "2023-10-10T10:10:10.000Z",
+                    "user": "Circular reference: User"
+                  },
                   "avatarUrl": "string",
                   "membership": "string",
-                  "verified": true,
-                  "active": true
+                  "active": true,
+                  "verified": true
                 },
                 "product": "Circular reference: Product"
               }
@@ -6338,11 +6512,23 @@
   ],
   "number": 0,
   "sort": {
+    "empty": true,
     "unsorted": true,
-    "sorted": true,
-    "empty": true
+    "sorted": true
   },
   "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "unsorted": true,
+      "sorted": true
+    },
+    "unpaged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "paged": true
+  },
   "empty": true
 }
 ```
@@ -6379,20 +6565,8 @@
 
 ```json
 {
-  "totalElements": 0,
   "totalPages": 0,
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 0,
-    "paged": true,
-    "unpaged": true,
-    "offset": 0,
-    "sort": {
-      "unsorted": true,
-      "sorted": true,
-      "empty": true
-    }
-  },
+  "totalElements": 0,
   "first": true,
   "last": true,
   "size": 0,
@@ -6415,11 +6589,23 @@
   ],
   "number": 0,
   "sort": {
+    "empty": true,
     "unsorted": true,
-    "sorted": true,
-    "empty": true
+    "sorted": true
   },
   "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "unsorted": true,
+      "sorted": true
+    },
+    "unpaged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "paged": true
+  },
   "empty": true
 }
 ```
@@ -6519,20 +6705,8 @@
 
 ```json
 {
-  "totalElements": 0,
   "totalPages": 0,
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 0,
-    "paged": true,
-    "unpaged": true,
-    "offset": 0,
-    "sort": {
-      "unsorted": true,
-      "sorted": true,
-      "empty": true
-    }
-  },
+  "totalElements": 0,
   "first": true,
   "last": true,
   "size": 0,
@@ -6557,11 +6731,23 @@
   ],
   "number": 0,
   "sort": {
+    "empty": true,
     "unsorted": true,
-    "sorted": true,
-    "empty": true
+    "sorted": true
   },
   "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "unsorted": true,
+      "sorted": true
+    },
+    "unpaged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "paged": true
+  },
   "empty": true
 }
 ```
@@ -6726,20 +6912,8 @@
 
 ```json
 {
-  "totalElements": 0,
   "totalPages": 0,
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 0,
-    "paged": true,
-    "unpaged": true,
-    "offset": 0,
-    "sort": {
-      "unsorted": true,
-      "sorted": true,
-      "empty": true
-    }
-  },
+  "totalElements": 0,
   "first": true,
   "last": true,
   "size": 0,
@@ -6759,16 +6933,29 @@
       "deliveryAddress": "string",
       "note": "string",
       "createdAt": "2023-10-10T10:10:10.000Z",
-      "updatedAt": "2023-10-10T10:10:10.000Z"
+      "updatedAt": "2023-10-10T10:10:10.000Z",
+      "shipperId": 0
     }
   ],
   "number": 0,
   "sort": {
+    "empty": true,
     "unsorted": true,
-    "sorted": true,
-    "empty": true
+    "sorted": true
   },
   "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "unsorted": true,
+      "sorted": true
+    },
+    "unpaged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "paged": true
+  },
   "empty": true
 }
 ```
@@ -6847,7 +7034,8 @@
     "note": "string"
   },
   "createdAt": "2023-10-10T10:10:10.000Z",
-  "updatedAt": "2023-10-10T10:10:10.000Z"
+  "updatedAt": "2023-10-10T10:10:10.000Z",
+  "shipperId": 0
 }
 ```
 
@@ -7187,20 +7375,8 @@
 
 ```json
 {
-  "totalElements": 0,
   "totalPages": 0,
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 0,
-    "paged": true,
-    "unpaged": true,
-    "offset": 0,
-    "sort": {
-      "unsorted": true,
-      "sorted": true,
-      "empty": true
-    }
-  },
+  "totalElements": 0,
   "first": true,
   "last": true,
   "size": 0,
@@ -7219,11 +7395,23 @@
   ],
   "number": 0,
   "sort": {
+    "empty": true,
     "unsorted": true,
-    "sorted": true,
-    "empty": true
+    "sorted": true
   },
   "numberOfElements": 0,
+  "pageable": {
+    "offset": 0,
+    "sort": {
+      "empty": true,
+      "unsorted": true,
+      "sorted": true
+    },
+    "unpaged": true,
+    "pageSize": 0,
+    "pageNumber": 0,
+    "paged": true
+  },
   "empty": true
 }
 ```

@@ -12,6 +12,8 @@ import com.vti.springdatajpa.repository.UserRepository;
 import com.vti.springdatajpa.service.WalletService;
 import com.vti.springdatajpa.dto.WalletBalanceDTO;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.domain.Page;
@@ -38,6 +40,7 @@ public class RestaurantOwnerController {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final WalletService walletService;
+    private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
 
     public RestaurantOwnerController(
             OrderRepository orderRepository,
@@ -146,6 +149,18 @@ public class RestaurantOwnerController {
     }
 
     private MyRestaurantResponseDTO mapToMyRestaurantDTO(Restaurant restaurant) {
+        List<ScheduleDTO> parsedSchedule = null;
+        if (restaurant.getSchedule() != null && !restaurant.getSchedule().isBlank()) {
+            try {
+                parsedSchedule = OBJECT_MAPPER.readValue(
+                    restaurant.getSchedule(),
+                    new com.fasterxml.jackson.core.type.TypeReference<List<ScheduleDTO>>() {}
+                );
+            } catch (Exception e) {
+                // ignore or log
+            }
+        }
+
         return MyRestaurantResponseDTO.builder()
                 .id(restaurant.getId())
                 .name(restaurant.getName())
@@ -158,6 +173,7 @@ public class RestaurantOwnerController {
                 .ownerId(restaurant.getOwnerId())
                 .createdAt(restaurant.getCreatedAt())
                 .categoryId(restaurant.getCategoryId())
+                .schedule(parsedSchedule)
                 .build();
     }
 
@@ -501,7 +517,45 @@ public class RestaurantOwnerController {
         return ResponseEntity.ok().build();
     }
 
-    // ==================== RESTAURANT STATUS ====================
+    // ==================== RESTAURANT STATUS & INFO ====================
+
+    @PutMapping("/restaurant/info")
+    public ResponseEntity<?> updateRestaurantInfo(
+            @Valid @RequestBody UpdateRestaurantInfoRequest request) {
+
+        User user = getCurrentUser();
+        if (user.getRole() != com.vti.springdatajpa.entity.enums.Role.RESTAURANT_OWNER) {
+            return roleForbiddenResponse();
+        }
+
+        List<Restaurant> restaurants = restaurantRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
+        if (restaurants.isEmpty()) {
+            return restaurantNotFoundResponse();
+        }
+        Restaurant restaurant = restaurants.get(0);
+
+        restaurant.setName(request.getName());
+        restaurant.setPhone(request.getPhone());
+        restaurant.setAddress(request.getAddress());
+
+        if (request.getStatus() != null && !request.getStatus().isBlank()) {
+            restaurant.setStatus("OPEN".equalsIgnoreCase(request.getStatus()));
+        }
+
+        if (request.getSchedule() != null) {
+            try {
+                String scheduleJson = OBJECT_MAPPER.writeValueAsString(request.getSchedule());
+                restaurant.setSchedule(scheduleJson);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(new ErrorResponse(
+                        400, "Bad Request", "Invalid schedule format", e.getMessage(), LocalDateTime.now().toString()
+                ));
+            }
+        }
+
+        restaurantRepository.save(restaurant);
+        return ResponseEntity.ok(mapToMyRestaurantDTO(restaurant));
+    }
 
     @PutMapping("/restaurant/status")
     public ResponseEntity<?> updateRestaurantStatus(
@@ -518,12 +572,13 @@ public class RestaurantOwnerController {
         }
         Restaurant restaurant = restaurants.get(0);
 
-        restaurant.setStatus(request.getIsOpen());
+        Boolean isOpen = "OPEN".equalsIgnoreCase(request.getStatus());
+        restaurant.setStatus(isOpen);
         restaurantRepository.save(restaurant);
 
         RestaurantStatusResponse response = new RestaurantStatusResponse();
         response.setRestaurantId(restaurant.getId());
-        response.setIsOpen(request.getIsOpen());
+        response.setIsOpen(isOpen);
         response.setUpdatedAt(LocalDateTime.now());
 
         return ResponseEntity.ok(response);
@@ -800,7 +855,8 @@ public class RestaurantOwnerController {
 
     @Data
     public static class UpdateRestaurantStatusRequest {
-        private Boolean isOpen;
+        @NotNull(message = "status field is required")
+        private String status;
     }
 
     @Data

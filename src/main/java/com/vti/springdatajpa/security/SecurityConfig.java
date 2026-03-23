@@ -57,6 +57,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/restaurant-owners/**").hasAnyRole("ADMIN", "SUPPORT")
                         .requestMatchers("/api/admin/dashboard/**").hasAnyRole("ADMIN", "SUPPORT")
                         .requestMatchers("/api/admin/support-tickets/**").hasAnyRole("ADMIN", "SUPPORT")
+                        .requestMatchers("/api/admin/statistics/**").hasAnyRole("ADMIN", "SUPPORT")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // Restaurant Owner endpoints
@@ -69,7 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/support/**").hasAnyRole("ADMIN", "SUPPORT")
 
                         // All authenticated users can access
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN", "SUPPORT")
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN", "SUPPORT", "SHIPPER", "RESTAURANT_OWNER")
 
                         // Face AI endpoints (require authentication)
                         .requestMatchers("/api/face/**").authenticated()
