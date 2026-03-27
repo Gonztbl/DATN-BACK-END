@@ -50,6 +50,7 @@ public class WalletService {
         System.out.println("Wallet balance: " + wallet.getAvailableBalance());
 
         WalletInfoDTO dto = new WalletInfoDTO();
+        dto.setId(wallet.getId());
         dto.setUserId(user.getId().toString());
         dto.setWalletId(wallet.getCode() != null ? wallet.getCode() : "WALLET" + wallet.getId());
         dto.setAccountName(user.getFullName());

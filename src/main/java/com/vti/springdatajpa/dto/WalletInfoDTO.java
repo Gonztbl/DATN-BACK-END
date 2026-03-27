@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class WalletInfoDTO {
+    private Integer id;
     private String userId;
     private String walletId;
     private String accountName;
