@@ -1,7 +1,9 @@
 package com.vti.springdatajpa.service;
 
 import com.vti.springdatajpa.entity.FaceEmbedding;
+import com.vti.springdatajpa.entity.User;
 import com.vti.springdatajpa.repository.FaceEmbeddingRepository;
+import com.vti.springdatajpa.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.opencv.core.Mat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ public class FaceRegistrationService {
 
     @Autowired
     private FaceEmbeddingCacheService cacheService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * Register a face: quality → detect → align → embed → save to DB.
@@ -49,6 +54,14 @@ public class FaceRegistrationService {
         faceEmbedding.setFaceAngle(result.faceAngle());
 
         FaceEmbedding saved = embeddingRepository.save(faceEmbedding);
+
+        // Update user's isVerified status to true
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            user.setVerified(true);
+            userRepository.save(user);
+            log.info("User {} isVerified status updated to true", userId);
+        }
 
         // Invalidate cache for this user
         cacheService.evict(userId);

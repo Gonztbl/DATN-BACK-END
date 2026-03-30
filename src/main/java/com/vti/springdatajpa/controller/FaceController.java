@@ -4,7 +4,9 @@ import com.vti.springdatajpa.dto.FaceEmbeddingDTO;
 import com.vti.springdatajpa.dto.FaceRegisterResponse;
 import com.vti.springdatajpa.dto.FaceVerifyResponse;
 import com.vti.springdatajpa.entity.FaceEmbedding;
+import com.vti.springdatajpa.entity.User;
 import com.vti.springdatajpa.repository.FaceEmbeddingRepository;
+import com.vti.springdatajpa.repository.UserRepository;
 import com.vti.springdatajpa.service.FaceEmbeddingCacheService;
 import com.vti.springdatajpa.service.FacePipelineService;
 import com.vti.springdatajpa.service.FaceRegistrationService;
@@ -51,6 +53,9 @@ public class FaceController {
 
     @Autowired
     private FaceEmbeddingCacheService cacheService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // ========================
     // 1. Register Face
@@ -144,9 +149,23 @@ public class FaceController {
             return ResponseEntity.notFound().build();
         }
 
+        Integer userId = embedding.get().getUserId();
+
         // Evict cache before delete
-        cacheService.evict(embedding.get().getUserId());
+        cacheService.evict(userId);
         embeddingRepository.deleteById(embeddingId);
+
+        // Check if user has any remaining embeddings
+        long remainingCount = embeddingRepository.countByUserId(userId);
+        if (remainingCount == 0) {
+            // Reset isVerified to false when all faces are deleted
+            User user = userRepository.findById(userId).orElse(null);
+            if (user != null) {
+                user.setVerified(false);
+                userRepository.save(user);
+                log.info("User {} has no more face embeddings, isVerified reset to false", userId);
+            }
+        }
 
         return ResponseEntity.ok(Map.of("message", "Embedding deleted successfully"));
     }
