@@ -89,4 +89,27 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 
     @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.wallet.id = :walletId AND t.direction = :direction AND t.createdAt >= :startDate AND t.createdAt <= :endDate")
     Double sumAmountByWalletIdAndDirectionBetween(@Param("walletId") Integer walletId, @Param("direction") TransactionDirection direction, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    // Count failed transactions in date range
+    @Query("SELECT COUNT(t) FROM Transaction t WHERE t.wallet.id = :walletId " +
+           "AND t.status = com.vti.springdatajpa.entity.enums.TransactionStatus.FAILED " +
+           "AND t.createdAt >= :fromDate AND t.createdAt <= :toDate")
+    Long countFailedTransactions(@Param("walletId") Integer walletId, @Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
+
+    // Get max inflow amount (IN direction)
+    @Query("SELECT MAX(t.amount) FROM Transaction t WHERE t.wallet.id = :walletId " +
+           "AND t.direction = com.vti.springdatajpa.entity.enums.TransactionDirection.IN " +
+           "AND t.createdAt >= :fromDate AND t.createdAt <= :toDate")
+    Double getMaxInflowAmount(@Param("walletId") Integer walletId, @Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
+
+    // Count total transactions in date range
+    @Query("SELECT COUNT(t) FROM Transaction t WHERE t.wallet.id = :walletId " +
+           "AND t.createdAt >= :fromDate AND t.createdAt <= :toDate")
+    Long countTransactionsInRange(@Param("walletId") Integer walletId, @Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
+
+    // Get transactions in date range for feature extraction
+    @Query("SELECT t FROM Transaction t WHERE t.wallet.id = :walletId " +
+           "AND t.createdAt >= :fromDate AND t.createdAt <= :toDate " +
+           "ORDER BY t.createdAt ASC")
+    List<Transaction> findTransactionsInRange(@Param("walletId") Integer walletId, @Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
 }

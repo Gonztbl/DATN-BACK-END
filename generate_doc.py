@@ -42,6 +42,54 @@ def extract_schema(s, components, visited=None):
     
     return "any"
 
+def extract_schema_details(s, components, required_fields=None, visited=None):
+    """Extract detailed schema properties with type and description"""
+    if visited is None:
+        visited = set()
+    if required_fields is None:
+        required_fields = []
+        
+    if not isinstance(s, dict):
+        return []
+    
+    if '$ref' in s:
+        ref_name = s['$ref'].split('/')[-1]
+        if ref_name in visited:
+            return []
+        visited.add(ref_name)
+        schema_ref = components.get('schemas', {}).get(ref_name, {})
+        result = extract_schema_details(schema_ref, components, required_fields, visited)
+        visited.remove(ref_name)
+        return result
+    
+    if s.get('type') == 'object' or 'properties' in s:
+        properties = s.get('properties', {})
+        required = s.get('required', [])
+        details = []
+        for prop, prop_details in properties.items():
+            field_type = prop_details.get('type', 'unknown')
+            field_desc = prop_details.get('description', '')
+            is_required = prop in required
+            
+            # Handle nested objects and arrays
+            if field_type == 'array':
+                items = prop_details.get('items', {})
+                item_type = items.get('type', 'object')
+                field_type = f'array[{item_type}]'
+            elif field_type == 'object' or '$ref' in prop_details:
+                field_type = 'object'
+            
+            req_status = "required" if is_required else "optional"
+            details.append({
+                'name': prop,
+                'type': field_type,
+                'required': is_required,
+                'description': field_desc
+            })
+        return details
+    
+    return []
+
 def main():
     url = "http://localhost:8080/v3/api-docs"
     print(f"Fetching {url}")
@@ -68,26 +116,55 @@ def main():
             if 'summary' in details:
                 markdown += f'**Summary:** {details["summary"]}\n\n'
             
+            if 'description' in details:
+                markdown += f'{details["description"]}\n\n'
+            
             # 1. Endpoint
             markdown += '### 1. Endpoint\n'
             markdown += f'`{method.upper()} {path}`\n\n'
             
             # 2. JSON Body
-            markdown += '### 2. Request Body / Parameters\n'
+            markdown += '### 2. Request / Input\n'
             has_body = False
             if 'requestBody' in details:
                 content = details['requestBody'].get('content', {})
                 if 'application/json' in content:
                     schema = content['application/json'].get('schema', {})
+                    
+                    # Get schema details
+                    schema_details = extract_schema_details(schema, components)
+                    if schema_details:
+                        markdown += '**Fields:**\n'
+                        markdown += '| Field | Type | Required | Description |\n'
+                        markdown += '|-------|------|----------|-------------|\n'
+                        for field in schema_details:
+                            req = '✓ Yes' if field['required'] else '✗ No'
+                            desc = field['description'] or '-'
+                            markdown += f"| `{field['name']}` | {field['type']} | {req} | {desc} |\n"
+                        markdown += '\n'
+                    
+                    # Example JSON
                     dummy = extract_schema(schema, components)
-                    markdown += '```json\n'
+                    markdown += '**Example:**\n```json\n'
                     markdown += json.dumps(dummy, indent=2) + '\n'
                     markdown += '```\n\n'
                     has_body = True
                 elif 'multipart/form-data' in content:
                     schema = content['multipart/form-data'].get('schema', {})
+                    
+                    schema_details = extract_schema_details(schema, components)
+                    if schema_details:
+                        markdown += '*(multipart/form-data)*\n\n**Fields:**\n'
+                        markdown += '| Field | Type | Required | Description |\n'
+                        markdown += '|-------|------|----------|-------------|\n'
+                        for field in schema_details:
+                            req = '✓ Yes' if field['required'] else '✗ No'
+                            desc = field['description'] or '-'
+                            markdown += f"| `{field['name']}` | {field['type']} | {req} | {desc} |\n"
+                        markdown += '\n'
+                    
                     dummy = extract_schema(schema, components)
-                    markdown += '*(multipart/form-data)*\n```json\n'
+                    markdown += '**Example:**\n```json\n'
                     markdown += json.dumps(dummy, indent=2) + '\n'
                     markdown += '```\n\n'
                     has_body = True
@@ -96,32 +173,59 @@ def main():
                 # Check parameters for query/path params
                 params = details.get('parameters', [])
                 if params:
+                    markdown += '| Parameter | Type | Required | Description |\n'
+                    markdown += '|-----------|------|----------|-------------|\n'
                     for p in params:
                         p_name = p.get('name')
                         p_in = p.get('in')
                         p_req = p.get('required', False)
                         p_type = p.get('schema', {}).get('type', 'string')
-                        markdown += f'- `{p_name}` ({p_in}, {p_type}) {"*(required)*" if p_req else ""}\n'
+                        p_desc = p.get('description', '') or '-'
+                        req = '✓ Yes' if p_req else '✗ No'
+                        markdown += f'| `{p_name}` ({p_in}) | {p_type} | {req} | {p_desc} |\n'
                     markdown += '\n'
                 else:
-                    markdown += '`None`\n\n'
+                    markdown += 'None\n\n'
 
             # 3. Response
-            markdown += '### 3. Response\n'
+            markdown += '### 3. Response / Output\n'
             responses = details.get('responses', {})
             for status_code, response_details in responses.items():
                 markdown += f'**Status {status_code}**: {response_details.get("description", "")}\n\n'
                 content = response_details.get('content', {})
                 if 'application/json' in content:
                     schema = content['application/json'].get('schema', {})
+                    
+                    # Get schema details
+                    schema_details = extract_schema_details(schema, components)
+                    if schema_details:
+                        markdown += '**Fields:**\n'
+                        markdown += '| Field | Type | Description |\n'
+                        markdown += '|-------|------|-------------|\n'
+                        for field in schema_details:
+                            desc = field['description'] or '-'
+                            markdown += f"| `{field['name']}` | {field['type']} | {desc} |\n"
+                        markdown += '\n'
+                    
                     dummy_response = extract_schema(schema, components)
-                    markdown += '```json\n'
+                    markdown += '**Example:**\n```json\n'
                     markdown += json.dumps(dummy_response, indent=2) + '\n'
                     markdown += '```\n\n'
                 elif '*/*' in content:
                     schema = content['*/*'].get('schema', {})
+                    
+                    schema_details = extract_schema_details(schema, components)
+                    if schema_details:
+                        markdown += '**Fields:**\n'
+                        markdown += '| Field | Type | Description |\n'
+                        markdown += '|-------|------|-------------|\n'
+                        for field in schema_details:
+                            desc = field['description'] or '-'
+                            markdown += f"| `{field['name']}` | {field['type']} | {desc} |\n"
+                        markdown += '\n'
+                    
                     dummy_response = extract_schema(schema, components)
-                    markdown += '```json\n'
+                    markdown += '**Example:**\n```json\n'
                     markdown += json.dumps(dummy_response, indent=2) + '\n'
                     markdown += '```\n\n'
                 else:

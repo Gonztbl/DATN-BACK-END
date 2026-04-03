@@ -450,72 +450,47 @@ Báo cáo này được tạo sau khi phân tích toàn bộ codebase (controlle
 
 ### Tổng quan
 
-| Entity | Tổng thuộc tính | Đang sử dụng | Chưa sử dụng | Tỷ lệ sử dụng |
-|---|---|---|---|---|
-| User | 16 | 14 | 2 | 87.5% |
-| Order | 24 | 20 | 4 | 83.3% |
-| Product | 15 | 13 | 2 | 86.7% |
-| Restaurant | 14 | 12 | 2 | 85.7% |
-| Wallet | 10 | 10 | 0 | 100% |
-| Transaction | 15 | 13 | 2 | 86.7% |
-| Category | 7 | 7 | 0 | 100% |
-| Card | 10 | 10 | 0 | 100% |
-| Review | 7 | 7 | 0 | 100% |
-| Notification | 7 | 7 | 0 | 100% |
-| Address | 8 | 8 | 0 | 100% |
-| BankAccount | 10 | 9 | 1 | 90% |
-| Favorite | 4 | 4 | 0 | 100% |
-| SupportTicket | 11 | 9 | 2 | 81.8% |
-| AdminAction | 8 | 6 | 2 | 75% |
-| BalanceChangeLog | 7 | 6 | 1 | 85.7% |
-| BankTransfer | 8 | 6 | 2 | 75% |
-| CardDeposit | 7 | 7 | 0 | 100% |
-| CardWithdraw | 9 | 9 | 0 | 100% |
-| Contact | 5 | 5 | 0 | 100% |
-| FaceEmbedding | 8 | 8 | 0 | 100% |
-| FaceVerificationLog | 7 | 7 | 0 | 100% |
-| OrderItem | 9 | 9 | 0 | 100% |
-| OTPRequest | 7 | 6 | 1 | 85.7% |
-| QRCode | 6 | 6 | 0 | 100% |
-| Session | 8 | 8 | 0 | 100% |
-| ShipperProfile | 10 | 8 | 2 | 80% |
-| SystemConfig | 5 | 5 | 0 | 100% |
-| TicketReply | 6 | 6 | 0 | 100% |
-| TransferDetail | 7 | 7 | 0 | 100% |
+> Cập nhật lại theo code hiện tại: một số dòng trong báo cáo cũ đã lỗi thời. Các field như `User.isVerified`, `User.membership`, `User.avatarUrl`, `Order.rejectedReason`, `Order.deliveryFailedReason`, các timestamp trạng thái của `Order`, `Restaurant.schedule`, `Transaction.idempotencyKey` và `SupportTicket.assignedTo` đều đã có reference trong service/controller hiện tại.
+
+| Nhóm Entity | Mức độ sử dụng | Ghi chú |
+|---|---|---|
+| `users`, `wallets`, `transactions` | Rất cao | Nhóm lõi xác thực, ví và dòng tiền |
+| `orders`, `order_items`, `products`, `restaurants`, `categories`, `reviews`, `addresses` | Rất cao | Nhóm food ordering chính |
+| `cards`, `bank_accounts`, `card_deposits`, `card_withdraws`, `favorites`, `notifications`, `support_tickets` | Trung bình - cao | Tính năng thanh toán và hỗ trợ |
+| `otp_requests`, `sessions`, `qr_codes`, `face_embeddings`, `face_verification_logs`, `shipper_profiles`, `system_configs` | Trung bình | Tính năng bổ trợ / bảo mật / vận hành |
+| `admin_actions`, `balance_change_logs`, `bank_transfers`, `transfer_details` | Thấp - trung bình | Audit, cleanup và một số flow chuyên biệt |
 
 ### Chi tiết theo Entity
 
 #### 1. User
 **Thuộc tính đang sử dụng:**
-- `id`, `userName`, `email`, `phone`, `fullName`, `avatar`, `dateOfBirth`, `address`, `passwordHash`, `pinHash`, `isActive`, `role`, `createdAt`, `updatedAt`
+- `id`, `userName`, `email`, `phone`, `fullName`, `avatar`, `dateOfBirth`, `address`, `passwordHash`, `pinHash`, `isActive`, `isVerified`, `role`, `createdAt`, `updatedAt`, `avatarUrl`, `membership`
 
-**Thuộc tính CHƯA sử dụng / Để trống:**
-- `isVerified` - Luôn được đọc nhưng chưa có API cập nhật
-- `membership` - Đọc trong profile nhưng chưa có logic cập nhật
-- `avatarUrl` - Đọc trong profile nhưng không có API cập nhật riêng
+**Ghi chú cập nhật:**
+- `isVerified` đang được cập nhật trong luồng đăng ký/xóa dữ liệu khuôn mặt
+- `membership` và `avatarUrl` đang được map ra DTO/profile, tuy chưa có luồng quản trị riêng biệt
 
 #### 2. Order
 **Thuộc tính đang sử dụng:**
-- `id`, `userId`, `totalAmount`, `status`, `deliveryAddress`, `recipientName`, `recipientPhone`, `note`, `paymentMethod`, `restaurantId`, `shipperId`, `createdAt`, `updatedAt`, `orderItems`, `restaurant`
+- `id`, `userId`, `totalAmount`, `status`, `deliveryAddress`, `recipientName`, `recipientPhone`, `note`, `paymentMethod`, `restaurantId`, `shipperId`, `rejectedReason`, `deliveryFailedReason`, `confirmedAt`, `readyAt`, `pickedUpAt`, `deliveredAt`, `createdAt`, `updatedAt`, `orderItems`, `restaurant`
 
-**Thuộc tính CHƯA sử dụng / Để trống:**
-- `rejectedReason` - Chưa có API cập nhật lý do từ chối
-- `deliveryFailedReason` - Chưa có API cập nhật lý do giao thất bại
-- `confirmedAt`, `readyAt`, `pickedUpAt`, `deliveredAt` - Timestamps trạng thái chưa được cập nhật tự động
+**Ghi chú cập nhật:**
+- `rejectedReason` và `deliveryFailedReason` đã được set trong các flow từ chối/giao thất bại
+- `confirmedAt`, `readyAt`, `pickedUpAt`, `deliveredAt` đã được cập nhật trong luồng nhà hàng và shipper
 
 #### 3. Product
 **Thuộc tính đang sử dụng:**
 - `id`, `name`, `description`, `price`, `imageBase64`, `categoryId`, `restaurantId`, `ratingAvg`, `ratingCount`, `status`, `createdAt`, `updatedAt`, `deletedAt`, `category`, `restaurant`
 
-**Thuộc tính CHƯA sử dụng / Để trống:**
-- `reviews` - Relation được định nghĩa nhưng chưa có API truy vấn reviews từ product
+**Thuộc tính dùng gián tiếp / ít dùng trực tiếp:**
+- `reviews` - Quan hệ ORM có tồn tại, nhưng API hiện chủ yếu query review qua `ReviewRepository` thay vì truy cập trực tiếp từ `Product`
 
 #### 4. Restaurant
 **Thuộc tính đang sử dụng:**
-- `id`, `name`, `phone`, `email`, `address`, `logoBase64`, `status`, `productCount`, `createdAt`, `updatedAt`, `deletedAt`, `ownerId`, `description`, `categoryId`, `products`
+- `id`, `name`, `phone`, `email`, `address`, `logoBase64`, `status`, `productCount`, `createdAt`, `updatedAt`, `deletedAt`, `ownerId`, `description`, `categoryId`, `schedule`, `products`
 
-**Thuộc tính CHƯA sử dụng / Để trống:**
-- `schedule` - Chưa có API cập nhật/cập nhật lịch làm việc
+**Ghi chú cập nhật:**
+- `schedule` đang được đọc/ghi trong luồng cập nhật thông tin nhà hàng, không còn là field bỏ trống
 
 #### 5. Wallet
 **Tất cả thuộc tính đều được sử dụng:**
@@ -523,11 +498,10 @@ Báo cáo này được tạo sau khi phân tích toàn bộ codebase (controlle
 
 #### 6. Transaction
 **Thuộc tính đang sử dụng:**
-- `id`, `wallet`, `type`, `direction`, `amount`, `fee`, `balanceBefore`, `balanceAfter`, `status`, `referenceId`, `metadata`, `createdAt`, `updatedAt`
+- `id`, `wallet`, `type`, `direction`, `amount`, `fee`, `balanceBefore`, `balanceAfter`, `status`, `referenceId`, `idempotencyKey`, `metadata`, `createdAt`, `updatedAt`
 
-**Thuộc tính CHƯA sử dụng / Để trống:**
-- `idempotencyKey` - Chưa có logic kiểm tra idempotency
-- `relatedTxId` - Chưa có logic liên kết transaction
+**Thuộc tính dùng nhẹ / chưa thấy dùng rõ:**
+- `relatedTxId` - Chưa thấy được khai thác rõ trong các flow refund/reversal hiện tại
 
 #### 7. Category
 **Tất cả thuộc tính đều được sử dụng:**
@@ -551,10 +525,10 @@ Báo cáo này được tạo sau khi phân tích toàn bộ codebase (controlle
 
 #### 12. BankAccount
 **Thuộc tính đang sử dụng:**
-- `id`, `code`, `user`, `bankCode`, `bankName`, `accountNumber`, `accountName`, `status`, `createdAt`
+- `id`, `user`, `bankCode`, `bankName`, `accountNumber`, `accountName`, `status`, `createdAt`
 
-**Thuộc tính CHƯA sử dụng / Để trống:**
-- `code` - Được tạo nhưng chưa sử dụng trong API
+**Thuộc tính dùng nhẹ / chưa thấy dùng rõ:**
+- `code` - Được tạo trong model nhưng hiện chưa thấy được khai thác rõ ở API nghiệp vụ
 
 #### 13. Favorite
 **Tất cả thuộc tính đều được sử dụng:**
@@ -562,10 +536,10 @@ Báo cáo này được tạo sau khi phân tích toàn bộ codebase (controlle
 
 #### 14. SupportTicket
 **Thuộc tính đang sử dụng:**
-- `id`, `user`, `subject`, `message`, `orderId`, `attachments`, `status`, `createdAt`, `updatedAt`, `replies`
+- `id`, `user`, `subject`, `message`, `orderId`, `attachments`, `status`, `createdAt`, `updatedAt`, `assignedTo`, `replies`
 
-**Thuộc tính CHƯA sử dụng / Để trống:**
-- `assignedTo` - Chưa có API phân công admin xử lý
+**Ghi chú cập nhật:**
+- `assignedTo` đã được dùng trong luồng admin nhận/xử lý ticket, không còn là field bỏ trống
 
 #### 15. AdminAction
 **Thuộc tính đang sử dụng:**
@@ -616,11 +590,8 @@ Báo cáo này được tạo sau khi phân tích toàn bộ codebase (controlle
 - `id`, `orderId`, `productId`, `quantity`, `priceAtTime`, `note`, `order`, `product`
 
 #### 24. OTPRequest
-**Thuộc tính đang sử dụng:**
+**Tất cả thuộc tính đều được sử dụng:**
 - `id`, `user`, `purpose`, `otpCode`, `isUsed`, `expiresAt`, `createdAt`
-
-**Thuộc tính CHƯA sử dụng / Để trống:**
-- Đang được sử dụng đầy đủ trong OTPService
 
 #### 25. QRCode
 **Tất cả thuộc tính đều được sử dụng:**
@@ -651,110 +622,58 @@ Báo cáo này được tạo sau khi phân tích toàn bộ codebase (controlle
 
 ### Khuyến nghị
 
-1. **Order timestamps**: Nên thêm logic tự động cập nhật `confirmedAt`, `readyAt`, `pickedUpAt`, `deliveredAt` khi chuyển trạng thái
-2. **Restaurant schedule**: Nên triển khai API quản lý lịch làm việc của nhà hàng
-3. **Shipper location**: Nên triển khai API cập nhật vị trí real-time cho shipper
-4. **Bank integration**: `bankReference`, `provider`, `processedAt` nên được sử dụng khi tích hợp ngân hàng thực
-5. **User verification**: Nên có API để cập nhật `isVerified` và `membership`
-6. **Transaction idempotency**: Nên triển khai kiểm tra `idempotencyKey` để tránh duplicate transactions
+1. **Shipper location**: Nên bổ sung API cập nhật `currentLat`/`currentLng` nếu muốn theo dõi vị trí real-time.
+2. **Bank integration**: `provider`, `processedAt` và cơ chế đồng bộ `bankReference` ở `BankTransfer` nên được hoàn thiện khi tích hợp ngân hàng thật.
+3. **Transaction linking**: Có thể bổ sung use case rõ ràng cho `relatedTxId` nếu sau này hỗ trợ refund/reversal.
+4. **Documentation hygiene**: Nên tiếp tục cập nhật `DATABASE.md` theo code hiện tại để tránh sai lệch giữa tài liệu và implementation.
 
 ---
 
-## Tổng hợp Danh sách Thuộc tính CHƯA Sử dụng
+## Tổng hợp Danh sách Thuộc tính Dùng Nhẹ / Chưa Thấy Dùng Rõ
 
-Dưới đây là danh sách đầy đủ tất cả các thuộc tính đang bỏ trống/chưa được sử dụng trong hệ thống:
-
-### User
-| Thuộc tính | Lý do chưa sử dụng |
-|---|---|
-| `isVerified` | Đọc trong profile nhưng chưa có API cập nhật trạng thái xác thực |
-| `membership` | Đọc trong profile nhưng chưa có logic cập nhật cấp độ thành viên |
-| `avatarUrl` | Đọc trong profile nhưng không có API cập nhật riêng, sử dụng `avatar` thay thế |
-
-### Order
-| Thuộc tính | Lý do chưa sử dụng |
-|---|---|
-| `rejectedReason` | Chưa có API cập nhật lý do từ chối đơn hàng |
-| `deliveryFailedReason` | Chưa có API cập nhật lý do giao hàng thất bại |
-| `confirmedAt` | Timestamp chưa được cập nhật khi nhà hàng xác nhận đơn |
-| `readyAt` | Timestamp chưa được cập nhật khi đơn sẵn sàng giao |
-| `pickedUpAt` | Timestamp chưa được cập nhật khi shipper nhận đơn |
-| `deliveredAt` | Timestamp chưa được cập nhật khi giao thành công |
-
-### Product
-| Thuộc tính | Lý do chưa sử dụng |
-|---|---|
-| `reviews` | Relation được định nghĩa nhưng chưa có API truy vấn reviews từ product (chỉ có API ngược lại từ Review) |
-
-### Restaurant
-| Thuộc tính | Lý do chưa sử dụng |
-|---|---|
-| `schedule` | Chưa có API quản lý/cập nhật lịch làm việc của nhà hàng |
+Sau khi đối chiếu lại code hiện tại, nhiều mục từng được đánh dấu “chưa sử dụng” thực tế **đã có logic dùng**. Hiện tại các field cần xem là **dùng nhẹ hoặc chưa thấy khai thác rõ** chủ yếu gồm:
 
 ### Transaction
-| Thuộc tính | Lý do chưa sử dụng |
+| Thuộc tính | Ghi chú |
 |---|---|
-| `idempotencyKey` | Chưa triển khai logic kiểm tra idempotency để tránh duplicate |
-| `relatedTxId` | Chưa có logic liên kết các transaction liên quan (refund, reversal) |
+| `relatedTxId` | Chưa thấy được dùng rõ trong flow hoàn tiền / đảo giao dịch |
 
 ### BankAccount
-| Thuộc tính | Lý do chưa sử dụng |
+| Thuộc tính | Ghi chú |
 |---|---|
-| `code` | Được tạo tự động nhưng chưa sử dụng trong bất kỳ API nào |
+| `code` | Có trong entity nhưng chưa thấy khai thác rõ ở API nghiệp vụ |
 
-### SupportTicket
-| Thuộc tính | Lý do chưa sử dụng |
+### Product
+| Thuộc tính | Ghi chú |
 |---|---|
-| `assignedTo` | Chưa có API phân công admin xử lý ticket cụ thể |
-
-### AdminAction
-| Thuộc tính | Lý do chưa sử dụng |
-|---|---|
-| `reason` | Chưa có API cập nhật lý do thực hiện action |
-| `metadata` | Chưa có API cập nhật thông tin bổ sung dạng JSON |
-
-### BalanceChangeLog
-| Thuộc tính | Lý do chưa sử dụng |
-|---|---|
-| *Entity đầy đủ* | Đang được tạo record nhưng chưa có API endpoint để query chi tiết |
+| `reviews` | Quan hệ ORM có tồn tại, nhưng API hiện đang query review chủ yếu từ `ReviewRepository` |
 
 ### BankTransfer
-| Thuộc tính | Lý do chưa sử dụng |
+| Thuộc tính | Ghi chú |
 |---|---|
-| `bankReference` | Chưa có tích hợp ngân hàng thực để nhận mã tham chiếu |
-| `provider` | Chưa có tích hợp payment provider |
-| `processedAt` | Chưa có cập nhật thời gian xử lý thực tế |
-
-### OTPRequest
-| Thuộc tính | Lý do chưa sử dụng |
-|---|---|
-| *Đầy đủ* | Đang sử dụng đầy đủ trong OTPService |
+| `bankReference` | Có khái niệm trong luồng webhook, nhưng việc lưu/use trong `BankTransfer` còn mỏng |
+| `provider` | Chưa thấy tích hợp provider hoàn chỉnh |
+| `processedAt` | Chưa thấy cập nhật thời điểm xử lý một cách ổn định |
 
 ### ShipperProfile
-| Thuộc tính | Lý do chưa sử dụng |
+| Thuộc tính | Ghi chú |
 |---|---|
 | `currentLat` | Chưa có API cập nhật vị trí latitude real-time |
 | `currentLng` | Chưa có API cập nhật vị trí longitude real-time |
 
 ---
 
-## Thống kê Tổng quan Thuộc tính Chưa Sử dụng
+## Kết luận cập nhật
 
-| Entity | Số thuộc tính chưa dùng | Phân loại |
-|---|---|---|
-| User | 3 | Thiếu API cập nhật |
-| Order | 6 | Thiếu timestamps tự động |
-| Product | 1 | Thiếu API query |
-| Restaurant | 1 | Thiếu API quản lý lịch |
-| Transaction | 2 | Thiếu logic nghiệp vụ |
-| BankAccount | 1 | Thuộc tính dư thừa |
-| SupportTicket | 1 | Thiếu API phân công |
-| AdminAction | 2 | Thiếu API cập nhật |
-| BalanceChangeLog | 1 | Thiếu API query |
-| BankTransfer | 3 | Chưa tích hợp ngân hàng |
-| ShipperProfile | 2 | Thiếu API vị trí |
-| **TỔNG** | **23** | |
+Các field sau đây **đang được dùng thật trong code hiện tại** và không nên tiếp tục xếp vào nhóm “chưa sử dụng”:
+
+- `User.isVerified`, `User.membership`, `User.avatarUrl`
+- `Order.rejectedReason`, `Order.deliveryFailedReason`
+- `Order.confirmedAt`, `Order.readyAt`, `Order.pickedUpAt`, `Order.deliveredAt`
+- `Restaurant.schedule`
+- `Transaction.idempotencyKey`
+- `SupportTicket.assignedTo`
 
 ---
 
-*Báo cáo được tạo tự động từ phân tích codebase*
+*Báo cáo đã được cập nhật lại theo codebase hiện tại*

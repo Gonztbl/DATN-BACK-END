@@ -72,4 +72,10 @@ public class User {
     @Column(name = "membership")
     private String membership; // e.g., "Silver", "Gold", "Platinum"
 
+    @Column(name = "kyc_level")
+    private Integer kycLevel; // Default 1
+
+    @Column(name = "job_segment", length = 100)
+    private String jobSegment; // Job classification
+
 }

@@ -45,4 +45,7 @@ public class Wallet {
 
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions;
+
+    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WalletDailySnapshot> dailySnapshots;
 }
