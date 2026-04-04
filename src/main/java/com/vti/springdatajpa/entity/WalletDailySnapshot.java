@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "WalletDailySnapshot")
 @Table(name = "wallet_daily_snapshots", indexes = {
         @Index(name = "idx_wallet_id", columnList = "wallet_id"),
         @Index(name = "idx_record_date", columnList = "record_date")

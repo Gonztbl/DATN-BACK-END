@@ -1,14 +1,17 @@
 package com.vti.springdatajpa.service;
 
 import com.vti.springdatajpa.dto.LoanRequestApplyDTO;
+import com.vti.springdatajpa.dto.LoanRequestListDTO;
 import com.vti.springdatajpa.dto.LoanRequestResponseDTO;
 import com.vti.springdatajpa.dto.LoanSummaryDTO;
+import com.vti.springdatajpa.dto.AdminDashboardStatsDTO;
 import com.vti.springdatajpa.dto.AdminLoanDetailDTO;
 import com.vti.springdatajpa.entity.*;
 import com.vti.springdatajpa.entity.enums.LoanStatus;
 import com.vti.springdatajpa.entity.enums.TransactionDirection;
 import com.vti.springdatajpa.entity.enums.TransactionStatus;
 import com.vti.springdatajpa.entity.enums.TransactionType;
+import com.vti.springdatajpa.dto.UserAIAnalysisDTO;
 import com.vti.springdatajpa.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -243,10 +246,44 @@ public class LoanService {
     }
 
     /**
+     * Admin: Get list of pending loan summaries (with search + filter)
+     */
+    public Page<LoanRequestListDTO> getPendingAdminLoanList(String keyword, Double minAiScore, Double maxAiScore, Pageable pageable) {
+        return loanRequestRepository.findPendingAdminLoanListDTO(
+                LoanStatus.PENDING_ADMIN,
+                (keyword == null || keyword.trim().isEmpty()) ? null : keyword.trim(),
+                minAiScore,
+                maxAiScore,
+                pageable
+        );
+    }
+
+    /**
+     * Admin: Get list of all loans (for debugging)
+     */
+    public Page<LoanRequestListDTO> getAllLoansList(String keyword, Double minAiScore, Double maxAiScore, LoanStatus status, Pageable pageable) {
+        return loanRequestRepository.findAllLoansListDTO(
+                (keyword == null || keyword.trim().isEmpty()) ? null : keyword.trim(),
+                minAiScore,
+                maxAiScore,
+                status,
+                pageable
+        );
+    }
+
+    /**
      * Admin: Get list of loans pending admin review
      */
     public Page<LoanRequest> getPendingAdminReviewLoans(Pageable pageable) {
         return loanRequestRepository.findByFinalStatusOrderByCreatedAtDesc(LoanStatus.PENDING_ADMIN, pageable);
+    }
+
+    public AdminDashboardStatsDTO getAdminDashboardStats() {
+        AdminDashboardStatsDTO stats = loanRequestRepository.findAdminDashboardStats(LoanStatus.PENDING_ADMIN);
+        if (stats == null) {
+            stats = new AdminDashboardStatsDTO(0L, 0.0, 0L, 0L, 0L);
+        }
+        return stats;
     }
 
     /**
@@ -420,6 +457,31 @@ public class LoanService {
             dto.setAvailableBalance(wallet.getAvailableBalance());
         }
 
+        // AI Analysis - Real-time Extraction
+        try {
+            UserAIAnalysisDTO analysis = featureExtractionService.getUserAIAnalysis(user);
+            
+            // Map AI metrics (keeping ratio format for loan review if specified in doc)
+            dto.setAge(analysis.getAge());
+            dto.setAccountAgeDays(analysis.getAccountAgeDays());
+            dto.setAvgBalance(analysis.getAvgBalance());
+            dto.setBalanceVolatility(analysis.getBalanceVolatility());
+            dto.setLowBalanceDaysRatio(analysis.getLowBalanceDaysRatio() / 100.0);
+            dto.setMonthlyInflowMean(analysis.getMonthlyInflowMean());
+            dto.setMonthlyOutflowMean(analysis.getMonthlyOutflowMean());
+            dto.setLargestInflow(analysis.getLargestInflow());
+            dto.setLargestOutflow(analysis.getLargestOutflow());
+            dto.setTransactionCount(analysis.getTransactionCount());
+            dto.setRejectedTransactionRatio(analysis.getRejectedTransactionRatio() / 100.0);
+            dto.setPeerTransferRatio(analysis.getPeerTransferRatio() / 100.0);
+            dto.setUniqueReceivers(analysis.getUniqueReceivers());
+            dto.setSpendIncomeRatio(analysis.getSpendIncomeRatio() / 100.0);
+            
+            log.info("Populated AI features for loan detail ID: {}", loanRequest.getId());
+        } catch (Exception e) {
+            log.warn("Could not populate AI features for loan detail: {}", e.getMessage());
+        }
+
         return dto;
     }
 
@@ -429,6 +491,7 @@ public class LoanService {
             case PENDING_ADMIN -> "Đang chờ admin xét duyệt";
             case APPROVED -> "Đã duyệt";
             case REJECTED -> "Đã từ chối";
+            case REJECTED_AI -> "AI từ chối";
         };
     }
 
@@ -438,26 +501,36 @@ public class LoanService {
             case PENDING_ADMIN -> "AI đã hoàn thành phân tích, chờ quản lý xem xét";
             case APPROVED -> "Hồ sơ đã được duyệt, tiền sẽ được cộng vào tài khoản";
             case REJECTED -> "Hồ sơ không được duyệt";
+            case REJECTED_AI -> "Hồ sơ bị AI từ chối do rủi ro tín dụng cao";
         };
     }
 
     public Integer getAuthenticatedUserId() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof User) {
-            return ((User) principal).getId();
-        }
-        String identity = null;
-        if (principal instanceof String) {
-            identity = (String) principal;
-        }
-        if (identity == null) {
-            throw new RuntimeException("Unsupported principal type for authenticated user");
-        }
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof User) {
+                return ((User) principal).getId();
+            }
+            String identity = null;
+            if (principal instanceof String) {
+                identity = (String) principal;
+            }
+            if (identity == null) {
+                log.error("Unsupported principal type for authenticated user");
+                throw new RuntimeException("Unsupported principal type for authenticated user");
+            }
 
-        final String finalIdentity = identity;
-        return userRepository.findByUserName(finalIdentity)
-                .or(() -> userRepository.findByEmail(finalIdentity))
-                .map(User::getId)
-                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found: " + finalIdentity));
+            final String finalIdentity = identity;
+            return userRepository.findByUserName(finalIdentity)
+                    .or(() -> userRepository.findByEmail(finalIdentity))
+                    .map(User::getId)
+                    .orElseThrow(() -> {
+                        log.error("Authenticated user not found: {}", finalIdentity);
+                        return new EntityNotFoundException("Authenticated user not found: " + finalIdentity);
+                    });
+        } catch (Exception e) {
+            log.error("Error getting authenticated user ID: {}", e.getMessage());
+            throw new RuntimeException("Authentication failed: " + e.getMessage());
+        }
     }
 }

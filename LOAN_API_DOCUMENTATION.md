@@ -303,6 +303,67 @@ Lấy thông tin chi tiết của một đơn vay (user chỉ có thể xem đơ
 
 ---
 
+## 4️⃣ **GET /api/v1/loans/summary** - Tóm Tắt Khoản Vay (Mới Thêm)
+
+### 📌 Mô Tả
+Lấy tóm tắt tổng quan về các đơn vay của người dùng hiện tại cho dashboard.
+
+### 📡 Request
+**HTTP Method:** `GET`  
+**URL:** `http://localhost:8080/api/v1/loans/summary`  
+**Authentication:** Yêu cầu JWT token (user role)
+
+### 📤 Response - Success (200 OK)
+```json
+{
+  "totalLoans": 5,
+  "totalLoanAmount": 250000000,
+  "approvedLoans": 2,
+  "pendingAdminLoans": 1,
+  "rejectedLoans": 2,
+  "averageAiScore": 0.65,
+  "creditRating": "Good",
+  "statusDisplay": "Loan dashboard summary",
+  "descriptionText": "This summary is based on all your loan requests and AI scoring."
+}
+```
+
+#### Response Fields
+| Field | Type | Description |
+|-------|------|-------------|
+| **totalLoans** | Integer | Tổng số đơn vay |
+| **totalLoanAmount** | BigDecimal | Tổng số tiền vay |
+| **approvedLoans** | Integer | Số đơn đã duyệt |
+| **pendingAdminLoans** | Integer | Số đơn chờ admin |
+| **rejectedLoans** | Integer | Số đơn bị từ chối |
+| **averageAiScore** | Double | Điểm AI trung bình (0-1) |
+| **creditRating** | String | Xếp hạng tín dụng (Excellent/Good/Fair/Poor) |
+| **statusDisplay** | String | Tiêu đề hiển thị |
+| **descriptionText** | String | Mô tả |
+
+### 📤 Response - Error Cases
+#### Case 1: Unauthorized (401)
+```json
+{
+  "timestamp": "2026-04-03T11:00:00",
+  "status": 401,
+  "error": "Unauthorized",
+  "message": "JWT token is missing or expired"
+}
+```
+
+---
+
+## 📋 **Changelog & Updates**
+
+### 📅 **03/04/2026 - Latest Updates**
+- ✅ **Sửa lỗi**: API `/apply` thêm fallback mock scoring khi AI model không load.
+- ✅ **Thêm mới**: API `/summary` cho dashboard user.
+- ✅ **Cải tiến**: Kiểm tra gian lận thu nhập khai báo vs thực tế.
+- ✅ **Fix kỹ thuật**: Sửa kiểu dữ liệu DTO để compile thành công.
+
+---
+
 ## 🔐 **Admin APIs**
 
 ### 4️⃣ **GET /api/v1/admin/loans** - Danh Sách Đơn Vay Chờ Duyệt

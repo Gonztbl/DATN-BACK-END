@@ -4,5 +4,6 @@ public enum LoanStatus {
     PENDING_AI,      // Waiting for AI decision
     PENDING_ADMIN,   // Waiting for admin review
     APPROVED,
-    REJECTED
+    REJECTED,
+    REJECTED_AI      // Rejected by AI scoring
 }

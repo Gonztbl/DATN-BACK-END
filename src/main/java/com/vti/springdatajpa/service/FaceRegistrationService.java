@@ -55,12 +55,13 @@ public class FaceRegistrationService {
 
         FaceEmbedding saved = embeddingRepository.save(faceEmbedding);
 
-        // Update user's isVerified status to true
+        // Update user's isVerified status and promote KYC level to 3
         User user = userRepository.findById(userId).orElse(null);
         if (user != null) {
             user.setVerified(true);
+            user.setKycLevel(3); // Promote to KYC level 3 when face registration succeeds
             userRepository.save(user);
-            log.info("User {} isVerified status updated to true", userId);
+            log.info("User {} isVerified status updated to true and kycLevel promoted to 3", userId);
         }
 
         // Invalidate cache for this user

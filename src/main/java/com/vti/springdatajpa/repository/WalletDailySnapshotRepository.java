@@ -36,18 +36,16 @@ public interface WalletDailySnapshotRepository extends JpaRepository<WalletDaily
     // Count snapshots with low balance (< 50k) for a wallet
     @Query("SELECT COUNT(wds) FROM WalletDailySnapshot wds " +
            "WHERE wds.wallet.id = :walletId AND wds.recordDate >= :fromDate " +
-           "AND CAST(wds.endOfDayBalance AS java.math.BigDecimal) < 50000")
+           "AND wds.endOfDayBalance < 50000")
     Long countLowBalanceDays(@Param("walletId") Integer walletId, @Param("fromDate") LocalDate fromDate);
 
     // Calculate average balance for a wallet
-    @Query("SELECT AVG(CAST(wds.endOfDayBalance AS DOUBLE)) FROM WalletDailySnapshot wds " +
+    @Query("SELECT AVG(wds.endOfDayBalance) FROM WalletDailySnapshot wds " +
            "WHERE wds.wallet.id = :walletId AND wds.recordDate >= :fromDate")
     Double getAverageBalance(@Param("walletId") Integer walletId, @Param("fromDate") LocalDate fromDate);
 
     // Calculate standard deviation of balance for a wallet
-    @Query("SELECT SQRT(AVG(POWER(CAST(wds.endOfDayBalance AS DOUBLE) - " +
-           "(SELECT AVG(CAST(wds2.endOfDayBalance AS DOUBLE)) FROM WalletDailySnapshot wds2 " +
-           "WHERE wds2.wallet.id = :walletId AND wds2.recordDate >= :fromDate), 2))) " +
+    @Query("SELECT STDDEV(wds.endOfDayBalance) " +
            "FROM WalletDailySnapshot wds " +
            "WHERE wds.wallet.id = :walletId AND wds.recordDate >= :fromDate")
     Double getBalanceStdDev(@Param("walletId") Integer walletId, @Param("fromDate") LocalDate fromDate);

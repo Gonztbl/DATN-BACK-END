@@ -51,6 +51,8 @@ public class RegisterServiceImpl implements RegisterService {
         user.setPinHash(String.valueOf(pin));
         user.setActive(true);
         user.setRole(Role.USER);
+        user.setKycLevel(1); // Default KYC level 1 on registration
+        user.setVerified(false); // Not verified until face registration
         user.setCreatedAt(java.time.LocalDateTime.now());
 
 
@@ -91,6 +93,8 @@ public class RegisterServiceImpl implements RegisterService {
         int pin = 100000 + new Random().nextInt(900000);
         user.setPinHash(String.valueOf(pin));
         user.setActive(true);
+        user.setKycLevel(1); // Default KYC level 1 on registration
+        user.setVerified(false); // Not verified until face registration
         // Role is already set by the caller
         user.setCreatedAt(java.time.LocalDateTime.now());
 

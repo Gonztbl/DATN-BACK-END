@@ -44,19 +44,20 @@ public class AdminLoanDetailDTO {
     private Double availableBalance;
 
     // AI Features (for admin review)
-    private Float age;
-    private Long accountAgeDays;
-    private Float avgBalance;
-    private Float balanceVolatility;
-    private Float lowBalanceDaysRatio;
-    private Float monthlyInflowMean;
-    private Float monthlyOutflowMean;
-    private Float largestInflow;
-    private Long transactionCount;
-    private Float rejectedTransactionRatio;
-    private Float peerTransferRatio;
-    private Long uniqueReceivers;
+    private Double age;
+    private Double accountAgeDays;
+    private Double avgBalance;
+    private Double balanceVolatility;
+    private Double lowBalanceDaysRatio;
+    private Double monthlyInflowMean;
+    private Double monthlyOutflowMean;
+    private Double largestInflow;
+    private Double largestOutflow;
+    private Double transactionCount;
+    private Double rejectedTransactionRatio;
+    private Double peerTransferRatio;
+    private Double uniqueReceivers;
 
     // Computed
-    private Float spendIncomeRatio;
+    private Double spendIncomeRatio;
 }

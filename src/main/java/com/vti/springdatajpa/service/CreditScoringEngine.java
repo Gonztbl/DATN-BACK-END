@@ -14,7 +14,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.io.File;
 import java.nio.FloatBuffer;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,7 +75,7 @@ public class CreditScoringEngine {
             modelLoaded = true;
             log.info("CreditScoringEngine initialized successfully");
         } catch (Exception e) {
-            log.error("Failed to initialize CreditScoringEngine, using mock mode: {}", e.getMessage());
+            log.error("CRITICAL: Failed to initialize CreditScoringEngine: {}", e.getMessage(), e);
             modelLoaded = false;
         }
     }
@@ -110,63 +109,74 @@ public class CreditScoringEngine {
 
         // Use mock scoring if model is not loaded
         if (!modelLoaded) {
-            log.warn("Model not available, using mock scoring");
-            return mockPredict(rawFeatures);
+            String errorMsg = "Credit scoring model is not initialized. Check server logs for startup errors.";
+            log.error(errorMsg);
+            throw new RuntimeException(errorMsg);
         }
 
         try {
+            // Log raw features for debugging
+            log.info("AI Prediction - Raw Features: {}", java.util.Arrays.toString(rawFeatures));
+
             // Normalize features using (value - mean) / scale
             float[] normalizedFeatures = normalizeFeatures(rawFeatures);
+            log.info("AI Prediction - Normalized Features: {}", java.util.Arrays.toString(normalizedFeatures));
             
             // Create ONNX tensor
             try (OnnxTensor tensor = createInputTensor(normalizedFeatures)) {
                 // Run inference
                 Map<String, OnnxTensor> inputs = new HashMap<>();
-                inputs.put("input", tensor);
+                inputs.put("float_input", tensor);
                 
-                OrtSession.Result results = session.run(inputs);
-                
-                // Extract prediction score from output
-                float[][] output = (float[][]) results.get(0).getValue();
-                double score = output[0][0]; // First row, first column
-                
-                log.debug("Raw prediction score: {}", score);
-                return Math.min(Math.max(score, 0.0), 1.0); // Clamp between 0 and 1
+                try (OrtSession.Result results = session.run(inputs)) {
+                    // Log all available outputs for debugging
+                    log.info("Model Inference completed. Number of outputs: {}", results.size());
+                    
+                    double score = 0.5;
+                    Object firstOutput = null;
+                    Object secondOutput = null;
+                    
+                    int idx = 0;
+                    for (var entry : results) {
+                        Object val = entry.getValue().getValue();
+                        log.info("Output[{}] - Name: {}, Type: {}", idx, entry.getKey(), val.getClass().getName());
+                        if (idx == 0) firstOutput = val;
+                        if (idx == 1) secondOutput = val;
+                        idx++;
+                    }
+
+                    // Patterns for ONNX classifiers (Skl2Onnx / ONNXMLTools)
+                    // Index 0: Labels (long[] - [J])
+                    // Index 1: Probabilities (List<Map<Long, Float>> or float[][])
+                    if (results.size() >= 2 && secondOutput != null) {
+                        if (secondOutput instanceof float[][]) {
+                            float[][] probs = (float[][]) secondOutput;
+                            score = probs[0][1]; // Probabilities for class 1 (Target)
+                        } else if (secondOutput instanceof java.util.List) {
+                            @SuppressWarnings("unchecked")
+                            java.util.List<Map<Long, Float>> probList = (java.util.List<Map<Long, Float>>) secondOutput;
+                            if (!probList.isEmpty()) {
+                                Map<Long, Float> probMap = probList.get(0);
+                                score = probMap.getOrDefault(1L, 0.5f);
+                            }
+                        }
+                        log.info("AI Prediction - Extracted Probability (Class 1): {}", score);
+                    } else if (firstOutput != null) {
+                        // Possible Regressor or single-output model
+                        if (firstOutput instanceof float[][]) {
+                            float[][] output = (float[][]) firstOutput;
+                            score = output[0][0];
+                        }
+                        log.info("AI Prediction - Extracted Single Score: {}", score);
+                    }
+                    
+                    return Math.min(Math.max(score, 0.0), 1.0); // Clamp between 0 and 1
+                }
             }
         } catch (Exception e) {
-            log.error("Error during prediction: {}", e.getMessage());
-            log.warn("Falling back to mock scoring due to error: {}", e.getMessage());
-            return mockPredict(rawFeatures);
+            log.error("Error during prediction: {}", e.getMessage(), e);
+            throw new RuntimeException("AI Prediction failed: " + e.getMessage());
         }
-    }
-
-    /**
-     * Mock prediction for testing when model is not available
-     * Based on income-to-loan ratio and job segment
-     */
-    private double mockPredict(float[] rawFeatures) {
-        if (rawFeatures == null || rawFeatures.length < 2) {
-            return 0.6; // Default moderate risk
-        }
-        
-        // Features: [0]=jobSegment, [1]=declaredIncome, [2]=age, ...
-        float declaredIncome = rawFeatures[1];
-        
-        // Simple mock: random score based on income (higher income = lower risk)
-        double baseScore = 0.7;
-        
-        if (declaredIncome > 50_000_000) {
-            baseScore = 0.3; // Low risk
-        } else if (declaredIncome > 20_000_000) {
-            baseScore = 0.5; // Medium risk
-        } else if (declaredIncome > 10_000_000) {
-            baseScore = 0.65; // Higher risk
-        } else {
-            baseScore = 0.8; // Very high risk
-        }
-        
-        log.info("Mock prediction: score={} (based on income={})", baseScore, declaredIncome);
-        return baseScore;
     }
 
     /**
